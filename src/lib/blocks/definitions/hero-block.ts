@@ -1,0 +1,28 @@
+import { registerBlock } from '../registry';
+
+registerBlock({
+  type: 'HeroBlock',
+  name: 'Hero Section',
+  category: 'Content',
+  icon: '🎯',
+  description: 'Full-page main banner with background image, title, subtitle, overlay and CTA button.',
+  fields: {
+    Title: { type: 'string', title: 'Title', placeholder: 'Write the title' },
+    TitleColor: { type: 'color', title: 'Title Color', defaultValue: '#ffffff' },
+    TitleSize: { type: 'string', title: 'Title Size', placeholder: 'e.g. 64px' },
+    Subtitle: { type: 'string', title: 'Subtitle' },
+    SubtitleColor: { type: 'color', title: 'Subtitle Color', defaultValue: '#e2e8f0' },
+    SubtitleSize: { type: 'string', title: 'Subtitle Size', placeholder: 'e.g. 20px' },
+    Description: { type: 'string', title: 'Description' },
+    Background: { type: 'image', title: 'Background Image' },
+    BackgroundColor: { type: 'color', title: 'Background Color', defaultValue: '#0f172a' },
+    OverlayColor: { type: 'color', title: 'Overlay Color', defaultValue: '#000000' },
+    OverlayOpacity: { type: 'string', title: 'Overlay Opacity (0–1)', placeholder: 'e.g. 0.4', defaultValue: '0.3' },
+    Height: { type: 'select', title: 'Height', options: [{ value: 'full-screen', label: 'Full screen' }, { value: 'half-screen', label: 'Half screen' }, { value: 'compact', label: 'Compact' }], defaultValue: 'half-screen' },
+    TextAlign: { type: 'select', title: 'Content alignment', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }], defaultValue: 'center' },
+    ButtonText: { type: 'string', title: 'Button Text' },
+    ButtonUrl: { type: 'url', title: 'Button URL' },
+    ButtonColor: { type: 'color', title: 'Button Background', defaultValue: '#3b82f6' },
+    ButtonTextColor: { type: 'color', title: 'Button Text Color', defaultValue: '#ffffff' },
+  },
+});

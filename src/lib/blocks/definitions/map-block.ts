@@ -1,0 +1,41 @@
+import { registerBlock } from '../registry';
+
+registerBlock({
+  type: 'MapBlock',
+  name: 'Map',
+  category: 'Media',
+  icon: '📍',
+  description: 'Embedded Google Maps or other service map. Requires the map iframe URL.',
+  fields: {
+    Address: { type: 'string', title: 'Address', placeholder: 'e.g. Gran Via 1, Madrid, Spain' },
+    Zoom: { type: 'string', title: 'Zoom (1-20)', placeholder: '15=city, 17=street, 19=building', defaultValue: '15' },
+    MapType: { type: 'select', title: 'Map Type', defaultValue: 'roadmap', options: [
+      { value: 'roadmap', label: 'Road Map' },
+      { value: 'satellite', label: 'Satellite' },
+      { value: 'hybrid', label: 'Hybrid' },
+      { value: 'terrain', label: 'Terrain' },
+    ]},
+    Title: { type: 'string', title: 'Title (above map)' },
+    TitleColor: { type: 'color', title: 'Title Color', defaultValue: '#111827' },
+    Subtitle: { type: 'string', title: 'Subtitle / Description' },
+    SubtitleColor: { type: 'color', title: 'Subtitle Color', defaultValue: '#6b7280' },
+    TextAlign: { type: 'select', title: 'Text Alignment', defaultValue: 'center', options: [
+      { value: 'left', label: 'Left' },
+      { value: 'center', label: 'Center' },
+      { value: 'right', label: 'Right' },
+    ]},
+    ShowInfoCard: { type: 'bool', title: 'Show Info Card', defaultValue: 'true' },
+    PlaceName: { type: 'string', title: 'Place / Business Name' },
+    AddressDisplay: { type: 'string', title: 'Address (visible in card)' },
+    Phone: { type: 'string', title: 'Phone' },
+    Email: { type: 'string', title: 'Email' },
+    Hours: { type: 'string', title: 'Hours' },
+    CardBgColor: { type: 'color', title: 'Card Background', defaultValue: '#ffffff' },
+    CardTextColor: { type: 'color', title: 'Card Text Color', defaultValue: '#374151' },
+    MapHeight: { type: 'string', title: 'Map Height', placeholder: 'e.g. 450px, 500px', defaultValue: '450px' },
+    MaxWidth: { type: 'string', title: 'Max Width', placeholder: 'e.g. 100%, 1200px', defaultValue: '100%' },
+    BorderRadius: { type: 'string', title: 'Border Radius', placeholder: 'e.g. 16px, 0px', defaultValue: '16px' },
+    BackgroundColor: { type: 'color', title: 'Section Background', defaultValue: '#ffffff' },
+    PaddingY: { type: 'string', title: 'Vertical Padding', defaultValue: '3rem' },
+  },
+});

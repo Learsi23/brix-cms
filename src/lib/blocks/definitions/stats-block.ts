@@ -1,0 +1,32 @@
+import { registerBlock } from '../registry';
+
+registerBlock({
+  type: 'StatsBlock',
+  name: 'Statistics',
+  category: 'Content',
+  icon: '📊',
+  description: 'Block of eye-catching numeric statistics (e.g. 500+ clients, 98% satisfaction). High visual impact.',
+  fields: {
+    Title: { type: 'string', title: 'Section Title' },
+    TitleColor: { type: 'color', title: 'Title Color', defaultValue: '#111827' },
+    Subtitle: { type: 'string', title: 'Subtitle' },
+    SubtitleColor: { type: 'color', title: 'Subtitle Color', defaultValue: '#6b7280' },
+    Stat1Number: { type: 'string', title: 'Stat 1 — Value', placeholder: 'e.g. +500, 99%, 10K' },
+    Stat1Label: { type: 'string', title: 'Stat 1 — Label' },
+    Stat1Icon: { type: 'string', title: 'Stat 1 — FA Icon (optional)', placeholder: 'fas fa-users' },
+    Stat2Number: { type: 'string', title: 'Stat 2 — Value' },
+    Stat2Label: { type: 'string', title: 'Stat 2 — Label' },
+    Stat2Icon: { type: 'string', title: 'Stat 2 — FA Icon (optional)' },
+    Stat3Number: { type: 'string', title: 'Stat 3 — Value' },
+    Stat3Label: { type: 'string', title: 'Stat 3 — Label' },
+    Stat3Icon: { type: 'string', title: 'Stat 3 — FA Icon (optional)' },
+    Stat4Number: { type: 'string', title: 'Stat 4 — Value' },
+    Stat4Label: { type: 'string', title: 'Stat 4 — Label' },
+    Stat4Icon: { type: 'string', title: 'Stat 4 — FA Icon (optional)' },
+    NumberColor: { type: 'color', title: 'Number Color', defaultValue: '#10b981' },
+    LabelColor: { type: 'color', title: 'Label Color', defaultValue: '#6b7280' },
+    BackgroundColor: { type: 'color', title: 'Section Background', defaultValue: '#f9fafb' },
+    CardBgColor: { type: 'color', title: 'Card Background', defaultValue: '#ffffff' },
+    PaddingY: { type: 'string', title: 'Vertical Padding', defaultValue: '4rem' },
+  },
+});
