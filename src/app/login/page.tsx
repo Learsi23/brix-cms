@@ -29,10 +29,10 @@ export default function LoginPage() {
         localStorage.setItem('eden_user', JSON.stringify(data.user || data));
         router.push('/admin');
       } else {
-        setError(data.error || 'Error al iniciar sesión');
+        setError(data.error || 'Error logging in');
       }
     } catch {
-      setError('Error de conexión');
+      setError('Connection error');
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-black text-slate-800">Eden CMS</h1>
-            <p className="text-slate-500 text-sm mt-2">Inicia sesión para continuar</p>
+            <p className="text-slate-500 text-sm mt-2">Log in to continue</p>
           </div>
 
           {error && (
@@ -70,7 +70,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                Contraseña
+                Password
               </label>
               <input
                 type="password"
@@ -87,13 +87,13 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 disabled:opacity-50 transition-colors text-sm"
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              {loading ? 'Logging in...' : 'Log In'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <Link href="/" className="text-sm text-slate-500 hover:text-emerald-600 transition-colors">
-              ← Volver al sitio
+              ← Back to site
             </Link>
           </div>
         </div>

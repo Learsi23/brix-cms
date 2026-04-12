@@ -27,6 +27,7 @@ interface ClarifyingQuestion {
   type: string;
 }
 
+
 type Step = 1 | 2 | 3 | 4;
 type Mode = 'create' | 'update';
 
@@ -37,14 +38,14 @@ const PROVIDERS = [
 ];
 
 const TEMPLATES = [
-  'Landing page de presentación de empresa con hero, servicios y contacto',
-  'Tienda online con catálogo de productos y carrito de compras',
-  'Blog de artículos con imagen destacada y grid de entradas recientes',
-  'Página de contacto con formulario, mapa y datos de la empresa',
-  'Portfolio de proyectos con galería de imágenes y descripción',
-  'Página de precios con 3 planes y tabla comparativa',
-  'About us con historia de la empresa, equipo y valores',
-  'FAQ con preguntas frecuentes organizadas por categorías',
+  'Landing page with hero, services, and contact sections',
+  'Online store with product catalog and shopping cart',
+  'Blog with featured image and recent posts grid',
+  'Contact page with form, map, and company details',
+  'Portfolio with project gallery and descriptions',
+  'Pricing page with 3 plans and comparison table',
+  'About us with company history, team, and values',
+  'FAQ with categorized frequently asked questions',
 ];
 
 export default function AIPageGenerator({ onClose }: { onClose: () => void }) {
@@ -97,7 +98,7 @@ export default function AIPageGenerator({ onClose }: { onClose: () => void }) {
 
       const mediaData = await mediaRes.json();
       setMediaFolders(mediaData.folders?.map((f: any) => f.name || f.path) || []);
-      
+
       const allFiles: string[] = [];
       (mediaData.folders || []).forEach((f: any) => {
         (f.files || []).forEach((img: string) => allFiles.push(img));
@@ -139,8 +140,6 @@ export default function AIPageGenerator({ onClose }: { onClose: () => void }) {
     setErrorMsg('');
 
     try {
-      // Determinar el provider a usar
-      // Si hay un provider activo configurado, usarlo; si no, usar ollama
       const providerToUse = activeProviderId && savedKeys[activeProviderId]?.hasSavedKey ? activeProviderId : 'ollama';
       console.log('[AI] Using provider:', providerToUse);
 
@@ -171,7 +170,6 @@ export default function AIPageGenerator({ onClose }: { onClose: () => void }) {
         data.questions.forEach((q: ClarifyingQuestion) => { answers[q.id] = ''; });
         setStep(2);
       } else if (data.success && data.page?.id) {
-        // Page already generated on first call — redirect directly, no second API call needed
         window.location.href = `/admin/pages/${data.page.id}/preview`;
       } else {
         setErrorMsg(data.error || 'Unexpected response from AI');
@@ -190,7 +188,6 @@ export default function AIPageGenerator({ onClose }: { onClose: () => void }) {
     setLoading(true);
     setErrorMsg('');
 
-    // Determinar el provider a usar
     const providerToUse = activeProviderId && savedKeys[activeProviderId]?.hasSavedKey ? activeProviderId : 'ollama';
     console.log('[AI] Using provider for generate:', providerToUse);
 
@@ -312,7 +309,7 @@ export default function AIPageGenerator({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden" style={{ maxHeight: '92vh' }}>
-        
+
         {/* Header */}
         <div className={`flex items-center justify-between px-6 py-4 border-b rounded-t-2xl ${
           step === 3 ? 'bg-gradient-to-r from-violet-600 to-indigo-600' :

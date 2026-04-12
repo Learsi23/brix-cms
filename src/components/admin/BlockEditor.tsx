@@ -16,6 +16,7 @@ import '@/lib/blocks';
 import { getBlockDefinition, getBlocksByCategory, createDefaultData } from '@/lib/blocks';
 import type { BlockData, BlockDefinition } from '@/lib/blocks/types';
 import BlockForm from './BlockForm';
+import Link from 'next/link';
 
 // ──────────────────────────────────────────────────────────────
 // Types
@@ -447,9 +448,9 @@ export default function BlockEditor({
             {pageIsPublished ? (
               <>
                 <span className="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase">✅ Published</span>
-                <a href={`/${pageSlug}`} target="_blank" className="bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition shadow-sm">
+                <Link href={`/${pageSlug}`} target="_blank" className="bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition shadow-sm">
                   🌐 View public
-                </a>
+                </Link>
               </>
             ) : (
               <span className="bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase">📝 Draft</span>
@@ -463,17 +464,17 @@ export default function BlockEditor({
               {saving ? '⏳ Saving...' : savedMsg ? '✅ Saved' : '💾 Save'}
             </button>
 
-            <a
+            <Link
               href={`/admin/pages/${pageId}/preview`}
               onClick={async (e) => { if (!savedMsg) { e.preventDefault(); await handleSave(); } }}
               className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-bold transition text-sm shadow-sm"
             >
               🔍 Preview
-            </a>
+            </Link>
 
-            <a href="/admin" className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-50 transition text-sm shadow-sm">
+            <Link href="/admin" className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-50 transition text-sm shadow-sm">
               Back
-            </a>
+            </Link>
 
             <button
               onClick={() => openSelector(null, null)}
@@ -581,9 +582,9 @@ export default function BlockEditor({
               🔍 Preview
             </a>
 
-            <a href="/admin" className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-50 transition text-sm shadow-sm">
+            <Link href="/admin" className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-50 transition text-sm shadow-sm">
               Back
-            </a>
+            </Link>
 
             <button
               onClick={() => openSelector(null, null)}

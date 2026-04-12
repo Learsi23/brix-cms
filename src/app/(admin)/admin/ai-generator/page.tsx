@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AIPageGenerator from "@/components/admin/AIPageGenerator";
+import Link from "next/link";
 
 interface Page {
   id: string;
@@ -57,7 +58,7 @@ export default function AIGeneratorPage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
         <div className="px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
           <h2 className="font-bold text-gray-700 text-sm">📋 Pages</h2>
-          <a href="/admin" className="text-xs text-violet-600 hover:underline font-semibold">View all →</a>
+          <Link href="/admin" className="text-xs text-violet-600 hover:underline font-semibold">View all →</Link>
         </div>
         {loading ? (
           <div className="px-6 py-10 text-center text-gray-400 text-sm">Loading...</div>
@@ -118,8 +119,8 @@ export default function AIGeneratorPage() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <h3 className="font-bold text-gray-700 text-sm mb-3">⚡ Provider</h3>
           <ul className="space-y-1.5 text-sm text-gray-600">
-            <li className="flex gap-2"><span className="text-indigo-400">•</span> <a href="/admin/ai-config" className="text-violet-600 underline">Settings → AI Config</a></li>
-            <li className="flex gap-2"><span className="text-indigo-400">•</span> <a href="/admin/media" className="text-violet-600 underline">Media Library</a> — upload images first</li>
+            <li className="flex gap-2"><span className="text-indigo-400">•</span> <Link href="/admin/ai-config" className="text-violet-600 underline">Settings → AI Config</Link></li>
+            <li className="flex gap-2"><span className="text-indigo-400">•</span> <Link href="/admin/media" className="text-violet-600 underline">Media Library</Link> — upload images first</li>
             <li className="flex gap-2"><span className="text-indigo-400">•</span> Generation: 10–30 sec with Gemini</li>
           </ul>
         </div>

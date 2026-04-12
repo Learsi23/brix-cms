@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 /**
  * FigmaImporter — Multi-step UI to import Figma frames and recreate them
  * as Eden CMS pages using the AI generator.
@@ -540,7 +541,7 @@ export default function FigmaImporter() {
         <i className="fas fa-info-circle mt-0.5 flex-shrink-0" />
         <div>
           <strong>Figma Personal Access Token required.</strong> If you see a connection error, go to{' '}
-          <a href="/admin/ai-config" className="underline hover:text-amber-900">Configuration → API Keys</a>
+          <Link href="/admin/ai-config" className="underline hover:text-amber-900">Configuration → API Keys</Link>
           {' '}and paste your token (Figma → Account Settings → Personal access tokens, scope: <code>file_content:read</code>).
         </div>
       </div>

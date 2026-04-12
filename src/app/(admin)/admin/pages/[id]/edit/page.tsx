@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import BlockEditor from '@/components/admin/BlockEditor';
+import Link from 'next/link';
 
 interface PageData {
   id: string;
@@ -43,7 +44,7 @@ export default function EditPageRoute({ params }: { params: Promise<{ id: string
     <div className="flex items-center justify-center min-h-screen text-center">
       <div>
         <p className="text-slate-500 mb-4">Page not found</p>
-        <a href="/admin" className="text-emerald-600 hover:underline text-sm">← Back</a>
+        <Link href="/admin" className="text-emerald-600 hover:underline text-sm">← Back</Link>
       </div>
     </div>
   );

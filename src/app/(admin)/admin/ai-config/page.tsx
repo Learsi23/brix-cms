@@ -950,7 +950,7 @@ export default function AiConfigPage() {
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex gap-2">
                           <i className="fas fa-flask mt-0.5 flex-shrink-0"></i>
                           <div>
-                            <strong>Sandbox / Direct connect:</strong> enter your platform's Secret Key and the connected account ID (<code className="bg-amber-100 px-1 rounded">acct_…</code>) directly — no OAuth redirect needed.
+                            <strong>Sandbox / Direct connect:</strong> enter your platform&apos;s Secret Key and the connected account ID (<code className="bg-amber-100 px-1 rounded">acct_…</code>) directly — no OAuth redirect needed.
                             <a href="https://dashboard.stripe.com/test/connect/accounts" target="_blank" className="underline font-semibold ml-1">Find account ID <i className="fas fa-external-link-alt text-[8px]"></i></a>
                           </div>
                         </div>
@@ -970,7 +970,7 @@ export default function AiConfigPage() {
                       ) : (
                         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-800">
                           <i className="fas fa-info-circle mr-1"></i>
-                          OAuth uses your platform's Client ID to connect. Make sure you've configured the platform first.
+                          OAuth uses your platform&apos;s Client ID to connect. Make sure you&apos;ve configured the platform first.
                         </div>
                       )}
 
@@ -1045,14 +1045,14 @@ export default function AiConfigPage() {
                 </div>
               </div>
               
-              <p className="font-semibold text-slate-800">You're live — payments flow directly to you</p>
+              <p className="font-semibold text-slate-800">You&apos;re live — payments flow directly to you</p>
               <p>Every checkout charge goes straight into your Stripe account. The platform automatically deducts a small platform fee per transaction (configurable, transparent).</p>
               
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
                 <p className="font-semibold mb-1">Transparency & legal note</p>
                 <p>The platform fee is a small percentage of each sale (e.g. 1%). This is how the platform covers infrastructure, hosting and development costs.</p>
                 <p className="mt-2"><strong>Minimum fee:</strong> €0.50 per transaction — this ensures the fee is meaningful even for low-priced products.</p>
-                <p className="mt-1">This fee is disclosed in the platform's Terms & Conditions, as required by Stripe.</p>
+                <p className="mt-1">This fee is disclosed in the platform&apos;s Terms & Conditions, as required by Stripe.</p>
               </div>
               
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-800">
