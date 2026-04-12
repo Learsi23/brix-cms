@@ -6,6 +6,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedLayout from "@/components/ProtectedLayout";
+import Image from "next/image";
 
 const navItems = [
   { href: "/admin", label: "Pages", icon: "🌐", exact: true },
@@ -42,7 +43,7 @@ export default function AdminLayout({
         <aside className="w-64 bg-slate-900 text-white p-6 flex-shrink-0 flex flex-col">
           <div className="mb-10">
             <span className="text-lg font-black tracking-tight text-white">
-              <img src="/images/LogoNavbar.png" height={120} width={120} alt="Brix logo" />
+              <Image src="/images/LogoNavbar.png" height={120} width={120} alt="Brix logo" />
             </span>
           </div>
           <nav className="flex-1">
