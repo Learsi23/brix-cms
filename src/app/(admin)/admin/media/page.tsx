@@ -62,7 +62,7 @@ export default function MediaPage() {
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       loadMedia();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al subir');
+      setError(err instanceof Error ? err.message : 'Upload error');
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -87,7 +87,7 @@ export default function MediaPage() {
   }
 
   async function deleteFolder(name: string) {
-    if (!confirm(`¿Eliminar carpeta "${name}"? Solo si está vacía`)) return;
+    if (!confirm(`Delete folder "${name}"? Only if empty`)) return;
     const res = await fetch('/api/media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -101,7 +101,7 @@ export default function MediaPage() {
   }
 
   async function deleteFile(name: string) {
-    if (!confirm(`¿Eliminar "${name}"?`)) return;
+    if (!confirm(`Delete "${name}"?`)) return;
     const res = await fetch('/api/media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -112,13 +112,13 @@ export default function MediaPage() {
 
   function copyUrl(path: string) {
     navigator.clipboard.writeText(path);
-    alert('✅ URL copiada al portapapeles: ' + path);
+    alert('✅ URL copied to clipboard: ' + path);
   }
 
   function selectImage(path: string) {
     navigator.clipboard.writeText(path);
     window.opener?.postMessage({ type: 'selectImage', url: path }, '*');
-    alert('✅ Imagen seleccionada. Vuelve al editor y pega (Ctrl+V)');
+    alert('✅ Image selected. Return to editor and paste (Ctrl+V)');
     window.close();
   }
 
@@ -132,7 +132,7 @@ export default function MediaPage() {
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <header className="mb-6">
-        <h1 className="text-3xl font-black text-slate-800">Biblioteca de Medios</h1>
+        <h1 className="text-3xl font-black text-slate-800">Media Library</h1>
         <p className="text-xs text-slate-400 font-mono mt-1">
           /uploads/{currentFolder}
         </p>
@@ -148,7 +148,7 @@ export default function MediaPage() {
               : 'bg-white border-slate-200 hover:bg-slate-50'
           }`}
         >
-          📁 Raíz
+          📁 Root
         </button>
         {breadcrumbs.map((crumb, i) => (
           <span key={i} className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export default function MediaPage() {
         <label className="flex flex-col items-center gap-3 cursor-pointer">
           <span className="text-4xl">{uploading ? '⏳' : '📸'}</span>
           <span className="text-sm font-bold text-slate-600">
-            {uploading ? 'Subiendo...' : 'Arrastra imágenes o haz clic para subir'}
+            {uploading ? 'Uploading...' : 'Drag images or click to upload'}
           </span>
           <input
             ref={inputRef}
@@ -200,23 +200,23 @@ export default function MediaPage() {
           onClick={() => setShowNewFolder(true)}
           className="bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-colors"
         >
-          📁 Nueva Carpeta
+          📁 New Folder
         </button>
         <div className="text-xs text-slate-400">
-          {files.length} archivo{files.length !== 1 ? 's' : ''} · {folders.length} carpeta{folders.length !== 1 ? 's' : ''}
+          {files.length} file{files.length !== 1 ? 's' : ''} · {folders.length} folder{folders.length !== 1 ? 's' : ''}
         </div>
       </div>
 
-      {/* Modal Nueva Carpeta */}
+      {/* New Folder Modal */}
       {showNewFolder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-xl font-black mb-4">Crear Nueva Carpeta</h3>
+            <h3 className="text-xl font-black mb-4">Create New Folder</h3>
             <input
               type="text"
               value={newFolderName}
               onChange={e => setNewFolderName(e.target.value)}
-              placeholder="Nombre de la carpeta"
+              placeholder="Folder name"
               className="w-full px-4 py-3 border border-slate-200 rounded-xl mb-4 focus:outline-none focus:border-emerald-500"
               autoFocus
               onKeyDown={e => e.key === 'Enter' && createFolder()}
@@ -226,24 +226,24 @@ export default function MediaPage() {
                 onClick={() => { setShowNewFolder(false); setNewFolderName(''); }}
                 className="px-6 py-2 border border-slate-200 rounded-xl hover:bg-slate-50"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 onClick={createFolder}
                 disabled={!newFolderName.trim()}
                 className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 disabled:opacity-50"
               >
-                Crear
+                Create
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Grid de carpetas */}
+      {/* Folders Grid */}
       {folders.length > 0 && (
         <div className="mb-8">
-          <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Carpetas</h3>
+          <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Folders</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
             {folders.map(folder => {
               const fullPath = currentFolder ? `${currentFolder}/${folder}` : folder;
@@ -259,7 +259,7 @@ export default function MediaPage() {
                   <button
                     onClick={() => deleteFolder(folder)}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Eliminar carpeta"
+                    title="Delete folder"
                   >
                     ×
                   </button>
@@ -270,10 +270,10 @@ export default function MediaPage() {
         </div>
       )}
 
-      {/* Grid de archivos */}
+      {/* Files Grid */}
       {files.length > 0 ? (
         <div>
-          <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Archivos</h3>
+          <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Files</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
             {files.map(file => (
               <div key={file.filename} className="group relative">
@@ -292,19 +292,19 @@ export default function MediaPage() {
                   <div className="text-[10px] truncate font-mono text-slate-500">{file.filename}</div>
                   <div className="text-[10px] text-slate-400">{formatSize(file.size)}</div>
                 </div>
-                {/* Overlay acciones */}
+                {/* Actions Overlay */}
                 <div className="absolute inset-0 bg-slate-900/60 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button
                     onClick={() => copyUrl(file.path)}
                     className="px-3 py-1.5 bg-white text-slate-800 text-xs font-bold rounded-lg hover:bg-emerald-50"
                   >
-                    📋 Copiar
+                    📋 Copy
                   </button>
                   <button
                     onClick={() => deleteFile(file.filename)}
                     className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600"
                   >
-                    🗑️
+                    🗑️ Delete
                   </button>
                 </div>
               </div>
@@ -314,8 +314,8 @@ export default function MediaPage() {
       ) : folders.length === 0 && (
         <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-slate-200">
           <div className="text-5xl mb-4">📪</div>
-          <p className="text-slate-400">Esta carpeta está vacía</p>
-          <p className="text-xs text-slate-300 mt-2">Sube imágenes o crea carpetas para organizar</p>
+          <p className="text-slate-400">This folder is empty</p>
+          <p className="text-xs text-slate-300 mt-2">Upload images or create folders to organize</p>
         </div>
       )}
     </div>

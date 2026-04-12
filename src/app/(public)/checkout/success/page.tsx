@@ -16,14 +16,14 @@ export default function CheckoutSuccessPage() {
           </svg>
         </div>
         
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">¡Pedido confirmado!</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">Order confirmed!</h1>
         <p className="text-gray-600 mb-6">
-          Gracias por tu compra. Tu pedido ha sido procesado exitosamente.
+          Thank you for your purchase. Your order has been successfully processed.
         </p>
 
         {orderRef && (
           <div className="bg-gray-100 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-500">Número de pedido</p>
+            <p className="text-sm text-gray-500">Order number</p>
             <p className="text-xl font-mono font-bold text-gray-800">#{orderRef}</p>
           </div>
         )}
@@ -33,13 +33,13 @@ export default function CheckoutSuccessPage() {
             href="/" 
             className="w-full py-3 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors"
           >
-            Volver al inicio
+            Back to home
           </Link>
           <Link 
             href="/cart" 
             className="w-full py-3 px-6 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors"
           >
-            Ver más productos
+            View more products
           </Link>
         </div>
       </div>

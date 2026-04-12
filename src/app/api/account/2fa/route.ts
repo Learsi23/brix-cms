@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     const secret = generateBase32Secret();
     // Store temporarily (will be confirmed on enable)
     await prisma.user.update({ where: { id: userId }, data: { twoFactorSecret: secret } });
-    const issuer = 'Eden CMS';
+    const issuer = 'Brix';
     const otpUrl = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(user.email)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpUrl)}`;
     return NextResponse.json({ secret, qrUrl });

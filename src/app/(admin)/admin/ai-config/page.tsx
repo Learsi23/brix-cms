@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 // Configuration page — Account Security + AI Provider/Keys + Usage Tracking + PDF Knowledge Base
 // Equivalent to ConfiguracionController.AiConfig + AiConfig.cshtml in .NET
 
@@ -12,7 +13,7 @@ interface UsageStats { totalCalls: number; totalInput: number; totalOutput: numb
 interface GenLog { id: string; pageId: string | null; pageTitle: string; prompt: string; provider: string; mode: string; date: string; }
 
 type AccountTab = 'email' | 'password' | '2fa';
-type AiTab = 'keys' | 'usage' | 'history' | 'ollama' | 'pdf' | 'stripe';
+type AiTab = 'keys' | 'usage' | 'history' | 'ollama' | 'pdf';
 type Msg = { type: 'success' | 'error'; text: string } | null;
 
 const PROVIDERS = [
@@ -75,80 +76,6 @@ export default function AiConfigPage() {
 
   // Key inputs per provider
   const [keyInputs, setKeyInputs] = useState<Record<string, string>>({});
-
-  // ── Stripe Connect state ─────────────────────────────────────────────
-  const [stripeSetup, setStripeSetup] = useState({ configured: false, clientId: '' });
-  const [stripeConnect, setStripeConnect] = useState({ connected: false, livemode: false, accountId: '', platformFeePercent: 1.0 });
-  const [stripeMode, setStripeMode] = useState<'direct' | 'oauth'>('direct');
-  const [stripeError, setStripeError] = useState('');
-  const [stripeSuccess, setStripeSuccess] = useState('');
-  const [stripeSaving, setStripeSaving] = useState(false);
-  const [showStripeHelp, setShowStripeHelp] = useState(false);
-
-  // Load Stripe data when tab is selected
-  useEffect(() => {
-    if (aiTab === 'stripe') {
-      fetch('/api/stripe?action=setup').then(r => r.json()).then(data => {
-        if (data.configured) setStripeSetup({ configured: true, clientId: data.clientId || '' });
-      });
-      fetch('/api/stripe?action=status').then(r => r.json()).then(data => {
-        if (data.connected) setStripeConnect({ connected: true, livemode: data.livemode || false, accountId: data.accountId || '', platformFeePercent: data.platformFeePercent || 1.0 });
-      });
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('stripe_error')) {
-        setStripeError(decodeURIComponent(params.get('stripe_error')!));
-        window.history.replaceState({}, '', '/admin/ai-config');
-      }
-      if (params.get('stripe_success')) {
-        setStripeSuccess('Connected successfully!');
-        window.history.replaceState({}, '', '/admin/ai-config');
-      }
-    }
-  }, [aiTab]);
-
-  async function saveStripeSetup(clientId: string, secretKey: string) {
-    setStripeSaving(true);
-    setStripeError('');
-    try {
-      const res = await fetch('/api/stripe?action=saveSetup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId, secretKey }) });
-      const data = await res.json();
-      if (data.error) setStripeError(data.error);
-      else { setStripeSetup({ configured: true, clientId }); setStripeSuccess('Setup saved!'); }
-    } catch (e: any) { setStripeError(e.message); }
-    finally { setStripeSaving(false); }
-  }
-
-  async function connectDirect(secretKey: string, accountId: string) {
-    setStripeSaving(true);
-    setStripeError('');
-    try {
-      const res = await fetch('/api/stripe?action=direct', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secretKey, accountId }) });
-      const data = await res.json();
-      if (data.error) setStripeError(data.error);
-      else { setStripeConnect({ connected: true, livemode: data.livemode, accountId: data.accountId, platformFeePercent: 1.0 }); setStripeSuccess('Connected!'); }
-    } catch (e: any) { setStripeError(e.message); }
-    finally { setStripeSaving(false); }
-  }
-
-  async function connectOAuth() {
-    setStripeSaving(true);
-    setStripeError('');
-    try {
-      const res = await fetch('/api/stripe?action=oauth', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-      const data = await res.json();
-      if (data.error) setStripeError(data.error);
-      else if (data.oauthUrl) window.location.href = data.oauthUrl;
-    } catch (e: any) { setStripeError(e.message); }
-    finally { setStripeSaving(false); }
-  }
-
-  async function disconnectStripe() {
-    if (!confirm('Disconnect Stripe Connect?')) return;
-    setStripeSaving(true);
-    await fetch('/api/stripe?action=disconnect', { method: 'POST' });
-    setStripeConnect({ connected: false, livemode: false, accountId: '', platformFeePercent: 1.0 });
-    setStripeSaving(false);
-  }
 
   useEffect(() => {
     fetch('/api/account').then(r => r.ok ? r.json() : null).then(d => {
@@ -575,7 +502,6 @@ export default function AiConfigPage() {
           <button onClick={() => { setAiTab('history'); loadGenHistory(); }} className={aiTabClass('history')}><i className="fas fa-history" /> History</button>
           <button onClick={() => { setAiTab('ollama'); loadOllamaModels(); }} className={aiTabClass('ollama')}><i className="fas fa-desktop" /> Ollama</button>
           <button onClick={() => setAiTab('pdf')} className={aiTabClass('pdf')}><i className="fas fa-file-pdf" /> Knowledge</button>
-          <button onClick={() => setAiTab('stripe')} className={aiTabClass('stripe')}><i className="fab fa-stripe-s" /> Stripe</button>
         </div>
         <div className="p-6">
           {/* Keys Tab */}
@@ -673,7 +599,7 @@ export default function AiConfigPage() {
                   )}
                   <p className="text-[10px] text-gray-400 leading-relaxed">
                     Figma → Account Settings → Personal access tokens → Create token → scope: <code className="bg-gray-100 px-1 rounded">file_content:read</code>.
-                    Used by <a href="/admin/figma" className="text-violet-500 underline">Figma Import</a> to export frames and recreate them as Eden CMS pages.
+                    Used by <Link href="/admin/figma" className="text-violet-500 underline">Figma Import</Link> to export frames and recreate them as Brix pages.
                   </p>
                 </div>
               </div>
@@ -863,213 +789,6 @@ export default function AiConfigPage() {
             </div>
           )}
 
-          {/* Stripe Tab */}
-          {aiTab === 'stripe' && (
-            <div className="space-y-6">
-              {/* Stripe Header */}
-              <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-violet-700 to-indigo-800 rounded-t-2xl">
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="font-black text-white text-sm tracking-tight">Stripe Connect</h2>
-                  <p className="text-violet-300 text-xs">Secure payments without sharing keys · Standard Connect (OAuth)</p>
-                </div>
-                <div className="ml-auto flex items-center gap-3">
-                  {stripeConnect.connected && (
-                    <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-300">
-                      <span className={`w-2 h-2 rounded-full ${stripeConnect.livemode ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`}></span>
-                      {stripeConnect.livemode ? '🟢 Live' : '🟡 Test'} · Connected
-                    </span>
-                  )}
-                  <button onClick={() => setShowStripeHelp(true)}
-                    className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all flex items-center justify-center text-xs font-bold"
-                    title="How does Stripe Connect work?">
-                    ?
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-b-2xl border border-t-0 border-slate-200 p-6">
-                {stripeError && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{stripeError}</div>
-                )}
-                {stripeSuccess && (
-                  <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-600">{stripeSuccess}</div>
-                )}
-
-                {!stripeConnect.connected ? (
-                  <div className="space-y-6">
-                    {/* Step 1: Setup (if not configured) */}
-                    {!stripeSetup.configured && (
-                      <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-slate-800">Step 1: Configure Stripe Platform</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Client ID <span className="text-red-400">*</span></label>
-                            <input id="stripeClientId" placeholder="ca_..." className={input} />
-                            <p className="text-[10px] text-gray-400 mt-1">
-                              <a href="https://dashboard.stripe.com/settings/connect" target="_blank" className="underline">Settings → Connect → Platform profile → Client ID</a>
-                            </p>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Secret Key <span className="text-red-400">*</span></label>
-                            <input id="stripeSecretKey" type="password" placeholder="sk_test_... or sk_live_..." className={input} />
-                            <p className="text-[10px] text-gray-400 mt-1">
-                              <a href="https://dashboard.stripe.com/apikeys" target="_blank" className="underline">Developers → API keys</a>
-                            </p>
-                          </div>
-                        </div>
-                        <button onClick={() => saveStripeSetup((document.getElementById('stripeClientId') as HTMLInputElement).value, (document.getElementById('stripeSecretKey') as HTMLInputElement).value)} disabled={stripeSaving} className="px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 disabled:opacity-50">
-                          {stripeSaving ? 'Saving...' : 'Save Setup'}
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Step 2: Connect */}
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-bold text-slate-800">Step 2: Connect Your Account</h3>
-                      
-                      {/* Mode selector */}
-                      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 text-xs font-semibold">
-                        <button type="button" onClick={() => setStripeMode('direct')}
-                          className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${stripeMode === 'direct' ? 'bg-white shadow text-violet-700' : 'text-slate-400'}`}>
-                          <i className="fas fa-plug text-[10px]"></i> Direct connect
-                          <span className="bg-amber-100 text-amber-600 text-[9px] font-bold px-1.5 rounded-full">SANDBOX</span>
-                        </button>
-                        <button type="button" onClick={() => setStripeMode('oauth')}
-                          className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${stripeMode === 'oauth' ? 'bg-white shadow text-violet-700' : 'text-slate-400'}`}>
-                          <i className="fas fa-link text-[10px]"></i> OAuth
-                          <span className="bg-emerald-100 text-emerald-600 text-[9px] font-bold px-1.5 rounded-full">PROD</span>
-                        </button>
-                      </div>
-
-                      {stripeMode === 'direct' && (
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex gap-2">
-                          <i className="fas fa-flask mt-0.5 flex-shrink-0"></i>
-                          <div>
-                            <strong>Sandbox / Direct connect:</strong> enter your platform&apos;s Secret Key and the connected account ID (<code className="bg-amber-100 px-1 rounded">acct_…</code>) directly — no OAuth redirect needed.
-                            <a href="https://dashboard.stripe.com/test/connect/accounts" target="_blank" className="underline font-semibold ml-1">Find account ID <i className="fas fa-external-link-alt text-[8px]"></i></a>
-                          </div>
-                        </div>
-                      )}
-
-                      {stripeMode === 'direct' ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Secret Key <span className="text-red-400">*</span></label>
-                            <input id="directSecretKey" type="password" placeholder="sk_test_... or sk_live_..." className={input} />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Connected Account ID <span className="text-red-400">*</span></label>
-                            <input id="directAccountId" placeholder="acct_..." className={input} />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-800">
-                          <i className="fas fa-info-circle mr-1"></i>
-                          OAuth uses your platform&apos;s Client ID to connect. Make sure you&apos;ve configured the platform first.
-                        </div>
-                      )}
-
-                      <div className="flex gap-3">
-                        {stripeMode === 'direct' ? (
-                          <button onClick={() => connectDirect((document.getElementById('directSecretKey') as HTMLInputElement).value, (document.getElementById('directAccountId') as HTMLInputElement).value)} disabled={stripeSaving} className="px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 disabled:opacity-50">
-                            {stripeSaving ? 'Connecting...' : 'Connect'}
-                          </button>
-                        ) : (
-                          <button onClick={connectOAuth} disabled={stripeSaving || !stripeSetup.configured} className="px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 disabled:opacity-50">
-                            {stripeSaving ? 'Redirecting...' : 'Connect with OAuth'}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* Connected state */
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-                      <div>
-                        <p className="text-sm font-bold text-emerald-800">
-                          {stripeConnect.livemode ? '🟢 Live Mode — connected' : '🟡 Test Mode (sandbox) — connected'}
-                        </p>
-                        <p className="text-xs text-emerald-600 font-mono mt-1">Account: {stripeConnect.accountId}</p>
-                      </div>
-                      <button onClick={disconnectStripe} disabled={stripeSaving} className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-bold hover:bg-red-600 disabled:opacity-50">
-                        Disconnect
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Stripe Connect Help Modal */}
-      {showStripeHelp && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowStripeHelp(false)}>
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-violet-700 to-indigo-800 px-6 py-4 flex justify-between items-center">
-              <h3 className="text-white font-black text-base">How Stripe Connect works</h3>
-              <button onClick={() => setShowStripeHelp(false)} className="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
-            </div>
-            <div className="p-6 space-y-4 text-sm text-slate-600">
-              <p className="font-semibold">Standard Connect — OAuth flow</p>
-              <p>Instead of asking you to copy and paste long secret keys, Stripe Connect lets you authorise this platform to process payments on your behalf — securely, in one click.</p>
-              
-              <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-                <div className="flex gap-3">
-                  <span className="w-6 h-6 bg-violet-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                  <div>
-                    <p className="font-semibold text-slate-800">Click "Connect with Stripe"</p>
-                    <p className="text-xs">You are redirected to stripe.com — no keys, no forms on our side. Stripe handles the entire authorisation securely.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="w-6 h-6 bg-violet-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                  <div>
-                    <p className="font-semibold text-slate-800">Log in and authorise</p>
-                    <p className="text-xs">Sign in to your existing Stripe account (or create one) and click Allow access. Your private keys are never shared with us.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="w-6 h-6 bg-violet-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                  <div>
-                    <p className="font-semibold text-slate-800">Stripe sends back a connection token</p>
-                    <p className="text-xs">Stripe redirects you here with an encrypted account_id (e.g. acct_1Xxx…). We save only this ID — nothing sensitive.</p>
-                  </div>
-                </div>
-              </div>
-              
-              <p className="font-semibold text-slate-800">You&apos;re live — payments flow directly to you</p>
-              <p>Every checkout charge goes straight into your Stripe account. The platform automatically deducts a small platform fee per transaction (configurable, transparent).</p>
-              
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
-                <p className="font-semibold mb-1">Transparency & legal note</p>
-                <p>The platform fee is a small percentage of each sale (e.g. 1%). This is how the platform covers infrastructure, hosting and development costs.</p>
-                <p className="mt-2"><strong>Minimum fee:</strong> €0.50 per transaction — this ensures the fee is meaningful even for low-priced products.</p>
-                <p className="mt-1">This fee is disclosed in the platform&apos;s Terms & Conditions, as required by Stripe.</p>
-              </div>
-              
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-800">
-                <p className="font-semibold mb-1">Your keys stay with Stripe</p>
-                <p>We never see, store or transmit your Stripe secret key. You can revoke access at any time from your Stripe Dashboard → Connected apps.</p>
-              </div>
-              
-              <a href="https://stripe.com/docs/connect/standard-accounts" target="_blank" className="inline-flex items-center gap-2 text-violet-600 hover:underline text-sm font-semibold">
-                <i className="fas fa-book text-[10px]"></i> Stripe Connect docs
-              </a>
-            </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
-              <button onClick={() => setShowStripeHelp(false)} className="w-full py-2.5 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition">Got it</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </div> </div> </div>
   );
-}
+};

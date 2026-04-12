@@ -1,0 +1,40 @@
+# Build outputs
+.next/
+out/
+build/
+
+# Dependencies
+node_modules/
+
+# Environment & secrets
+.env
+.env.local
+.env.*
+!.env.example
+
+# Dev / editor
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
+
+# Database files (never ship real data)
+*.db
+*.db-journal
+prisma/migrations/
+prisma/check-admin.ts
+
+# User uploads & private data (ship empty folder via .gitkeep)
+public/uploads/
+public/data/
+
+# Personal/client images — ship only placeholder
+public/images/
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+
+# Internal docs
+docs-ai-testing.md
+docs-ai-complete.md

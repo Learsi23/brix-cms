@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Igual que EdenCMS.Pro: Pages contienen Blocks directamente
+// Igual que Brix.Pro: Pages contienen Blocks directamente
 model Page {
   id          String    @id @default(cuid())
   title       String

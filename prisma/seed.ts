@@ -1,28 +1,28 @@
-// prisma/seed.ts — Script de inicialización
+// prisma/seed.ts — Initialization script
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Crear usuario admin por defecto
+  // Create default admin user
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@eden.com' },
     update: {},
     create: {
       email: 'admin@eden.com',
-      password: 'admin123', // En producción usar bcrypt
-      name: 'Administrador',
+      password: 'admin123', // In production use bcrypt
+      name: 'Administrator',
       role: 'admin',
     },
   });
-  console.log('✅ Usuario admin creado:', adminUser.email);
+  console.log('✅ Admin user created:', adminUser.email);
 
-  // Crear página de inicio si no existe
+  // Create home page if it doesn't exist
   const homePage = await prisma.page.upsert({
     where: { slug: '' },
     update: {},
     create: {
-      title: 'Inicio',
+      title: 'Home',
       slug: '',
       isPublished: true,
       publishedAt: new Date(),
@@ -32,49 +32,49 @@ async function main() {
       }),
     },
   });
-  console.log('✅ Página de inicio creada:', homePage.title);
+  console.log('✅ Home page created:', homePage.title);
 
-  // Crear bloque Hero en la página de inicio
+  // Create Hero block on the home page
   const heroBlock = await prisma.block.create({
     data: {
       type: 'HeroBlock',
       pageId: homePage.id,
       sortOrder: 0,
       jsonData: JSON.stringify({
-        Title: { Value: 'Bienvenido a Eden CMS' },
+        Title: { Value: 'Welcome to Brix' },
         TitleColor: { Value: '#ffffff' },
         TitleSize: { Value: '3rem' },
-        Subtitle: { Value: 'Tu CMS moderno con Next.js' },
+        Subtitle: { Value: 'Your modern CMS with Next.js' },
         SubtitleColor: { Value: '#ffffff' },
         SubtitleSize: { Value: '1.25rem' },
-        Description: { Value: 'Crea páginas increíbles con bloques dinámicos' },
+        Description: { Value: 'Create amazing pages with dynamic blocks' },
         Background: { Value: '' },
       }),
     },
   });
-  console.log('✅ Bloque Hero creado');
+  console.log('✅ Hero block created');
 
-  // Crear bloque de texto
+  // Create text block
   const textBlock = await prisma.block.create({
     data: {
       type: 'TextBlock',
       pageId: homePage.id,
       sortOrder: 1,
       jsonData: JSON.stringify({
-        Title: { Value: 'Características' },
+        Title: { Value: 'Features' },
         TitleColor: { Value: '#1e293b' },
         TitleSize: { Value: '2rem' },
         TitleAlignment: { Value: 'center' },
-        Body: { Value: 'Eden CMS es un sistema de gestión de contenido moderno, rápido y fácil de usar. Crea páginas con bloques dinámicos como Hero, Texto, Imágenes, Galerías y más.' },
+        Body: { Value: 'Brix is a modern, fast, and easy-to-use content management system. Create pages with dynamic blocks like Hero, Text, Images, Galleries, and more.' },
         BodyColor: { Value: '#64748b' },
         BodySize: { Value: '1rem' },
         BodyAlignment: { Value: 'center' },
       }),
     },
   });
-  console.log('✅ Bloque de texto creado');
+  console.log('✅ Text block created');
 
-  // Crear configuración del sitio por defecto
+  // Create default site configuration
   const siteConfig = await prisma.siteConfig.upsert({
     where: { key: 'site' },
     update: {},
@@ -85,7 +85,7 @@ async function main() {
           backgroundColor: '#ffffff',
           textColor: '#000000',
           logo: '',
-          logoAltText: 'Eden CMS',
+          logoAltText: 'Brix',
           logoWidth: '150px',
           logoLink: '/',
           isSticky: true,
@@ -97,19 +97,19 @@ async function main() {
           backgroundColor: '#1a1a1a',
           textColor: '#ffffff',
           logo: '',
-          logoAltText: 'Eden CMS',
+          logoAltText: 'Brix',
           logoWidth: '150px',
           logoPosition: 'left',
           showPagesColumn: true,
-          pagesColumnTitle: 'Páginas',
+          pagesColumnTitle: 'Pages',
           pages: [],
           showSocialMediaColumn: true,
-          socialMediaColumnTitle: 'Síguenos',
+          socialMediaColumnTitle: 'Follow Us',
           socialMedia: [],
           showCopyrightRow: true,
-          companyName: 'Eden CMS',
+          companyName: 'Brix',
           companyNumber: '',
-          copyrightText: 'Todos los derechos reservados',
+          copyrightText: 'All rights reserved',
           showHorizontalLine: true,
           paddingVertical: 'py-6',
           columnsGap: 'gap-8',
@@ -117,11 +117,11 @@ async function main() {
       }),
     },
   });
-  console.log('✅ Configuración del sitio creada');
+  console.log('✅ Site configuration created');
 
-  console.log('\n🎉 ¡Inicialización completada!');
+  console.log('\n🎉 Initialization completed!');
   console.log('📧 Email: admin@eden.com');
-  console.log('🔑 Contraseña: admin123');
+  console.log('🔑 Password: admin123');
 }
 
 main()

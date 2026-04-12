@@ -16,7 +16,6 @@ const navItems = [
   { href: "/admin/backup", label: "Backup", icon: "💾" },
   { href: "/admin/ai-config", label: "Configuration", icon: "⚙️" },
   { href: "/admin/ai-generator", label: "AI Generator", icon: "🤖" },
-  { href: "/admin/figma", label: "Figma Import", icon: "🎨" },
 ];
 
 export default function AdminLayout({
@@ -43,7 +42,7 @@ export default function AdminLayout({
         <aside className="w-64 bg-slate-900 text-white p-6 flex-shrink-0 flex flex-col">
           <div className="mb-10">
             <span className="text-lg font-black tracking-tight text-white">
-              ⚡ Eden CMS
+              <img src="/images/LogoNavbar.png" height={120} width={120} alt="Brix logo" />
             </span>
           </div>
           <nav className="flex-1">

@@ -20,7 +20,7 @@ export function getAvailableImages(): string[] {
 }
 
 /**
- * System prompt for Eden CMS AI page generation.
+ * System prompt for Brix AI page generation.
  *
  * Supports two response modes:
  *   QUESTIONS MODE  → { "questions": [ { "id": "...", "question": "...", "why": "...", "type": "..." } ] }
@@ -58,7 +58,7 @@ ${fields}`;
     ? `\nPRODUCT DATA FROM PDF:\n${pdfProductData.substring(0, 5000)}\nCreate one ProductCardBlock per product. Use ColumnBlock for ≤4 products, GridColumn (MaxColumns "2") for 5+ products.`
     : "";
 
-  return `You are an expert EdenCMS page architect. You design complete, professional web pages using a structured block system.
+  return `You are an expert Brix page architect. You design complete, professional web pages using a structured block system.
 
 You respond in ONE of two modes.
 
@@ -587,7 +587,7 @@ export function generateUserPrompt(
   hasPdf?: boolean,
   questionAnswers?: Record<string, string>,
 ): string {
-  let prompt = `Build an Eden CMS page for this request:\n\n"${userRequest}"`;
+  let prompt = `Build an Brix page for this request:\n\n"${userRequest}"`;
 
   if (questionAnswers && Object.keys(questionAnswers).length > 0) {
     prompt += `\n\nAdditional information provided by the client:\n`;
@@ -611,7 +611,7 @@ export function generateUserPrompt(
 /** Human-readable docs for the debug endpoint. */
 export function getBlocksDocumentation(): string {
   const blocks = getAllBlockDefinitions();
-  let doc = `# Eden CMS Blocks\n\n`;
+  let doc = `# Brix Blocks\n\n`;
   doc += `## Manual Completo\n`;
   doc += `Para información detallada sobre todos los bloques, navbar, footer y configuración de background por página, consulta el archivo: EDEN-CMS-MANUAL.md\n\n`;
   doc += `---\n\n`;

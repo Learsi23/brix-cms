@@ -8,7 +8,7 @@ import type { BlockData } from '@/lib/blocks/types';
 export default async function CmsPage({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug: slugParts = [] } = await params;
 
-  // Evitar que /admin llegue aquí
+  // admin cannot be accessed via frontend routes
   if (slugParts[0] === 'admin') return notFound();
 
   const slug = slugParts.length > 0 ? slugParts.join('/') : '';
@@ -16,7 +16,7 @@ export default async function CmsPage({ params }: { params: Promise<{ slug?: str
   const page = await prisma.page.findFirst({
     where: {
       slug: slug || undefined,
-      // Sin slug → buscar página de inicio (slug vacío o "home")
+      // without slug, try to find page with empty slug or 'home' or 'inicio' (for spanish sites)
       ...(slug === '' ? { OR: [{ slug: '' }, { slug: 'home' }, { slug: 'inicio' }] } : {}),
       isPublished: true,
     },
@@ -27,7 +27,7 @@ export default async function CmsPage({ params }: { params: Promise<{ slug?: str
 
   if (!page) return notFound();
 
-  // Separar bloques raíz y hijos
+//organize blocks into tree structure
   const rootBlocks = page.blocks.filter(b => !b.parentId);
   const childrenByParent = page.blocks
     .filter(b => b.parentId)
@@ -63,7 +63,7 @@ export default async function CmsPage({ params }: { params: Promise<{ slug?: str
   );
 }
 
-// Generar metadata dinámica para SEO
+// generer metadata for SEO and social sharing based on page content
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug: slugParts = [] } = await params;
   const slug = slugParts.join('/');
@@ -73,23 +73,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     select: { title: true, description: true, ogImage: true },
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eden-cms.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://brix-cms.com';
   const pageUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
 
   return {
-    title: page?.title || 'Eden CMS',
+    title: page?.title || 'Brix',
     description: page?.description || '',
     openGraph: {
-      title: page?.title || 'Eden CMS',
+      title: page?.title || 'Brix',
       description: page?.description || '',
       url: pageUrl,
-      siteName: 'Eden CMS',
+      siteName: 'Brix',
       type: 'website',
       images: page?.ogImage ? [{ url: page.ogImage }] : [],
     },
     twitter: {
       card: 'summary_large_image',
-      title: page?.title || 'Eden CMS',
+      title: page?.title || 'Brix',
       description: page?.description || '',
       images: page?.ogImage ? [page.ogImage] : [],
     },

@@ -1,7 +1,44 @@
 {
-  "name": "eden-cms",
-  "version": "0.1.0",
-  "private": true,
+  "name": "brix-cms",
+  "version": "1.1.1",
+  "description": "The open-source, AI-powered block CMS. Self-hosted. Headless. Yours.",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/brix-cms"
+  },
+  "files": [
+    "src",
+    "prisma/schema.prisma",
+    "prisma/seed.ts",
+    "public/robots.txt",
+    "public/uploads/.gitkeep",
+    "public/images/.gitkeep",
+    ".env.example",
+    "next.config.ts",
+    "tailwind.config.js",
+    "postcss.config.js",
+    "tsconfig.json",
+    "eslint.config.mjs",
+    "README.md",
+    "LICENSE",
+    "BLOCKS-MANUAL.md",
+    "docs-ai-generation.md",
+    "docs-blocks.md"
+  ],
+  "keywords": [
+    "cms",
+    "headless-cms",
+    "ai",
+    "nextjs",
+    "blocks",
+    "open-source",
+    "self-hosted",
+    "e-commerce",
+    "page-builder",
+    "prisma"
+  ],
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build",
@@ -9,7 +46,9 @@
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "setup": "prisma db push && npx tsx prisma/seed.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

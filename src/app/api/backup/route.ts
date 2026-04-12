@@ -37,7 +37,7 @@ export async function GET() {
 
     return NextResponse.json(backup, {
       headers: {
-        "Content-Disposition": `attachment; filename="eden-cms-backup-${new Date().toISOString().split("T")[0]}.json"`,
+        "Content-Disposition": `attachment; filename="brix-cms-backup-${new Date().toISOString().split("T")[0]}.json"`,
         "Content-Type": "application/json",
       },
     });

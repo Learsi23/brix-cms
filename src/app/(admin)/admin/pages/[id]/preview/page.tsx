@@ -1,5 +1,5 @@
-// Preview page — equivalente a Preview.cshtml en .NET
-// Muestra la página tal como se verá publicada, con banner de preview y botón Publicar
+// Preview page — equivalent to Preview.cshtml in .NET
+// Shows the page as it will appear when published, with preview banner and Publish button
 
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
@@ -30,7 +30,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
   const pageSettings = page.jsonData ? JSON.parse(page.jsonData) : {};
   const bgColor = pageSettings.BackgroundColor?.Value ?? '#ffffff';
 
-  // Serializar todos los bloques para el botón de publicar (igual que .NET)
+  // Serialize all blocks for the publish button (same as .NET)
   const allBlocksForPublish = allBlocks
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map(b => ({
@@ -42,12 +42,12 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
     }));
 
   const publishedAtStr = page.publishedAt
-    ? new Date(page.publishedAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? new Date(page.publishedAt).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : null;
 
   return (
     <>
-      {/* Banner de preview (cliente) */}
+      {/* Preview banner (client) */}
       <PreviewBanner
         pageId={page.id}
         pageSlug={page.slug}
@@ -59,16 +59,16 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
         jsonData={page.jsonData ?? '{}'}
       />
 
-      {/* Spacer para que el contenido no quede bajo el banner */}
+      {/* Spacer so content doesn't sit under the banner */}
       <div style={{ paddingTop: '60px' }} />
 
-      {/* Contenido de la página */}
+      {/* Page content */}
       <main style={{ backgroundColor: bgColor, minHeight: 'calc(100vh - 60px)', width: '100%' }}>
         {rootBlocks.length === 0 ? (
           <div className="text-center py-20 text-gray-500">
-            <p>📭 Sin bloques para mostrar</p>
+            <p>📭 No blocks to display</p>
             <a href={`/admin/pages/${page.id}/edit`} className="text-indigo-600 text-sm mt-2 inline-block">
-              ← Volver al editor
+              ← Back to editor
             </a>
           </div>
         ) : (
@@ -98,5 +98,5 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const page = await prisma.page.findUnique({ where: { id }, select: { title: true } });
-  return { title: `PREVIEW — ${page?.title ?? 'Página'}` };
+  return { title: `PREVIEW — ${page?.title ?? 'Page'}` };
 }

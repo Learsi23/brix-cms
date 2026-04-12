@@ -27,7 +27,7 @@ export default function PreviewBanner({
   const [published, setPublished] = useState(false);
 
   async function publishFromPreview() {
-    if (!confirm('¿Publicar esta página? Será visible públicamente.')) return;
+    if (!confirm('Publish this page? It will become publicly visible.')) return;
 
     setPublishing(true);
     try {
@@ -44,10 +44,10 @@ export default function PreviewBanner({
           window.location.href = `/admin/pages/${pageId}/edit`;
         }, 1000);
       } else {
-        alert('❌ Error al publicar: ' + result.error);
+        alert('❌ Error publishing: ' + result.error);
       }
     } catch (e) {
-      alert('❌ Error de red: ' + (e as Error).message);
+      alert('❌ Network error: ' + (e as Error).message);
     } finally {
       setPublishing(false);
     }
@@ -55,15 +55,15 @@ export default function PreviewBanner({
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-amber-500 text-white text-center py-3 z-50 shadow-lg flex items-center justify-center gap-4 text-sm">
-      <span>🔍 MODO PREVISUALIZACIÓN</span>
+      <span>🔍 PREVIEW MODE</span>
 
       {isPublished ? (
         <span className="bg-green-600 px-3 py-1 rounded-full text-xs font-bold">
-          ✅ Publicada — {publishedAt}
+          ✅ Published — {publishedAt}
         </span>
       ) : (
         <span className="bg-gray-700 px-3 py-1 rounded-full text-xs font-bold">
-          📝 Borrador
+          📝 Draft
         </span>
       )}
 
@@ -71,7 +71,7 @@ export default function PreviewBanner({
         href={`/admin/pages/${pageId}/edit`}
         className="underline font-bold text-sm"
       >
-        ← Volver al Editor
+        ← Back to Editor
       </a>
 
       <button
@@ -79,7 +79,7 @@ export default function PreviewBanner({
         disabled={publishing || published}
         className={`px-4 py-1.5 rounded text-sm font-bold transition-colors ${published ? 'bg-green-800' : 'bg-green-600 hover:bg-green-700'} disabled:opacity-75`}
       >
-        {published ? '✅ Publicada' : publishing ? '⏳ Publicando...' : '🚀 Publicar'}
+        {published ? '✅ Published' : publishing ? '⏳ Publishing...' : '🚀 Publish'}
       </button>
     </div>
   );

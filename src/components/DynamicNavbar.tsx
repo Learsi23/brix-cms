@@ -65,7 +65,7 @@ export default async function DynamicNavbar() {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={settings.logo} alt={settings.logoAltText} style={{ width: settings.logoWidth }} />
           ) : (
-            <span className="text-xl font-bold" style={{ color: settings.textColor }}>EdenCMS</span>
+            <span className="text-xl font-bold" style={{ color: settings.textColor }}>Brix</span>
           )}
         </Link>
 
