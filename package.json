@@ -1,12 +1,16 @@
 {
   "name": "brix-cms",
-  "version": "1.1.1",
-  "description": "The open-source, AI-powered block CMS. Self-hosted. Headless. Yours.",
+  "version": "2.0.1",
+  "description": "Open-source self-hosted block-based CMS. Visual page builder, 38 blocks, drag-and-drop, headless REST API, Next.js 16, SQLite/PostgreSQL.",
   "private": false,
   "license": "MIT",
+  "homepage": "https://github.com/king-lear/brix-cms#readme",
+  "bugs": {
+    "url": "https://github.com/king-lear/brix-cms/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/brix-cms"
+    "url": "https://github.com/king-lear/brix-cms"
   },
   "files": [
     "src",
@@ -24,20 +28,24 @@
     "README.md",
     "LICENSE",
     "BLOCKS-MANUAL.md",
-    "docs-ai-generation.md",
     "docs-blocks.md"
   ],
   "keywords": [
     "cms",
     "headless-cms",
-    "ai",
     "nextjs",
     "blocks",
     "open-source",
     "self-hosted",
-    "e-commerce",
     "page-builder",
-    "prisma"
+    "prisma",
+    "block-editor",
+    "drag-and-drop",
+    "typescript",
+    "sqlite",
+    "postgresql",
+    "visual-editor",
+    "content-management"
   ],
   "scripts": {
     "dev": "next dev --webpack",
@@ -62,7 +70,6 @@
     "prisma": "^6.19.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "stripe": "^14.0.0",
     "uuid": "^13.0.0",
     "zod": "^4.3.5"
   },

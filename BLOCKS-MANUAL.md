@@ -1,173 +1,172 @@
-# Brix - Manual Técnico Completo
+# Brix - Complete Technical Manual
 
-## Tabla de Contenidos
+## Table of Contents
 
-1. [Arquitectura General](#arquitectura-general)
-2. [Sistema de Páginas y Bloques](#sistema-de-páginas-y-bloques)
-3. [Bloques Contenedor](#bloques-contenedor)
-4. [Bloques de Contenido](#bloques-de-contenido)
-5. [Bloques de Media](#bloques-de-media)
-6. [Bloques de Ecommerce](#bloques-de-ecommerce)
-7. [Bloques de Layout](#bloques-de-layout)
+1. [General Architecture](#general-architecture)
+2. [Pages and Blocks System](#pages-and-blocks-system)
+3. [Container Blocks](#container-blocks)
+4. [Content Blocks](#content-blocks)
+5. [Media Blocks](#media-blocks)
+6. [Ecommerce Blocks](#ecommerce-blocks)
+7. [Layout Blocks](#layout-blocks)
 8. [Navbar](#navbar)
 9. [Footer](#footer)
-10. [Color de Fondo de Página](#color-de-fondo-de-página)
-11. [Guía para Crear Páginas](#guía-para-crear-páginas)
-12. [Generador de Páginas con IA](#generador-de-páginas-con-ia)
+10. [Page Background Color](#page-background-color)
+11. [Guide for Creating Pages](#guide-for-creating-pages)
+12. [AI Page Generator](#ai-page-generator)
 
 ---
 
-## Arquitectura General
+## General Architecture
 
-Brix es un sistema de gestión de contenido basado en Next.js que permite crear páginas dinámicas mediante bloques modulares.
+Brix is a Next.js-based content management system that allows creating dynamic pages through modular blocks.
 
-### Componentes Principales
+### Main Components
 
-- **Page**: Entidad en la base de datos que contiene título, slug, configuración y referencias a bloques
-- **Block**: Unidad atómica de contenido que se renderiza en la página
-- **BlockRenderer**: Componente que decide qué componente renderizar según el tipo de bloque
-- **DynamicNavbar/Footer**: Componentes que leen la configuración global del sitio
+- **Page**: Database entity containing title, slug, configuration, and references to blocks
+- **Block**: Atomic unit of content rendered on the page
+- **BlockRenderer**: Component that decides which component to render based on the block type
+- **DynamicNavbar/Footer**: Components that read the global site configuration
 
-### Flujo de Renderizado
-
-```
+### Rendering Flow
 URL → [[...slug]]/page.tsx
-  → Buscar página por slug en DB
-  → Obtener bloques asociados (root + hijos)
-  → Leer BackgroundColor de page.jsonData
-  → Renderizar BlockRenderer para cada bloque
-```
+→ Find page by slug in DB
+→ Get associated blocks (root + children)
+→ Read BackgroundColor from page.jsonData
+→ Render BlockRenderer for each block
+
+text
 
 ---
 
-## Sistema de Páginas y Bloques
+## Pages and Blocks System
 
-### Estructura de Datos
+### Data Structure
 
 **Page (Prisma)**
-- `id`: ID único
-- `title`: Título de la página
-- `slug`: URL amigable (único)
-- `jsonData`: JSON con configuración (backgroundColor, etc.)
-- `isPublished`: Boolean para publicar
-- `blocks`: Relación uno-a-muchos con Block
+- `id`: Unique ID
+- `title`: Page title
+- `slug`: Friendly URL (unique)
+- `jsonData`: JSON with configuration (backgroundColor, etc.)
+- `isPublished`: Boolean for publishing
+- `blocks`: One-to-many relationship with Block
 
 **Block (Prisma)**
-- `id`: ID único
-- `type`: Tipo de bloque ("HeroBlock", "ColumnBlock", etc.)
-- `sortOrder`: Orden de renderizado
-- `jsonData`: JSON con datos del bloque, formato `{ "Campo": { "Value": "valor" } }`
-- `pageId`: Clave foránea a Page
-- `parentId`: ID del bloque padre (para bloques anidados)
+- `id`: Unique ID
+- `type`: Block type ("HeroBlock", "ColumnBlock", etc.)
+- `sortOrder`: Rendering order
+- `jsonData`: JSON with block data, format `{ "Field": { "Value": "value" } }`
+- `pageId`: Foreign key to Page
+- `parentId`: Parent block ID (for nested blocks)
 
 ---
 
-## Bloques Contenedor
+## Container Blocks
 
-Los bloques contenedor tienen `isGroup: true` y pueden contener bloques hijos (children).
+Container blocks have `isGroup: true` and can contain child blocks (children).
 
-> **IMPORTANTE**: Solo `ColumnBlock` y `GridColumn` son contenedores válidos para el sistema de IA. Los demás bloques listados como "isGroup" tienen su propio sistema de hijos específico.
+> **IMPORTANT**: Only `ColumnBlock` and `GridColumn` are valid containers for the AI system. The other listed "isGroup" blocks have their own specific child system.
 
-### 1. ColumnBlock (Columnas)
+### 1. ColumnBlock (Columns)
 
-**Propósito**: Contenedor que organiza bloques hijos en columnas responsivas (flex row). Ideal para 2-4 items lado a lado.
+**Purpose**: Container that organizes child blocks in responsive columns (flex row). Ideal for 2-4 items side by side.
 
-**Tipo**: `ColumnBlock`
-**Categoría**: Layout (isGroup: true)
+**Type**: `ColumnBlock`
+**Category**: Layout (isGroup: true)
 
-**Campos Configurables**:
+**Configurable Fields**:
 
-| Campo | Tipo | Valores | Default | Descripción |
+| Field | Type | Values | Default | Description |
 |-------|------|---------|---------|-------------|
-| Gap | select | gap-0, gap-2, gap-4, gap-6, gap-8, gap-12 | gap-6 | Espacio entre columnas |
+| Gap | select | gap-0, gap-2, gap-4, gap-6, gap-8, gap-12 | gap-6 | Space between columns |
 
-> Para controlar el número de columnas, agrega la cantidad de hijos directos que desees (1-4).
+> To control the number of columns, add the desired number of direct children (1-4).
 
-**Uso Típico**:
-```
-ColumnBlock (2 columnas = 2 hijos directos)
-  ├── TextBlock (izquierda)
-  └── ImageBlock (derecha)
-```
+**Typical Usage**:
+ColumnBlock (2 columns = 2 direct children)
+├── TextBlock (left)
+└── ImageBlock (right)
+
+text
 
 ---
 
-### 2. GridColumn (Columna en Grid)
+### 2. GridColumn (Grid Column)
 
-**Propósito**: Grid CSS responsivo. Usar para 5+ productos/cards o grids grandes con título de sección.
+**Purpose**: Responsive CSS grid. Use for 5+ products/cards or large grids with section title.
 
-**Tipo**: `GridColumn`
-**Categoría**: Layout (isGroup: true)
+**Type**: `GridColumn`
+**Category**: Layout (isGroup: true)
 
-**Campos Configurables**:
+**Configurable Fields**:
 
-| Campo | Tipo | Valores/Placeholder | Default | Descripción |
+| Field | Type | Values/Placeholder | Default | Description |
 |-------|------|---------------------|---------|-------------|
-| MaxColumns | string | 1-6 | 3 | Columnas máx en desktop |
-| Gap | string | gap-4, gap-6, gap-8 | gap-6 | Espacio entre items |
-| PaddingY | string | 3rem, 48px | 3rem | Padding vertical |
-| PaddingX | string | 1.5rem, 24px | 1.5rem | Padding horizontal |
-| BackgroundColor | color | - | transparent | Color de fondo |
-| BackgroundImage | image | - | - | Imagen de fondo |
-| ItemsAlign | select | start, center, end, stretch | stretch | Alineación de items |
-| SectionId | string | servicios | - | ID ancla (#) |
-| TitleSida | string | - | - | Eyebrow (sobre el título) |
-| TitleSidaColor | color | - | - | Color del eyebrow |
-| TitleSidaSize | string | 1rem, 16px | - | Tamaño del eyebrow |
-| TitleSidaAlign | select | left, center, right | left | Alineación del eyebrow |
-| Title | string | - | - | Título principal |
-| TitleColor | color | - | - | Color del título |
-| TitleSize | string | 2rem, 32px | - | Tamaño del título |
-| SubTitle | string | - | - | Subtítulo |
-| SubTitleColor | color | - | - | Color del subtítulo |
-| SubTitleSize | string | 1.1rem, 18px | - | Tamaño del subtítulo |
-| Description | textarea | - | - | Descripción (debajo del subtítulo) |
-| DescriptionColor | color | - | - | Color de la descripción |
-| HeaderTextAlign | select | left, center, right | left | Alineación del header |
+| MaxColumns | string | 1-6 | 3 | Max columns on desktop |
+| Gap | string | gap-4, gap-6, gap-8 | gap-6 | Space between items |
+| PaddingY | string | 3rem, 48px | 3rem | Vertical padding |
+| PaddingX | string | 1.5rem, 24px | 1.5rem | Horizontal padding |
+| BackgroundColor | color | - | transparent | Background color |
+| BackgroundImage | image | - | - | Background image |
+| ItemsAlign | select | start, center, end, stretch | stretch | Item alignment |
+| SectionId | string | services | - | Anchor ID (#) |
+| TitleSida | string | - | - | Eyebrow (above title) |
+| TitleSidaColor | color | - | - | Eyebrow color |
+| TitleSidaSize | string | 1rem, 16px | - | Eyebrow size |
+| TitleSidaAlign | select | left, center, right | left | Eyebrow alignment |
+| Title | string | - | - | Main title |
+| TitleColor | color | - | - | Title color |
+| TitleSize | string | 2rem, 32px | - | Title size |
+| SubTitle | string | - | - | Subtitle |
+| SubTitleColor | color | - | - | Subtitle color |
+| SubTitleSize | string | 1.1rem, 18px | - | Subtitle size |
+| Description | textarea | - | - | Description (below subtitle) |
+| DescriptionColor | color | - | - | Description color |
+| HeaderTextAlign | select | left, center, right | left | Header alignment |
 
-**Regla para productos**: ≤4 productos → usa `ColumnBlock`; 5+ productos → usa `GridColumn` con `MaxColumns "2"`.
+**Rule for products**: ≤4 products → use `ColumnBlock`; 5+ products → use `GridColumn` with `MaxColumns "2"`.
 
 ---
 
-### 3. ProductColumnBlock (Columna de Productos)
+### 3. ProductColumnBlock (Product Column)
 
-**Propósito**: Catálogo completo de productos con sidebar de categorías y grid de productos. Carga automáticamente de la base de datos.
+**Purpose**: Complete product catalog with category sidebar and product grid. Automatically loads from database.
 
-**Tipo**: `ProductColumnBlock`
-**Categoría**: Ecommerce (isGroup: true)
+**Type**: `ProductColumnBlock`
+**Category**: Ecommerce (isGroup: true)
 
-**Campos Configurables**:
+**Configurable Fields**:
 
-| Campo | Tipo | Valores/Placeholder | Default | Descripción |
+| Field | Type | Values/Placeholder | Default | Description |
 |-------|------|---------------------|---------|-------------|
-| Title | string | Our Products | - | Título del bloque |
-| TitleColor | color | - | #1e293b | Color del título |
-| TitleSize | string | 32px | 32px | Tamaño del título |
-| SubTitle | string | - | - | Subtítulo |
-| ShowSidebar | bool | true/false | true | Mostrar sidebar de categorías |
-| Columns | string | 4 | 4 | Productos por fila |
-| ProductsPerPage | string | 12 | 12 | Productos por página |
-| BackgroundColor | color | - | #f8fafc | Color de fondo |
-| CardBgColor | color | - | #ffffff | Fondo de las tarjetas |
-| AccentColor | color | - | #2563eb | Color de acento (botones) |
-| PaddingY | string | 3rem | 3rem | Padding vertical |
-| ShowStock | bool | true/false | true | Mostrar badge de stock |
-| ShowRating | bool | true/false | false | Mostrar estrellas de rating |
-| ButtonText | string | Add to cart | Add to cart | Texto del botón |
-| FilterCategories | string | Manga, Novela | - | Filtrar por categorías (vacío = todos) |
+| Title | string | Our Products | - | Block title |
+| TitleColor | color | - | #1e293b | Title color |
+| TitleSize | string | 32px | 32px | Title size |
+| SubTitle | string | - | - | Subtitle |
+| ShowSidebar | bool | true/false | true | Show category sidebar |
+| Columns | string | 4 | 4 | Products per row |
+| ProductsPerPage | string | 12 | 12 | Products per page |
+| BackgroundColor | color | - | #f8fafc | Background color |
+| CardBgColor | color | - | #ffffff | Card background |
+| AccentColor | color | - | #2563eb | Accent color (buttons) |
+| PaddingY | string | 3rem | 3rem | Vertical padding |
+| ShowStock | bool | true/false | true | Show stock badge |
+| ShowRating | bool | true/false | false | Show rating stars |
+| ButtonText | string | Add to cart | Add to cart | Button text |
+| FilterCategories | string | Manga, Novel | - | Filter by categories (empty = all) |
 
-**Nota**: Usa este bloque cuando el usuario quiere un catálogo/tienda completa con filtrado por categorías. Carga productos de DB automáticamente.
+**Note**: Use this block when the user wants a complete catalog/store with category filtering. Automatically loads products from DB.
 
 ---
 
-### 4. GalleryBlock (Galería)
+### 4. GalleryBlock (Gallery)
 
-**Propósito**: Galería de imágenes en grid responsivo. Seleccionar múltiples imágenes de la biblioteca de medios.
+**Purpose**: Image gallery in responsive grid. Select multiple images from the media library.
 
-**Tipo**: `GalleryBlock`
-**Categoría**: Media (isGroup: true)
+**Type**: `GalleryBlock`
+**Category**: Media (isGroup: true)
 
-**Campos**:
+**Fields**:
 - Title, TitleColor, TitleSize
 - LayoutType: carousel/grid/masonry
 - AutoPlay, AutoPlayInterval (3000ms)
@@ -175,114 +174,114 @@ ColumnBlock (2 columnas = 2 hijos directos)
 - ItemsPerView (3), Gap (16px), ItemHeight (300px)
 - BackgroundColor (transparent), Padding (20px), BorderRadius
 
-**Hijos**: ImageBlock
+**Children**: ImageBlock
 
 ---
 
-### 5. ProductsGalleryBlock (Galería de Productos)
+### 5. ProductsGalleryBlock (Products Gallery)
 
-**Propósito**: Renderiza automáticamente TODOS los productos publicados.
+**Purpose**: Automatically renders ALL published products.
 
-**Tipo**: `ProductsGalleryBlock`
-**Categoría**: Media (isGroup: true)
+**Type**: `ProductsGalleryBlock`
+**Category**: Media (isGroup: true)
 
-**Campos**:
+**Fields**:
 - Title, TitleColor, TitleSize
 - CardsPerView (3), Gap (16px)
 - BackgroundColor, Padding, BorderRadius
 
 ---
 
-## Bloques de Contenido
+## Content Blocks
 
-Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
+Content blocks are leaf blocks — **they have no children**.
 
-### 6. HeroBlock (Sección Hero)
+### 6. HeroBlock (Hero Section)
 
-**Propósito**: Banner principal de página completa con imagen de fondo, título y subtítulo.
+**Purpose**: Full-page main banner with background image, title, and subtitle.
 
-**Tipo**: `HeroBlock`
-**Categoría**: Content
+**Type**: `HeroBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 
-| Campo | Tipo | Default | Descripción |
+| Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| Title | string | - | Título principal |
-| TitleColor | color | #ffffff | Color del título |
-| TitleSize | string | 56px | Tamaño (siempre en px: 56px, 64px) |
-| Subtitle | string | - | Subtítulo |
-| SubtitleColor | color | #ffffff | Color del subtítulo |
-| SubtitleSize | string | 20px | Tamaño (en px) |
-| Description | string | - | Descripción |
-| Background | image | - | Imagen de fondo |
+| Title | string | - | Main title |
+| TitleColor | color | #ffffff | Title color |
+| TitleSize | string | 56px | Size (always in px: 56px, 64px) |
+| Subtitle | string | - | Subtitle |
+| SubtitleColor | color | #ffffff | Subtitle color |
+| SubtitleSize | string | 20px | Size (in px) |
+| Description | string | - | Description |
+| Background | image | - | Background image |
 
-> **Nota IA**: Usa siempre valores en px para los tamaños (56px, 64px). Nunca clases Tailwind (text-5xl).
+> **AI Note**: Always use px values for sizes (56px, 64px). Never Tailwind classes (text-5xl).
 
 ---
 
-### 7. TextBlock (Bloque de Texto)
+### 7. TextBlock (Text Block)
 
-**Propósito**: Bloque de texto versátil con título, subtítulo y cuerpo. Control total sobre tipografía, colores, alineación y márgenes.
+**Purpose**: Versatile text block with title, subtitle, and body. Full control over typography, colors, alignment, and margins.
 
-**Tipo**: `TextBlock`
-**Categoría**: Content
+**Type**: `TextBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 
-**Posición**:
+**Position**:
 - VerticalPosition: top/middle/bottom
 - HorizontalPosition: left/center/right
 
-**Márgenes** (cada lado):
-- MarginTop, MarginBottom, MarginLeft, MarginRight (ej: 0, 10px, 1rem)
+**Margins** (each side):
+- MarginTop, MarginBottom, MarginLeft, MarginRight (e.g., 0, 10px, 1rem)
 
-**Padding** (cada lado):
+**Padding** (each side):
 - PaddingTop, PaddingBottom, PaddingLeft, PaddingRight
 
-**Título**:
-- Title, TitleColor, TitleSize (en px: 32px, 28px), TitleAlignment (left/center/right)
+**Title**:
+- Title, TitleColor, TitleSize (in px: 32px, 28px), TitleAlignment (left/center/right)
 
-**Subtítulo**:
-- Subtitle, SubtitleColor, SubtitleSize (en px: 18px), SubtitleAlignment
+**Subtitle**:
+- Subtitle, SubtitleColor, SubtitleSize (in px: 18px), SubtitleAlignment
 
-**Cuerpo**:
-- Body (textarea), BodyColor, BodySize (en px: 16px), BodyAlignment (incluye justify)
+**Body**:
+- Body (textarea), BodyColor, BodySize (in px: 16px), BodyAlignment (includes justify)
 
 ---
 
-### 8. ImageBlock (Imagen Simple)
+### 8. ImageBlock (Simple Image)
 
-**Propósito**: Imagen simple con texto alternativo y tamaño/alineación configurables.
+**Purpose**: Simple image with configurable alt text and size/alignment.
 
-**Tipo**: `ImageBlock`
-**Categoría**: Content
+**Type**: `ImageBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 - Source: image
-- AltText: string (texto alternativo)
+- AltText: string (alternative text)
 
 ---
 
-### 9. CardBlock (Tarjeta Universal)
+### 9. CardBlock (Universal Card)
 
-**Propósito**: Tarjeta visual con imagen, título, descripción y botón. Soporta layout vertical, horizontal y overlay. Ideal para grids de servicios/características.
+**Purpose**: Visual card with image, title, description, and button. Supports vertical, horizontal, and overlay layouts. Ideal for service/feature grids.
 
-**Tipo**: `CardBlock`
-**Categoría**: Content
+**Type**: `CardBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 
-**Contenido**:
+**Content**:
 - Title, TitleColor (#1f293b), TitleSize (1.5rem)
-- Badge (subtítulo), BadgeColor, BadgeSize (0.875rem)
+- Badge (subtitle), BadgeColor, BadgeSize (0.875rem)
 - Description, DescriptionColor, DescriptionSize
 
-**Imagen e Icono**:
+**Image and Icon**:
 - Image, ImageHeight (250px)
 - IconClass (FontAwesome: fas fa-rocket)
 
-**Acción**:
+**Action**:
 - TargetUrl, ButtonText (Learn more)
 - AccentColor (#3b82f6), ButtonTextColor (#ffffff)
 - HoverColor, BorderRadius, Border, Padding
@@ -295,16 +294,16 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ---
 
-### 10. IconCardBlock (Tarjeta con Icono)
+### 10. IconCardBlock (Icon Card)
 
-**Propósito**: Tarjeta con icono grande, título y descripción. Perfecto para listar características, servicios o beneficios en un grid de 3-4 columnas.
+**Purpose**: Card with large icon, title, and description. Perfect for listing features, services, or benefits in a 3-4 column grid.
 
-**Tipo**: `IconCardBlock`
-**Categoría**: Content
+**Type**: `IconCardBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 
-**Contenedor**:
+**Container**:
 - BackgroundColor, BorderColor
 - BorderRadius (12px), BorderWidth (1px), Padding (1.5rem)
 - Shadow (0 4px 20px rgba(0,0,0,0.1))
@@ -313,37 +312,37 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 - IconPosition: top/left/right
 - TextAlign: left/center/right
 
-**Icono Izquierdo**:
+**Left Icon**:
 - LeftIcon (image), LeftIconSize (48px)
 - LeftIconClass (FontAwesome: fas fa-star), LeftIconColor
 - LeftIconFaSize (2rem)
 
-**Icono Derecho** (decorativo):
+**Right Icon** (decorative):
 - RightIcon, RightIconSize (32px)
 - RightIconClass, RightIconColor
 
-**Textos**:
+**Texts**:
 - Title, TitleColor, TitleSize (1.25rem)
 - Subtitle, SubtitleColor, SubtitleSize (1rem)
 - Text, TextColor, TextSize (0.95rem)
 - MarkDown, MarkDownColor
 
 **Link (CTA)**:
-- LinkUrl (/servicios o https://...)
-- LinkText (Ver más)
+- LinkUrl (/services or https://...)
+- LinkText (See more)
 - LinkBgColor, LinkTextColor
 - LinkNewTab: true/false
 
 ---
 
-### 11. ButtonLinkBlock (Botón Link)
+### 11. ButtonLinkBlock (Button Link)
 
-**Propósito**: Botón o link con estilos. CTA simple, link interno o externo.
+**Purpose**: Button or link with styles. Simple CTA, internal or external link.
 
-**Tipo**: `ButtonLinkBlock`
-**Categoría**: Content
+**Type**: `ButtonLinkBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 - Text, Url
 - Color (#10b981), HoverColor (#059669)
 - TextColor (#ffffff)
@@ -354,36 +353,36 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ---
 
-### 12. CTABannerBlock (Banner CTA)
+### 12. CTABannerBlock (CTA Banner)
 
-**Propósito**: Banner llamada-a-la-acción con fondo de color, texto y botón. Ideal para cerrar secciones.
+**Purpose**: Call-to-action banner with background color, text, and button. Ideal for closing sections.
 
-**Tipo**: `CTABannerBlock`
-**Categoría**: Content
+**Type**: `CTABannerBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 - Title, TitleColor (#ffffff), TitleSize (2rem)
-- Subtitle, SubtitleColor (rgba blanco)
+- Subtitle, SubtitleColor (white rgba)
 - Btn1Text, Btn1Url, Btn1BgColor, Btn1TextColor
 - Btn2Text, Btn2Url, Btn2Color
-- BackgroundColor (#10b981), BackgroundColor2 (degradado)
+- BackgroundColor (#10b981), BackgroundColor2 (gradient)
 - BackgroundImage
 - PaddingY (5rem)
 - TextAlign: left/center/right
 
 ---
 
-### 13. StatsBlock (Estadísticas)
+### 13. StatsBlock (Statistics)
 
-**Propósito**: Bloque de estadísticas numéricas impactantes (ej. 500+ clientes, 98% satisfacción).
+**Purpose**: Impactful numerical statistics block (e.g., 500+ clients, 98% satisfaction).
 
-**Tipo**: `StatsBlock`
-**Categoría**: Content
+**Type**: `StatsBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 - Title, TitleColor (#111827)
 - Subtitle, SubtitleColor (#6b7280)
-- Stat1Number (ej: +500), Stat1Label, Stat1Icon (fas fa-users)
+- Stat1Number (e.g., +500), Stat1Label, Stat1Icon (fas fa-users)
 - Stat2Number, Stat2Label, Stat2Icon
 - Stat3Number, Stat3Label, Stat3Icon
 - Stat4Number, Stat4Label, Stat4Icon
@@ -395,24 +394,24 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### 14. MarkdownBlock (Markdown)
 
-**Propósito**: Renderiza contenido en formato Markdown. Ideal para textos largos, documentación o artículos con formato.
+**Purpose**: Renders content in Markdown format. Ideal for long texts, documentation, or formatted articles.
 
-**Tipo**: `MarkdownBlock`
-**Categoría**: Content
+**Type**: `MarkdownBlock`
+**Category**: Content
 
-**Campos**:
-- Content (tipo markdown: **negrita**, ## encabezados, - listas, etc.)
+**Fields**:
+- Content (type markdown: **bold**, ## headings, - lists, etc.)
 
 ---
 
-### 15. LogoStripBlock (Banda de Logos)
+### 15. LogoStripBlock (Logo Strip)
 
-**Propósito**: Banda horizontal de logos de marcas/partners.
+**Purpose**: Horizontal strip of brand/partner logos.
 
-**Tipo**: `LogoStripBlock`
-**Categoría**: Content
+**Type**: `LogoStripBlock`
+**Category**: Content
 
-**Campos**:
+**Fields**:
 - Heading, HeadingColor
 - Logo1 (image), Logo1Url ... Logo6, Logo6Url
 - LogoHeight (48px), Grayscale (true/false)
@@ -420,16 +419,16 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ---
 
-### 16. ContactFormBlock (Formulario de Contacto)
+### 16. ContactFormBlock (Contact Form)
 
-**Propósito**: Formulario de contacto configurable.
+**Purpose**: Configurable contact form.
 
-**Tipo**: `ContactFormBlock`
-**Categoría**: AI/Email
+**Type**: `ContactFormBlock`
+**Category**: AI/Email
 
-**Campos**:
+**Fields**:
 - Title, RecipientEmail
-- Text (botón), Color, HoverColor, BorderRadius, Border
+- Text (button), Color, HoverColor, BorderRadius, Border
 - Width, Padding, TextColor
 - ButtonPosition (left/center/right)
 
@@ -437,28 +436,28 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### 17. ChatBlock (Chat)
 
-**Propósito**: Widget de chat con IA.
+**Purpose**: AI chat widget.
 
-**Tipo**: `ChatBlock`
-**Categoría**: AI/Email
+**Type**: `ChatBlock`
+**Category**: AI/Email
 
-**Campos**:
+**Fields**:
 - CustomPrompt, WelcomeMessage
 - Logo (image), LogoSize, Ai_Logo (image), Ai_LogoSize
 - Title, TitleColor, TitleSize, BackgroundColor
 
 ---
 
-## Bloques de Media
+## Media Blocks
 
 ### 18. VideoBlock (Video)
 
-**Propósito**: Video embebido de YouTube o Vimeo. Solo requiere la URL pública.
+**Purpose**: Embedded video from YouTube or Vimeo. Only requires the public URL.
 
-**Tipo**: `VideoBlock`
-**Categoría**: Media
+**Type**: `VideoBlock`
+**Category**: Media
 
-**Campos**:
+**Fields**:
 - VideoUrl (YouTube/Vimeo)
 - AspectRatio (16/9, 4/3, 1/1)
 - MaxWidth (900px)
@@ -468,14 +467,14 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ---
 
-### 19. MapBlock (Mapa)
+### 19. MapBlock (Map)
 
-**Propósito**: Mapa embebido con tarjeta de información.
+**Purpose**: Embedded map with information card.
 
-**Tipo**: `MapBlock`
-**Categoría**: Media
+**Type**: `MapBlock`
+**Category**: Media
 
-**Campos**:
+**Fields**:
 - Address, Zoom (15), MapType (roadmap)
 - Title, TitleColor, Subtitle, SubtitleColor
 - PlaceName, AddressDisplay, Phone, Email, Hours
@@ -487,12 +486,12 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### 20. FlexibleImageTextBlock
 
-**Propósito**: Imagen y texto en layout flexible (alternado izquierda/derecha).
+**Purpose**: Image and text in flexible layout (alternating left/right).
 
-**Tipo**: `FlexibleImageTextBlock`
-**Categoría**: Media
+**Type**: `FlexibleImageTextBlock`
+**Category**: Media
 
-**Campos**:
+**Fields**:
 - Layout: image-left/image-right
 - Image (image), ImageWidth, ImageMaxWidth, ImageBorderRadius (rounded-xl)
 - Title, TitleColor, TitleSize, TitleWeight (bold)
@@ -506,12 +505,12 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### 21. DropdownBlock (Dropdown/FAQ)
 
-**Propósito**: Acordeón estilo dropdown. Ideal para FAQs o contenido colapsable. Un bloque por pregunta.
+**Purpose**: Accordion-style dropdown. Ideal for FAQs or collapsible content. One block per question.
 
-**Tipo**: `DropdownBlock`
-**Categoría**: Media
+**Type**: `DropdownBlock`
+**Category**: Media
 
-**Campos**:
+**Fields**:
 - Title, TitleColor, TitleSize
 - BackgroundColor, BackgroundGradient
 - Question, QuestionColor, QuestionSize
@@ -521,17 +520,17 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ---
 
-## Bloques de Ecommerce
+## Ecommerce Blocks
 
 ### 22. ProductCardBlock
 
-**Propósito**: Tarjeta de producto individual para e-commerce.
+**Purpose**: Individual product card for e-commerce.
 
-**Tipo**: `ProductCardBlock`
-**Categoría**: Ecommerce
+**Type**: `ProductCardBlock`
+**Category**: Ecommerce
 
-**Campos**:
-- ProductId: **SIEMPRE dejar vacío ""** — el sistema lo asigna automáticamente
+**Fields**:
+- ProductId: **ALWAYS leave empty ""** — the system assigns it automatically
 - Name, Description, Price (29.99), Stock (50)
 - Image (image)
 - ButtonText (Add to cart)
@@ -541,18 +540,18 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### 23. CatalogItemBlock
 
-**Propósito**: Tarjeta de producto rica con variantes, badges y ratings.
+**Purpose**: Rich product card with variants, badges, and ratings.
 
-**Tipo**: `CatalogItemBlock`
-**Categoría**: Ecommerce
+**Type**: `CatalogItemBlock`
+**Category**: Ecommerce
 
-**Campos**:
-- ProductId: **SIEMPRE dejar vacío ""**
+**Fields**:
+- ProductId: **ALWAYS leave empty ""**
 - Name, ShortDescription, LongDescription
-- Image (image), Price, OriginalPrice (si hay oferta), CurrencySymbol (€/$)
-- Stock, Category, Tags (nuevo,oferta)
-- Sizes (S,M,L,XL), Colors (Rojo,Azul), CustomOptions
-- Badge (Nuevo/Oferta/Bestseller), BadgeColor
+- Image (image), Price, OriginalPrice (if on sale), CurrencySymbol (€/$)
+- Stock, Category, Tags (new,offer)
+- Sizes (S,M,L,XL), Colors (Red,Blue), CustomOptions
+- Badge (New/Offer/Bestseller), BadgeColor
 - Rating (4.5), ReviewCount (128), ShowRating (true)
 - ButtonText (Add to cart), BackgroundColor (#ffffff)
 
@@ -560,12 +559,12 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### 24. EmailButtonBlock
 
-**Propósito**: Botón que abre cliente de email.
+**Purpose**: Button that opens email client.
 
-**Tipo**: `EmailButtonBlock`
-**Categoría**: Ecommerce
+**Type**: `EmailButtonBlock`
+**Category**: Ecommerce
 
-**Campos**:
+**Fields**:
 - Text, EmailAddress, Subject, Body
 - BackgroundColor, HoverColor, TextColor
 - BorderRadius (8px), Border, Width, Padding
@@ -573,29 +572,29 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ---
 
-## Bloques de Layout
+## Layout Blocks
 
-### 25. SpacerBlock (Espaciador)
+### 25. SpacerBlock (Spacer)
 
-**Propósito**: Espacio vacío configurable por altura. Separa secciones.
+**Purpose**: Empty configurable height space. Separates sections.
 
-**Tipo**: `SpacerBlock`
-**Categoría**: Layout
+**Type**: `SpacerBlock`
+**Category**: Layout
 
-**Campos**:
+**Fields**:
 - Height (3rem)
 - BackgroundColor (transparent)
 
 ---
 
-### 26. DividerBlock (Divisor)
+### 26. DividerBlock (Divider)
 
-**Propósito**: Línea divisoria horizontal con estilos configurables.
+**Purpose**: Horizontal dividing line with configurable styles.
 
-**Tipo**: `DividerBlock`
-**Categoría**: Layout
+**Type**: `DividerBlock`
+**Category**: Layout
 
-**Campos**:
+**Fields**:
 - Style: solid/dashed/dotted/double
 - Color (#e2e8f0)
 - Thickness (1px)
@@ -606,12 +605,12 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### 27. TextWithButtonBlock
 
-**Propósito**: Bloque de texto con botón integrado.
+**Purpose**: Text block with integrated button.
 
-**Tipo**: `TextWithButtonBlock`
-**Categoría**: Interactive
+**Type**: `TextWithButtonBlock`
+**Category**: Interactive
 
-**Campos**:
+**Fields**:
 - Title, TitleColor, TitleSize
 - Subtitle, SubtitleColor, SubtitleSize
 - Description, DescriptionColor, DescriptionSize
@@ -624,17 +623,17 @@ Los bloques de contenido son hojas (leaf blocks) — **no tienen hijos**.
 
 ### DynamicNavbar.tsx
 
-Componente de navegación que lee la configuración desde `SiteConfig` con clave `site`.
+Navigation component that reads configuration from `SiteConfig` with key `site`.
 
-**Ubicación**: `src/components/DynamicNavbar.tsx`
+**Location**: `src/components/DynamicNavbar.tsx`
 
-**Datos leídos de la base de datos**:
+**Data read from database**:
 ```json
 {
   "navbar": {
     "backgroundColor": "#ffffff",
     "textColor": "#000000",
-    "logo": "URL del logo",
+    "logo": "Logo URL",
     "logoAltText": "Logo",
     "logoWidth": "150px",
     "logoLink": "/",
@@ -643,7 +642,7 @@ Componente de navegación que lee la configuración desde `SiteConfig` con clave
     "paddingVertical": "py-3",
     "menuItems": [
       {
-        "customText": "Inicio",
+        "customText": "Home",
         "customUrl": "",
         "isCustomUrl": false,
         "pageSlug": "home"
@@ -651,41 +650,36 @@ Componente de navegación que lee la configuración desde `SiteConfig` con clave
     ]
   }
 }
-```
+Configurable Fields:
 
-**Campos Configurables**:
+Field	Type	Default	Description
+backgroundColor	color	#ffffff	Background color
+textColor	color	#000000	Text color
+logo	string	-	Logo URL
+logoAltText	string	Logo	Alternative text
+logoWidth	string	150px	Logo width
+logoLink	string	/	Click link
+isSticky	boolean	true	Stick to top
+hasShadow	boolean	true	Show shadow
+paddingVertical	string	py-3	Vertical padding
+menuItems	array	[]	Menu items
+Menu: If no menuItems are configured, automatically shows published pages. If there are menuItems, it uses those.
 
-| Campo | Tipo | Default | Descripción |
-|-------|------|---------|-------------|
-| backgroundColor | color | #ffffff | Color de fondo |
-| textColor | color | #000000 | Color del texto |
-| logo | string | - | URL del logo |
-| logoAltText | string | Logo | Texto alternativo |
-| logoWidth | string | 150px | Ancho del logo |
-| logoLink | string | / | Link al hacer clic |
-| isSticky | boolean | true | Fijar al top |
-| hasShadow | boolean | true | Mostrar sombra |
-| paddingVertical | string | py-3 | Padding vertical |
-| menuItems | array | [] | Items del menú |
+Fixed Items: After the menu, always shows:
 
-**Menú**: Si no hay `menuItems` configurados, muestra automáticamente las páginas publicadas. Si hay `menuItems`, usa esos.
+Cart (/cart)
 
-**Elementos Fijos**: Después del menú, siempre muestra:
-- Carrito (/cart)
-- Panel Admin (/admin)
+Admin Panel (/admin)
 
----
+Footer
+DynamicFooter.tsx
+Footer component that reads configuration from SiteConfig with key site.
 
-## Footer
+Location: src/components/DynamicFooter.tsx
 
-### DynamicFooter.tsx
+Data read from database:
 
-Componente de footer que lee la configuración desde `SiteConfig` con clave `site`.
-
-**Ubicación**: `src/components/DynamicFooter.tsx`
-
-**Datos leídos de la base de datos**:
-```json
+json
 {
   "footer": {
     "backgroundColor": "#1a1a1a",
@@ -695,324 +689,293 @@ Componente de footer que lee la configuración desde `SiteConfig` con clave `sit
     "logoWidth": "150px",
     "logoPosition": "left",
     "showPagesColumn": true,
-    "pagesColumnTitle": "Páginas",
+    "pagesColumnTitle": "Pages",
     "pages": [],
     "showSocialMediaColumn": true,
-    "socialMediaColumnTitle": "Síguenos",
+    "socialMediaColumnTitle": "Follow Us",
     "socialMedia": [],
     "showCopyrightRow": true,
     "companyName": "",
     "companyNumber": "",
-    "copyrightText": "Todos los derechos reservados",
+    "copyrightText": "All rights reserved",
     "showHorizontalLine": true,
     "paddingVertical": "py-6",
     "columnsGap": "gap-8"
   }
 }
-```
+Supported social networks:
 
-**Redes sociales soportadas**:
-- facebook, instagram, twitter, x, linkedin, youtube, tiktok, whatsapp, pinterest, snapchat, reddit, discord, telegram
+facebook, instagram, twitter, x, linkedin, youtube, tiktok, whatsapp, pinterest, snapchat, reddit, discord, telegram
 
-**Formato de socialMedia**:
-```json
+socialMedia format:
+
+json
 {
   "platform": "instagram",
-  "url": "https://instagram.com/mi_empresa",
+  "url": "https://instagram.com/my_company",
   "iconType": "class",
   "iconClass": "fab fa-instagram"
 }
-```
+Page Background Color
+How to Configure
+Each page can have its own background color. It is configured in the jsonData field of the page.
 
----
+Structure:
 
-## Color de Fondo de Página
-
-### Cómo Configurar
-
-Cada página puede tener su propio color de fondo. Se configura en el campo `jsonData` de la página.
-
-**Estructura**:
-```json
+json
 {
   "BackgroundColor": {
     "Value": "#f8fafc"
   }
 }
-```
+Reading in Rendering
+In [[...slug]]/page.tsx:
 
-### Lectura en el Renderizado
-
-En `[[...slug]]/page.tsx`:
-```typescript
+typescript
 const pageSettings = page.jsonData ? JSON.parse(page.jsonData) : {};
 const bgColor = pageSettings.BackgroundColor?.Value ?? '#ffffff';
-```
+Applied to the main container:
 
-Aplicado al contenedor principal:
-```jsx
+jsx
 <div className="min-h-screen" style={{ backgroundColor: bgColor }}>
-```
+Common Colors
+Color	Code	Usage
+White	#ffffff	Default
+Light gray	#f8fafc	Alternative background
+Black	#000000	Dark background
+Light blue	#eff6ff	Decorative backgrounds
+Guide for Creating Pages
+Method 1: Visual Editor (Admin)
+Go to /admin/pages
 
-### Colores Comunes
+Click "New Page"
 
-| Color | Código | Uso |
-|-------|--------|-----|
-| Blanco | #ffffff | Default |
-| Gris claro | #f8fafc | Fondo alternativo |
-| Negro | #000000 | Fondo oscuro |
-| Azul claro | #eff6ff | Fondos decorativos |
+Configure title and slug
 
----
+Drag blocks from the side panel
 
-## Guía para Crear Páginas
+Configure each block
 
-### Método 1: Editor Visual (Admin)
+Publish
 
-1. Ir a `/admin/pages`
-2. Hacer clic en "Nueva Página"
-3. Configurar título y slug
-4. Arrastrar bloques desde el panel lateral
-5. Configurar cada bloque
-6. Publicar
+Method 2: REST API
+Create page:
 
-### Método 2: REST API
-
-**Crear página**:
-```
+text
 POST /api/pages
 Body: {
-  title: "Mi Página",
-  slug: "mi-pagina",
+  title: "My Page",
+  slug: "my-page",
   jsonData: "{\"BackgroundColor\":{\"Value\":\"#f8fafc\"}}"
 }
-```
+Add blocks:
 
-**Agregar bloques**:
-```
+text
 POST /api/pages/{id}/blocks
 Body: {
   type: "HeroBlock",
-  jsonData: "{\"Title\":{\"Value\":\"Bienvenido\"}}"
+  jsonData: "{\"Title\":{\"Value\":\"Welcome\"}}"
 }
-```
+Method 3: AI Page Generator
+See AI Page Generator section below.
 
-### Método 3: Generador de Páginas con IA
-
-Ver sección [Generador de Páginas con IA](#generador-de-páginas-con-ia) más abajo.
-
-### Estructuras Comunes de Páginas
-
-#### Landing Page
-```
-HeroBlock (fondo con imagen)
-TextBlock (bienvenida, centrado)
-ColumnBlock → 3x CardBlock o IconCardBlock (servicios)
-StatsBlock (estadísticas)
-CTABannerBlock (llamada a la acción)
+Common Page Structures
+Landing Page
+text
+HeroBlock (background with image)
+TextBlock (welcome, centered)
+ColumnBlock → 3x CardBlock or IconCardBlock (services)
+StatsBlock (statistics)
+CTABannerBlock (call to action)
 ContactFormBlock
-```
-
-#### Página de Servicios
-```
+Services Page
+text
 HeroBlock
-GridColumn (con título "Nuestros Servicios")
-  ├── IconCardBlock (servicio 1)
-  ├── IconCardBlock (servicio 2)
-  └── IconCardBlock (servicio 3)
+GridColumn (with title "Our Services")
+  ├── IconCardBlock (service 1)
+  ├── IconCardBlock (service 2)
+  └── IconCardBlock (service 3)
 StatsBlock
 CTABannerBlock
-```
-
-#### Página de Contacto
-```
+Contact Page
+text
 HeroBlock
-TextBlock (info de contacto)
+TextBlock (contact info)
 MapBlock
 ContactFormBlock
-```
-
-#### Catálogo de Productos (completo)
-```
+Product Catalog (complete)
+text
 HeroBlock
-ProductColumnBlock (con sidebar de categorías)
-```
-
-#### Catálogo de Productos (manual, 4 productos o menos)
-```
+ProductColumnBlock (with category sidebar)
+Product Catalog (manual, 4 products or less)
+text
 HeroBlock
 ColumnBlock → 4x ProductCardBlock
 CTABannerBlock
-```
-
-#### Catálogo de Productos (manual, 5+ productos)
-```
+Product Catalog (manual, 5+ products)
+text
 HeroBlock
 GridColumn (MaxColumns "2") → ProductCardBlock x N
 CTABannerBlock
-```
-
-#### FAQ
-```
+FAQ
+text
 HeroBlock
-DropdownBlock (pregunta 1)
-DropdownBlock (pregunta 2)
-DropdownBlock (pregunta 3)
-```
-
-#### Página con Grid de Contenido
-```
+DropdownBlock (question 1)
+DropdownBlock (question 2)
+DropdownBlock (question 3)
+Content Grid Page
+text
 HeroBlock
-ColumnBlock (2 columnas)
+ColumnBlock (2 columns)
   ├── TextBlock
   └── ImageBlock
-LogoStripBlock (clientes)
+LogoStripBlock (clients)
 CTABannerBlock
-```
+AI Page Generator
+The AI generator allows creating complete pages through natural language. Supports multiple providers.
 
----
+Available Providers
+Provider	Recommended Model	Speed	Quality
+Google Gemini	gemini-2.0-flash	Fast (~15s)	Very good
+DeepSeek	deepseek-chat	Medium (~30s)	Excellent
+Mistral AI	mistral-large-latest	Medium (~30s)	Good
+Ollama (local)	deepseek-r1:14b	Slow (60-120s)	Good
+Recommendation: Use Gemini or DeepSeek with saved API key for better results and higher speed.
 
-## Generador de Páginas con IA
+How to Use
+Go to Admin → 🤖 AI Generator
 
-El generador de IA permite crear páginas completas mediante lenguaje natural. Soporta múltiples proveedores.
+Write the prompt describing the page
 
-### Proveedores Disponibles
+The system may ask clarifying questions (step 2)
 
-| Proveedor | Modelo Recomendado | Velocidad | Calidad |
-|-----------|-------------------|-----------|---------|
-| Google Gemini | gemini-2.0-flash | Rápido (~15s) | Muy buena |
-| DeepSeek | deepseek-chat | Medio (~30s) | Excelente |
-| Mistral AI | mistral-large-latest | Medio (~30s) | Buena |
-| Ollama (local) | deepseek-r1:14b | Lento (60-120s) | Buena |
+The page is generated and automatically redirects to the editor
 
-> **Recomendación**: Usar Gemini o DeepSeek con API key guardada para mejores resultados y mayor velocidad.
+Generation Flow
+text
+User prompt
+  → Analysis (first AI call)
+  → If missing data: shows questions → answers → generate page
+  → If has data: creates page directly
+  → Redirects to editor
+Prompt Rules for AI
+VALID Blocks — AI can only use these types:
 
-### Cómo Usar
+Containers (require children):
 
-1. Ir a **Admin → 🤖 Generador IA**
-2. Escribir el prompt describiendo la página
-3. El sistema puede hacer preguntas aclaratorias (paso 2)
-4. Se genera y redirige automáticamente al editor de la página
+ColumnBlock, GridColumn
 
-### Flujo de Generación
+Leaf blocks (no children):
 
-```
-Prompt del usuario
-  → Análisis (primera llamada a la IA)
-  → Si faltan datos: muestra preguntas → respuestas → genera página
-  → Si tiene datos: crea la página directamente
-  → Redirige al editor
-```
+HeroBlock, TextBlock, MarkdownBlock, ImageBlock
 
-### Reglas del Prompt para IA
+CardBlock, IconCardBlock, StatsBlock, CTABannerBlock
 
-**Bloques VÁLIDOS** — la IA solo puede usar estos tipos:
+LogoStripBlock, SpacerBlock, DividerBlock
 
-**Contenedores** (requieren hijos):
-- `ColumnBlock`, `GridColumn`
+GalleryBlock, ProductsGalleryBlock, FlexibleImageTextBlock
 
-**Hojas** (sin hijos):
-- `HeroBlock`, `TextBlock`, `MarkdownBlock`, `ImageBlock`
-- `CardBlock`, `IconCardBlock`, `StatsBlock`, `CTABannerBlock`
-- `LogoStripBlock`, `SpacerBlock`, `DividerBlock`
-- `GalleryBlock`, `ProductsGalleryBlock`, `FlexibleImageTextBlock`
-- `VideoBlock`, `MapBlock`, `ButtonLinkBlock`, `DropdownBlock`
-- `TextWithButtonBlock`, `EmailButtonBlock`
-- `ProductCardBlock`, `CatalogItemBlock`, `ProductColumnBlock`
-- `ContactFormBlock`, `ChatBlock`
+VideoBlock, MapBlock, ButtonLinkBlock, DropdownBlock
 
-**Tipos INVÁLIDOS** (no existen):
-- `SectionBlock`, `FormBlock`, `NavbarBlock`, `HeaderBlock`
-- `TabsBlock`, `CarouselBlock`, `AccordionBlock`, `IconColumn`
+TextWithButtonBlock, EmailButtonBlock
 
-**Formato JSON de cada campo**: `{ "Value": "valor" }` — siempre string, incluso números y booleanos.
+ProductCardBlock, CatalogItemBlock, ProductColumnBlock
 
-### Ejemplos de Prompts Efectivos
+ContactFormBlock, ChatBlock
 
-#### Ejemplo 1: Landing Page
+INVALID Types (do not exist):
 
-```
-Crea una página de inicio para una agencia web con:
+SectionBlock, FormBlock, NavbarBlock, HeaderBlock
+
+TabsBlock, CarouselBlock, AccordionBlock, IconColumn
+
+JSON format for each field: { "Value": "value" } — always string, even numbers and booleans.
+
+Effective Prompt Examples
+Example 1: Landing Page
+text
+Create a home page for a web agency with:
 
 HERO:
-- Fondo azul oscuro
-- Título blanco: "Diseño Web Profesional"
-- Subtítulo: "Transformamos tus ideas en experiencias digitales"
-- Botón naranja: "Solicitar Demo"
+- Dark blue background
+- White title: "Professional Web Design"
+- Subtitle: "We transform your ideas into digital experiences"
+- Orange button: "Request Demo"
 
-SERVICIOS (3 columnas con IconCardBlock):
-- Ícono fas fa-paint-brush, Título "Diseño", Descripción "Interfaces modernas"
-- Ícono fas fa-code, Título "Desarrollo", Descripción "Código limpio y rápido"
-- Ícono fas fa-mobile-alt, Título "Responsivo", Descripción "Se ve bien en todo"
+SERVICES (3 columns with IconCardBlock):
+- Icon fas fa-paint-brush, Title "Design", Description "Modern interfaces"
+- Icon fas fa-code, Title "Development", Description "Clean and fast code"
+- Icon fas fa-mobile-alt, Title "Responsive", Description "Looks great everywhere"
 
-ESTADÍSTICAS: 500+ clientes, 98% satisfacción, 10 años
+STATISTICS: 500+ clients, 98% satisfaction, 10 years
 
-CONTACTO: Formulario con email y mensaje
+CONTACT: Form with email and message
 
-Colores: Azul #0047AB, naranja #FF6B35, fondo blanco
-```
+Colors: Blue #0047AB, orange #FF6B35, white background
+Example 2: Detailed Services Page
+text
+Create a services page with:
 
-#### Ejemplo 2: Página de Servicios Detallada
+INTRO: Centered title "Our Services" + description
 
-```
-Crea página de servicios con:
+SERVICES (GridColumn 3 columns with IconCardBlock):
+- Web Design, Digital Marketing, Consulting
+- 24/7 Support, SEO, Maintenance
 
-INTRO: Título centrado "Nuestros Servicios" + descripción
+PROCESS (ColumnBlock 4 columns with CardBlock):
+1. Consultation → 2. Proposal → 3. Development → 4. Delivery
 
-SERVICIOS (GridColumn 3 columnas con IconCardBlock):
-- Diseño Web, Marketing Digital, Consultoría
-- Soporte 24/7, SEO, Mantenimiento
+CTA: Dark banner with button "Request Quote" → /contact
 
-PROCESO (ColumnBlock 4 columnas con CardBlock):
-1. Consulta → 2. Propuesta → 3. Desarrollo → 4. Entrega
+Colors: Light gray #F5F5F5 background, red accent #E63946
+Example 3: Product Catalog (5+ items)
+text
+Create a category page with 6 clothing products:
+- Blue T-shirt - $29.99
+- Black Pants - $49.99
+- Red Dress - $59.99
+- Gray Jacket - $79.99
+- Beige Shorts - $35.99
+- Green Skirt - $45.99
 
-CTA: Banner oscuro con botón "Solicitar Presupuesto" → /contacto
+Use GridColumn with 3 columns and ProductCardBlock.
+White background, blue buttons #0047AB.
+Tips for Better Results
+Be specific about layout: "3 equal columns", "2 columns with left image"
 
-Colores: Gris claro #F5F5F5 fondo, acento rojo #E63946
-```
+Mention blocks by name if the exact type is important
 
-#### Ejemplo 3: Catálogo de Productos (5+ items)
+Colors in hex: #FF6B35, #0047AB (never names like "navy blue")
 
-```
-Crea página de categoría con 6 productos de ropa:
-- Camiseta Azul - $29.99
-- Pantalón Negro - $49.99
-- Vestido Rojo - $59.99
-- Chaqueta Gris - $79.99
-- Shorts Beige - $35.99
-- Falda Verde - $45.99
+Font sizes in px: "title 48px", "text 16px"
 
-Usar GridColumn con 3 columnas y ProductCardBlock.
-Fondo blanco, botones azul #0047AB.
-```
+Limit: Maximum 15 blocks per page to avoid timeouts
 
-### Tips para Mejores Resultados
+Products: For 5+ products, explicitly mention GridColumn
 
-1. **Sé específico en el layout**: "3 columnas iguales", "2 columnas con imagen izquierda"
-2. **Menciona bloques por nombre** si es importante el tipo exacto
-3. **Colores en hex**: #FF6B35, #0047AB (nunca nombres como "azul marino")
-4. **Tamaños de fuente en px**: "título 48px", "texto 16px"
-5. **Límite**: Máximo 15 bloques por página para evitar timeouts
-6. **Productos**: Para 5+ productos, menciona GridColumn explícitamente
-7. **FontAwesome**: Usa clases reales como `fas fa-rocket`, `fas fa-star`, `fas fa-users`
+FontAwesome: Use real classes like fas fa-rocket, fas fa-star, fas fa-users
 
----
+Glossary
+Block: Atomic unit of content
 
-## Glosario
+isGroup/Container: Block that can contain other child blocks
 
-- **Block**: Unidad atómica de contenido
-- **isGroup/Container**: Bloque que puede contener otros bloques hijos
-- **jsonData**: JSON con configuración de cada bloque en formato `{ "Campo": { "Value": "valor" } }`
-- **slug**: URL amigable de la página (solo minúsculas y guiones)
-- **SiteConfig**: Configuración global del sitio (navbar, footer)
-- **BackgroundColor**: Color de fondo de la página
-- **Sticky**: Navbar que se fija al hacer scroll
-- **Glassmorphism**: Efecto visual translúcido
-- **Leaf block**: Bloque sin hijos (no contenedor)
-- **eyebrow**: Texto pequeño encima del título principal (TitleSida en GridColumn)
+jsonData: JSON with each block's configuration in format { "Field": { "Value": "value" } }
 
----
+slug: Page's friendly URL (only lowercase and hyphens)
 
-*Manual de Brix Next.js*
-*Versión: 2.0*
-*Fecha: Abril 2026*
+SiteConfig: Global site configuration (navbar, footer)
+
+BackgroundColor: Page background color
+
+Sticky: Navbar that fixes when scrolling
+
+Glassmorphism: Translucent visual effect
+
+Leaf block: Block without children (non-container)
+
+eyebrow: Small text above the main title (TitleSida in GridColumn)
+
+Brix Next.js Manual
+Version: 2.0
+Date: April 2026

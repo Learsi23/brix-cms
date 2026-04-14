@@ -7,14 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Igual que Brix.Pro: Pages contienen Blocks directamente
 model Page {
   id          String    @id @default(cuid())
   title       String
   slug        String    @unique
-  description String?   // SEO meta description
-  ogImage     String?   // SEO Open Graph image
-  jsonData    String?   // Configuración de la página (color de fondo, etc.)
+  description String?
+  ogImage     String?
+  jsonData    String?
   isPublished Boolean   @default(false)
   publishedAt DateTime?
   sortOrder   Int       @default(0)
@@ -27,15 +26,14 @@ model Page {
   @@index([isPublished])
 }
 
-// Bloque: unidad atómica de contenido. Igual que .NET Block
 model Block {
   id        String   @id @default(cuid())
-  type      String   // "HeroBlock", "TextBlock", etc.
+  type      String
   sortOrder Int      @default(0)
-  jsonData  String?  // JSON con los datos del bloque: {"Title":{"Value":"..."},...}
+  jsonData  String?
   pageId    String
   page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  parentId  String?  // Para bloques anidados (ColumnBlock contiene otros bloques)
+  parentId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -43,20 +41,18 @@ model Block {
   @@index([parentId])
 }
 
-// Configuración global del sitio (clave → valor)
 model SiteConfig {
   id    String @id @default(cuid())
   key   String @unique
-  value String // JSON: site, stripe_setup, stripe_connect, etc.
+  value String
 }
 
-// Librería de medios con soporte de carpetas (igual que .NET MediaController)
 model Media {
   id        String   @id @default(cuid())
   filename  String
   path      String   @unique
-  folder    String   @default("")  // Subcarpeta relativa dentro de /uploads/
-  type      String   // image, video, document
+  folder    String   @default("")
+  type      String
   size      Int
   mimeType  String
   width     Int?
@@ -64,144 +60,14 @@ model Media {
   createdAt DateTime @default(now())
 }
 
-// Categorías de producto
-model Category {
-  id        String    @id @default(cuid())
-  name      String
-  slug      String    @unique
-  products  Product[]
-  createdAt DateTime  @default(now())
-}
-
-// Productos para e-commerce (igual que .NET ProductEntity)
-model Product {
-  id             String    @id @default(cuid())
-  name           String
-  description    String?
-  longDescription String?
-  price          Float
-  originalPrice  Float?
-  currencySymbol String?
-  stock          Int       @default(0)
-  imageUrl       String?
-  imagesJson     String?   // JSON array de URLs — hasta 6 imágenes
-  categoryId     String?
-  category       Category? @relation(fields: [categoryId], references: [id])
-  categoryName   String?   // Campo de categoría como string (igual que .NET)
-  tags           String?
-  sizes          String?   // Variantes separadas por coma
-  colors         String?
-  customOptions  String?
-  badge          String?
-  rating         Float?
-  reviewCount    Int?
-  sku            String?
-  stripePriceId  String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  cartItems      CartItem[]
-  orderItems     OrderItem[]
-}
-
-// Items del carrito (igual que .NET CartItem)
-model CartItem {
-  id        String   @id @default(cuid())
-  sessionId String
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  quantity  Int      @default(1)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([sessionId])
-  @@index([productId])
-}
-
-// Órdenes (igual que .NET Order)
-model Order {
-  id              String      @id @default(cuid())
-  sessionId       String
-  stripeSessionId String?
-  customerEmail   String?
-  totalAmount     Float
-  currency        String      @default("SEK")
-  status          String      @default("pending")
-  itemsJson       String?     // JSON con los items del pedido
-  isRestaurant    Boolean     @default(false)
-  restaurantName  String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  orderItems      OrderItem[]
-
-  @@index([sessionId])
-  @@index([createdAt])
-}
-
-// Items de orden (relación N:M entre Order y Product)
-model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  name      String
-  price     Float
-  quantity  Int
-  createdAt DateTime @default(now())
-
-  @@index([orderId])
-}
-
-// API Keys for external AI providers — stored AES-256-GCM encrypted
-model ApiKey {
-  id           String   @id @default(cuid())
-  provider     String   @unique   // "gemini" | "deepseek" | "mistral"
-  encryptedKey String              // hex-encoded ciphertext
-  iv           String              // hex-encoded 16-byte IV
-  authTag      String              // hex-encoded 16-byte GCM auth tag
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-// Users for authentication
 model User {
-  id                 String   @id @default(cuid())
-  email              String   @unique
-  password           String
-  name               String?
-  role               String   @default("admin")
-  twoFactorEnabled   Boolean  @default(false)
-  twoFactorSecret    String?  // TOTP secret (base32)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-}
-
-// AI Usage Log - tracks token usage and cost per provider
-model AiUsageLog {
-  id            String   @id @default(cuid())
-  provider      String   // "gemini", "deepseek", "mistral", "ollama"
-  operation     String   // "Generate", "AskQuestions", "Chat"
-  inputTokens   Int      @default(0)
-  outputTokens  Int      @default(0)
-  totalTokens   Int      @default(0)
-  cost          Float    @default(0)
-  model         String?
-  createdAt     DateTime @default(now())
-
-  @@index([provider])
-  @@index([createdAt])
-}
-
-// AI Generation History - tracks AI-generated pages
-model AiGenerationLog {
-  id          String   @id @default(cuid())
-  pageId      String?  // Page ID if created/updated
-  pageTitle   String   // Page title at generation time
-  prompt      String   // The prompt used
-  provider    String   // Provider used
-  mode        String   // "create" or "update"
-  createdAt   DateTime @default(now())
-
-  @@index([pageId])
-  @@index([createdAt])
+  id               String   @id @default(cuid())
+  email            String   @unique
+  password         String
+  name             String?
+  role             String   @default("admin")
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorSecret  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

@@ -46,15 +46,15 @@ export default async function DynamicFooter() {
     logoWidth: '150px',
     logoPosition: 'left',
     showPagesColumn: true,
-    pagesColumnTitle: 'Páginas',
+    pagesColumnTitle: 'Pages',
     pages: [],
     showSocialMediaColumn: true,
-    socialMediaColumnTitle: 'Síguenos',
+    socialMediaColumnTitle: 'Follow Us',
     socialMedia: [],
     showCopyrightRow: true,
     companyName: '',
     companyNumber: '',
-    copyrightText: 'Todos los derechos reservados',
+    copyrightText: 'All rights reserved',
     showHorizontalLine: true,
     paddingVertical: 'py-6',
     columnsGap: 'gap-8',
@@ -178,6 +178,19 @@ export default async function DynamicFooter() {
             </p>
           </div>
         )}
+
+        {/* Powered by BrixCMS — required attribution for open-source license */}
+        <div className="mt-4 text-center">
+          <a
+            href="https://brix-cms.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: settings.textColor, opacity: 0.4 }}
+            className="text-xs hover:opacity-70 transition-opacity"
+          >
+            Powered by BrixCMS
+          </a>
+        </div>
       </div>
     </footer>
   );

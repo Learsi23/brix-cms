@@ -1,9 +1,5 @@
 // ====================================================================
-// EDEN CMS - BLOCK REGISTRY
-// ====================================================================
-// Import all block definitions to register them.
-// Import this file wherever you need access to registered block types.
-// Equivalent to BlockRegistrationExtensions.cs in .NET
+// BRIX CMS - BLOCK REGISTRY
 // ====================================================================
 
 // Layout
@@ -36,7 +32,6 @@ import './definitions/timeline-item-block';
 
 // Media
 import './definitions/gallery-block';
-import './definitions/products-gallery-block';
 import './definitions/flexible-image-text-block';
 import './definitions/video-block';
 import './definitions/map-block';
@@ -50,19 +45,10 @@ import './definitions/accordion-item-block';
 import './definitions/tabs-block';
 import './definitions/tab-item-block';
 import './definitions/countdown-block';
-
-// Ecommerce
-import './definitions/catalog-item-block';
-import './definitions/product-card-block';
-import './definitions/product-column-block';
 import './definitions/email-button-block';
-import './definitions/existing-products-block';
-
-// AI / Email
-import './definitions/chat-block';
 import './definitions/contact-form-block';
 
-// Re-exportar utilidades
+// Re-export utilities
 export {
   registerBlock,
   getBlockDefinition,

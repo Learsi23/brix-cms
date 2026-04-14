@@ -1,5 +1,5 @@
-// /api/config — gestión de SiteConfig (navbar, footer, settings)
-// Equivalente al ConfiguracionController de .NET
+// /api/config  -API for site configuration management
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 

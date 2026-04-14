@@ -1,172 +1,147 @@
-# Brix — Guía para crear Bloques
+# Brix — Guide for creating Blocks
 
-Los **bloques** son las unidades atómicas de contenido del CMS. Cada página está compuesta por una lista de bloques ordenados que el editor puede añadir, reordenar y configurar.
+**Blocks** are the atomic units of content of the CMS. Each page is composed of an ordered list of blocks that the editor can add, reorder, and configure.
 
-Este sistema es idéntico al de Brix.Pro (.NET), traducido a TypeScript.
-
----
-
-## Estructura de un Bloque
-
-Un bloque tiene tres partes:
-
-| Parte | Ubicación | Descripción |
-|-------|-----------|-------------|
-| **Definición** | `src/lib/blocks/definitions/` | Declara los campos editables (equivalente a la clase C# con `[BlockType]` y `[Field]`) |
-| **Componente** | `src/components/blocks/` | Renderiza el bloque en el frontend |
-| **Registro** | `src/lib/blocks/index.ts` | Importa la definición para que quede disponible |
+This system is identical to Brix.Pro (.NET), translated to TypeScript.
 
 ---
 
-## Paso 1 — Crear la definición del bloque
+## Structure of a Block
 
-Crea un archivo en `src/lib/blocks/definitions/mi-bloque.ts`:
+A block has three parts:
+
+| Part | Location | Description |
+|------|----------|-------------|
+| **Definition** | `src/lib/blocks/definitions/` | Declares the editable fields (equivalent to the C# class with `[BlockType]` and `[Field]`) |
+| **Component** | `src/components/blocks/` | Renders the block on the frontend |
+| **Registration** | `src/lib/blocks/index.ts` | Imports the definition to make it available |
+
+---
+
+## Step 1 — Create the block definition
+
+Create a file in `src/lib/blocks/definitions/my-block.ts`:
 
 ```typescript
 import { registerBlock } from '../registry';
 
 registerBlock({
-  type: 'MiBloque',          // Nombre único — sin espacios
-  name: 'Mi Bloque',         // Nombre visible en el editor
-  category: 'Contenido',     // Grupo en el selector: Bloques, Contenido, Media, Columnas
-  icon: '🎨',                // Emoji o clase CSS
+  type: 'MyBlock',          // Unique name — no spaces
+  name: 'My Block',         // Visible name in the editor
+  category: 'Content',      // Group in the selector: Blocks, Content, Media, Columns
+  icon: '🎨',                // Emoji or CSS class
 
   fields: {
-    // Cada clave es el nombre del campo (se guarda en la BD como { "Value": "..." })
-    Titulo: {
+    // Each key is the field name (saved in the DB as { "Value": "..." })
+    Title: {
       type: 'string',
-      title: 'Título',
-      placeholder: 'Escribe el título aquí',
+      title: 'Title',
+      placeholder: 'Write the title here',
     },
-    Descripcion: {
+    Description: {
       type: 'textarea',
-      title: 'Descripción',
-      description: 'Texto largo opcional',
+      title: 'Description',
+      description: 'Optional long text',
     },
-    ColorFondo: {
+    BackgroundColor: {
       type: 'color',
-      title: 'Color de Fondo',
+      title: 'Background Color',
       defaultValue: '#ffffff',
     },
-    Imagen: {
+    Image: {
       type: 'image',
-      title: 'Imagen',
+      title: 'Image',
     },
-    Alineacion: {
+    Alignment: {
       type: 'select',
-      title: 'Alineación',
+      title: 'Alignment',
       options: [
-        { value: 'left',   label: 'Izquierda' },
-        { value: 'center', label: 'Centro' },
-        { value: 'right',  label: 'Derecha' },
+        { value: 'left',   label: 'Left' },
+        { value: 'center', label: 'Center' },
+        { value: 'right',  label: 'Right' },
       ],
       defaultValue: 'left',
     },
-    MostrarBoton: {
+    ShowButton: {
       type: 'bool',
-      title: '¿Mostrar botón?',
+      title: 'Show button?',
       defaultValue: 'false',
     },
-    Tamanio: {
+    Size: {
       type: 'number',
-      title: 'Tamaño (px)',
+      title: 'Size (px)',
       defaultValue: '16',
     },
   },
 });
-```
+Available field types
+Type	Description	Editor input
+string	Single-line text	<input type="text">
+textarea	Multi-line text	<textarea>
+color	Color picker	Color picker + hex text
+image	Image URL	Path + preview
+markdown	Markdown content	Text editor
+select	Dropdown list	<select> with options
+bool	True/False	Checkbox
+number	Number	<input type="number">
+url	Link URL	<input type="url">
+Step 2 — Create the block component
+Create src/components/blocks/MyBlock.tsx:
 
-### Tipos de campo disponibles
-
-| Tipo | Descripción | Input en el editor |
-|------|-------------|-------------------|
-| `string` | Texto de una línea | `<input type="text">` |
-| `textarea` | Texto multilínea | `<textarea>` |
-| `color` | Selector de color | Color picker + texto hex |
-| `image` | URL de imagen | Ruta + preview |
-| `markdown` | Contenido Markdown | Editor de texto |
-| `select` | Lista desplegable | `<select>` con `options` |
-| `bool` | Verdadero/Falso | Checkbox |
-| `number` | Número | `<input type="number">` |
-| `url` | Enlace URL | `<input type="url">` |
-
----
-
-## Paso 2 — Crear el componente del bloque
-
-Crea `src/components/blocks/MiBloque.tsx`:
-
-```tsx
+tsx
 import { getFieldValue } from '@/lib/blocks/types';
 import type { BlockData } from '@/lib/blocks/types';
 
-export default function MiBloque({ data }: { data: BlockData }) {
-  // getFieldValue(data, 'NombreCampo', 'valorPorDefecto')
-  const titulo = getFieldValue(data, 'Titulo', '');
-  const descripcion = getFieldValue(data, 'Descripcion', '');
-  const colorFondo = getFieldValue(data, 'ColorFondo', '#ffffff');
-  const imagen = getFieldValue(data, 'Imagen', '');
-  const alineacion = getFieldValue(data, 'Alineacion', 'left');
-  const mostrarBoton = getFieldValue(data, 'MostrarBoton') === 'true';
+export default function MyBlock({ data }: { data: BlockData }) {
+  // getFieldValue(data, 'FieldName', 'defaultValue')
+  const title = getFieldValue(data, 'Title', '');
+  const description = getFieldValue(data, 'Description', '');
+  const backgroundColor = getFieldValue(data, 'BackgroundColor', '#ffffff');
+  const image = getFieldValue(data, 'Image', '');
+  const alignment = getFieldValue(data, 'Alignment', 'left');
+  const showButton = getFieldValue(data, 'ShowButton') === 'true';
 
   return (
-    <section style={{ backgroundColor: colorFondo, textAlign: alineacion as 'left' | 'center' | 'right' }}>
-      {imagen && <img src={imagen} alt={titulo} className="w-full" />}
-      {titulo && <h2 className="text-2xl font-bold">{titulo}</h2>}
-      {descripcion && <p>{descripcion}</p>}
-      {mostrarBoton && <button>Click aquí</button>}
+    <section style={{ backgroundColor: backgroundColor, textAlign: alignment as 'left' | 'center' | 'right' }}>
+      {image && <img src={image} alt={title} className="w-full" />}
+      {title && <h2 className="text-2xl font-bold">{title}</h2>}
+      {description && <p>{description}</p>}
+      {showButton && <button>Click here</button>}
     </section>
   );
 }
-```
+Step 3 — Register the definition
+Add the import in src/lib/blocks/index.ts:
 
----
+typescript
+// Add this line along with the other imports
+import './definitions/my-block';
+Step 4 — Add the renderer
+In src/components/blocks/BlockRenderer.tsx, add a case to the switch:
 
-## Paso 3 — Registrar la definición
+typescript
+import MyBlock from './MyBlock';
 
-Añade el import en `src/lib/blocks/index.ts`:
+// Inside the switch(type):
+case 'MyBlock':
+  return <MyBlock data={data} />;
+Container blocks (isGroup: true)
+Container blocks can have child blocks (like ColumnBlock or GalleryBlock).
 
-```typescript
-// Añade esta línea junto al resto de imports
-import './definitions/mi-bloque';
-```
+To create one, add isGroup: true in the definition:
 
----
-
-## Paso 4 — Añadir el renderer
-
-En `src/components/blocks/BlockRenderer.tsx`, añade un `case` en el switch:
-
-```typescript
-import MiBloque from './MiBloque';
-
-// Dentro del switch(type):
-case 'MiBloque':
-  return <MiBloque data={data} />;
-```
-
----
-
-## Bloques contenedores (isGroup: true)
-
-Los bloques contenedores pueden tener **bloques hijos** (como `ColumnBlock` o `GalleryBlock`).
-
-Para crear uno, añade `isGroup: true` en la definición:
-
-```typescript
+typescript
 registerBlock({
-  type: 'MiContenedor',
-  name: 'Mi Contenedor',
-  category: 'Columnas',
+  type: 'MyContainer',
+  name: 'My Container',
+  category: 'Columns',
   icon: '⬜',
-  isGroup: true,  // ← puede contener bloques hijos
+  isGroup: true,  // ← can contain child blocks
   fields: { ... },
 });
-```
+The component receives the children prop with the child blocks:
 
-El componente recibe la prop `children` con los bloques hijos:
-
-```tsx
+tsx
 import BlockRenderer from './BlockRenderer';
 
 interface Props {
@@ -174,7 +149,7 @@ interface Props {
   children?: Array<{ id: string; type: string; jsonData: string | null }>;
 }
 
-export default function MiContenedor({ data, children = [] }: Props) {
+export default function MyContainer({ data, children = [] }: Props) {
   return (
     <div className="grid grid-cols-2 gap-6">
       {children.map(child => {
@@ -188,35 +163,25 @@ export default function MiContenedor({ data, children = [] }: Props) {
     </div>
   );
 }
-```
+Database data format
+Each block saves its fields in a jsonData column with this format:
 
----
-
-## Formato de datos en la base de datos
-
-Cada bloque guarda sus campos en una columna `jsonData` con este formato:
-
-```json
+json
 {
-  "Titulo":      { "Value": "Hola mundo" },
-  "ColorFondo":  { "Value": "#f0f0f0" },
-  "Imagen":      { "Value": "/uploads/foto.jpg" },
-  "Alineacion":  { "Value": "center" }
+  "Title":      { "Value": "Hello world" },
+  "BackgroundColor":  { "Value": "#f0f0f0" },
+  "Image":      { "Value": "/uploads/photo.jpg" },
+  "Alignment":  { "Value": "center" }
 }
-```
+This is identical to the Brix.Pro (.NET) format — the data is completely portable between both systems.
 
-Esto es idéntico al formato de Brix.Pro (.NET) — los datos son completamente portables entre ambos sistemas.
-
----
-
-## Estructura de archivos resultante
-
-```
+Resulting file structure
+text
 src/
 ├── lib/blocks/
-│   ├── types.ts              ← Tipos TypeScript (FieldType, BlockDefinition, etc.)
-│   ├── registry.ts           ← Registro de bloques
-│   ├── index.ts              ← Importa todas las definiciones + re-exporta
+│   ├── types.ts              ← TypeScript types (FieldType, BlockDefinition, etc.)
+│   ├── registry.ts           ← Block registry
+│   ├── index.ts              ← Imports all definitions + re-exports
 │   └── definitions/
 │       ├── hero-block.ts
 │       ├── text-block.ts
@@ -225,10 +190,10 @@ src/
 │       ├── column-block.ts
 │       ├── gallery-block.ts
 │       ├── button-link-block.ts
-│       └── mi-bloque.ts      ← Tu nuevo bloque
+│       └── my-block.ts       ← Your new block
 │
 └── components/blocks/
-    ├── BlockRenderer.tsx     ← Switch de tipo → componente
+    ├── BlockRenderer.tsx     ← Type → component switch
     ├── HeroBlock.tsx
     ├── TextBlock.tsx
     ├── ImageBlock.tsx
@@ -236,23 +201,17 @@ src/
     ├── ColumnBlock.tsx
     ├── GalleryBlock.tsx
     ├── ButtonLinkBlock.tsx
-    └── MiBloque.tsx          ← Tu nuevo componente
-```
-
----
-
-## Comandos útiles
-
-```bash
-# Primera vez (inicializar base de datos)
+    └── MyBlock.tsx           ← Your new component
+Useful commands
+bash
+# First time (initialize database)
 npx prisma db push
 
-# Ver la BD con interfaz visual
+# View the DB with visual interface
 npx prisma studio
 
-# Iniciar el servidor de desarrollo
+# Start the development server
 npm run dev
 
-# Admin del CMS
+# CMS Admin
 http://localhost:3000/admin
-```
