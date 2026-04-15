@@ -10,10 +10,10 @@ const b = (data: Record<string, { Value: string }>) => JSON.stringify(data);
 async function main() {
   // ── Admin user ───────────────────────────────────────────────────────────────
   const adminUser = await prisma.user.upsert({
-    where:  { email: 'admin@example.com' },
+    where:  { email: 'admin@brix.com' },
     update: {},
     create: {
-      email:    'admin@example.com',
+      email:    'admin@brix.com',
       password: 'admin123',  // Change this after first login
       name:     'Administrator',
       role:     'admin',
@@ -54,8 +54,8 @@ async function main() {
         Background:     v('/images/HeroBrix.png'),
         BackgroundColor:v('#0f172a'),
         OverlayColor:   v('#0f172a'),
-        OverlayOpacity: v('0.72'),
-        Height:         v('full-screen'),
+        OverlayOpacity: v('0.78'),
+        Height:         v('half-screen'),
         TextAlign:      v('center'),
         ButtonText:     v('Open Admin →'),
         ButtonUrl:      v('/admin'),

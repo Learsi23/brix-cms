@@ -86,18 +86,6 @@ export default async function DynamicNavbar() {
               </Link>
             ))
           )}
-
-          <span className="text-gray-300" style={{ color: settings.textColor }}>|</span>
-
-          <Link href="/cart" className="relative flex items-center hover:opacity-75 transition-opacity" style={{ color: settings.textColor }}>
-            <i className="fas fa-shopping-cart text-lg" />
-            <span id="cart-count" className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-          </Link>
-
-          <span className="text-gray-300" style={{ color: settings.textColor }}>|</span>
-          <Link href="/admin" className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded hover:bg-gray-200 no-underline">
-            ⚙️ Panel
-          </Link>
         </div>
 
         <button className="md:hidden" style={{ color: settings.textColor }}>

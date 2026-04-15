@@ -32,7 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex h-screen overflow-hidden">
         <aside className="w-64 bg-slate-900 text-white p-6 flex-shrink-0 flex flex-col">
           <div className="mb-10">
-            <Image src="/images/LogoNavbar.png" height={120} width={120} alt="Brix CMS" />
+            <Image src="/LogoNavbar.png" height={120} width={120} alt="Brix CMS" />
           </div>
           <nav className="flex-1">
             <ul className="space-y-1">

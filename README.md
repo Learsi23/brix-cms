@@ -172,7 +172,7 @@ Features planned or in active development:
 - [ ] **GraphQL API**
 - [ ] **Official Docker image**
 
-> Looking for AI + Ecommerce + PDF import **right now**? Check out [EdenCMS Standard / Pro](https://edencms.io) — the full-featured version built on the same block system.
+> Looking for AI + Ecommerce + PDF import **right now**? Check out [BrixCMS Standard / Pro](https://brixcms.io) — the full-featured version built on the same block system.
 
 ---
 
