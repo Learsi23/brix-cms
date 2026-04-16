@@ -35,7 +35,7 @@ describe('GET /api/account', () => {
     // — password is excluded at the query level, not in application code
     const safeUser = { id: 'user-1', email: 'admin@example.com', name: 'Admin', role: 'admin', twoFactorEnabled: false };
     vi.mocked(prisma.user.findUnique).mockResolvedValue(safeUser as never);
-    const req = makeRequest('http://localhost/api/account', { cookies: { eden_auth: 'user-1' } });
+    const req = makeRequest('http://localhost/api/account', { cookies: { brix_auth: 'user-1' } });
     const res = await GET(req);
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -54,7 +54,7 @@ describe('PATCH /api/account — change-email', () => {
     const req = makeRequest('http://localhost/api/account', {
       method: 'PATCH',
       body: { action: 'change-email', newEmail: 'new@example.com' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     const res = await PATCH(req);
     expect(res.status).toBe(200);
@@ -66,7 +66,7 @@ describe('PATCH /api/account — change-email', () => {
     const req = makeRequest('http://localhost/api/account', {
       method: 'PATCH',
       body: { action: 'change-email', newEmail: 'taken@example.com' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await PATCH(req)).status).toBe(409);
   });
@@ -75,7 +75,7 @@ describe('PATCH /api/account — change-email', () => {
     const req = makeRequest('http://localhost/api/account', {
       method: 'PATCH',
       body: { action: 'change-email' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await PATCH(req)).status).toBe(400);
   });
@@ -96,7 +96,7 @@ describe('PATCH /api/account — change-password', () => {
         newPassword: 'newpassword1',
         confirmPassword: 'newpassword1',
       },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     const res = await PATCH(req);
     expect(res.status).toBe(200);
@@ -107,7 +107,7 @@ describe('PATCH /api/account — change-password', () => {
     const req = makeRequest('http://localhost/api/account', {
       method: 'PATCH',
       body: { action: 'change-password', currentPassword: 'currentpass', newPassword: 'abc12345', confirmPassword: 'abc67890' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await PATCH(req)).status).toBe(400);
   });
@@ -116,7 +116,7 @@ describe('PATCH /api/account — change-password', () => {
     const req = makeRequest('http://localhost/api/account', {
       method: 'PATCH',
       body: { action: 'change-password', currentPassword: 'currentpass', newPassword: 'short', confirmPassword: 'short' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await PATCH(req)).status).toBe(400);
   });
@@ -126,7 +126,7 @@ describe('PATCH /api/account — change-password', () => {
     const req = makeRequest('http://localhost/api/account', {
       method: 'PATCH',
       body: { action: 'change-password', currentPassword: 'wrongpass', newPassword: 'newpassword1', confirmPassword: 'newpassword1' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await PATCH(req)).status).toBe(401);
   });
@@ -138,7 +138,7 @@ describe('PATCH /api/account — unknown action', () => {
     const req = makeRequest('http://localhost/api/account', {
       method: 'PATCH',
       body: { action: 'delete-account' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await PATCH(req)).status).toBe(400);
   });

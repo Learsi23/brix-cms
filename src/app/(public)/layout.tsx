@@ -5,7 +5,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <DynamicNavbar />
-      <main>{children}</main>
+      <main className="pt-16">{children}</main>
       <DynamicFooter />
     </>
   );

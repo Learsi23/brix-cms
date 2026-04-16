@@ -41,7 +41,7 @@ describe('POST /api/account/2fa', () => {
     const req = makeRequest('http://localhost/api/account/2fa', {
       method: 'POST',
       body: { action: 'setup' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     const res = await POST(req);
     expect(res.status).toBe(200);
@@ -60,7 +60,7 @@ describe('POST /api/account/2fa', () => {
     const req = makeRequest('http://localhost/api/account/2fa', {
       method: 'POST',
       body: { action: 'enable', totpCode: wrongCode },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await POST(req)).status).toBe(400);
   });
@@ -73,7 +73,7 @@ describe('POST /api/account/2fa', () => {
     const req = makeRequest('http://localhost/api/account/2fa', {
       method: 'POST',
       body: { action: 'enable', totpCode: validCode },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     const res = await POST(req);
     expect(res.status).toBe(200);
@@ -86,7 +86,7 @@ describe('POST /api/account/2fa', () => {
     const req = makeRequest('http://localhost/api/account/2fa', {
       method: 'POST',
       body: { action: 'disable', password: 'wrongpass' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     expect((await POST(req)).status).toBe(401);
   });
@@ -97,7 +97,7 @@ describe('POST /api/account/2fa', () => {
     const req = makeRequest('http://localhost/api/account/2fa', {
       method: 'POST',
       body: { action: 'disable', password: 'correctpass' },
-      cookies: { eden_auth: 'user-1' },
+      cookies: { brix_auth: 'user-1' },
     });
     const res = await POST(req);
     expect(res.status).toBe(200);

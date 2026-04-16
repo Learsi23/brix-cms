@@ -3,8 +3,8 @@ import { getFieldValue } from '@/lib/blocks/types';
 import type { BlockData } from '@/lib/blocks/types';
 
 const HEIGHT_MAP: Record<string, string> = {
-  'full-screen': 'min-h-screen',
-  'half-screen': 'min-h-[65vh]',
+  'full-screen': 'min-h-screen -mt-16',
+  'half-screen': 'min-h-[55vh]',
   'compact':     'min-h-[42vh]',
 };
 
@@ -28,6 +28,8 @@ export default function HeroBlock({ data }: { data: BlockData }) {
   const overlayOpacity  = parseFloat(getFieldValue(data, 'OverlayOpacity', '0.45'));
   const height          = getFieldValue(data, 'Height',          'half-screen');
   const textAlign       = getFieldValue(data, 'TextAlign',       'center');
+  const bgSize          = getFieldValue(data, 'BackgroundSize',     'cover');
+  const bgPosition      = getFieldValue(data, 'BackgroundPosition', 'top center');
   const buttonText      = getFieldValue(data, 'ButtonText');
   const buttonUrl       = getFieldValue(data, 'ButtonUrl',       '#');
   const buttonColor     = getFieldValue(data, 'ButtonColor',     '#3b82f6');
@@ -41,8 +43,8 @@ export default function HeroBlock({ data }: { data: BlockData }) {
       className={`relative flex flex-col justify-center px-6 py-24 ${heightClass}`}
       style={{
         backgroundImage:    background ? `url(${background})` : undefined,
-        backgroundSize:     'cover',
-        backgroundPosition: 'center center',
+        backgroundSize:     bgSize,
+        backgroundPosition: bgPosition,
         backgroundRepeat:   'no-repeat',
         backgroundColor:    bgColor,
       }}

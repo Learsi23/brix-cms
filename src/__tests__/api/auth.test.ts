@@ -22,7 +22,7 @@ const mockUser = {
 describe('POST /api/auth', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('200 + sets eden_auth cookie on valid credentials', async () => {
+  it('200 + sets brix_auth cookie on valid credentials', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as never);
     const req = makeRequest('http://localhost/api/auth', {
       method: 'POST',
@@ -33,7 +33,7 @@ describe('POST /api/auth', () => {
     const body = await res.json();
     expect(body.success).toBe(true);
     expect(body.user.email).toBe('admin@example.com');
-    expect(res.headers.get('set-cookie')).toContain('eden_auth=user-1');
+    expect(res.headers.get('set-cookie')).toContain('brix_auth=user-1');
   });
 
   it('401 on wrong password', async () => {
@@ -73,12 +73,12 @@ describe('POST /api/auth', () => {
 
 // ── DELETE /api/auth — logout ─────────────────────────────────────────────────
 describe('DELETE /api/auth', () => {
-  it('200 + clears eden_auth cookie (Max-Age=0)', async () => {
+  it('200 + clears brix_auth cookie (Max-Age=0)', async () => {
     const res = await DELETE();
     expect(res.status).toBe(200);
     expect((await res.json()).success).toBe(true);
     const setCookie = res.headers.get('set-cookie');
-    expect(setCookie).toContain('eden_auth=');
+    expect(setCookie).toContain('brix_auth=');
     expect(setCookie).toContain('Max-Age=0');
   });
 });
@@ -95,7 +95,7 @@ describe('GET /api/auth', () => {
 
   it('200 + authenticated:true for valid session', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as never);
-    const req = makeRequest('http://localhost/api/auth', { cookies: { eden_auth: 'user-1' } });
+    const req = makeRequest('http://localhost/api/auth', { cookies: { brix_auth: 'user-1' } });
     const res = await GET(req);
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -105,7 +105,7 @@ describe('GET /api/auth', () => {
 
   it('401 when cookie exists but user was deleted', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-    const req = makeRequest('http://localhost/api/auth', { cookies: { eden_auth: 'stale-id' } });
+    const req = makeRequest('http://localhost/api/auth', { cookies: { brix_auth: 'stale-id' } });
     expect((await GET(req)).status).toBe(401);
   });
 });

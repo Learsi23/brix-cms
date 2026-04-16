@@ -66,7 +66,7 @@ Works with Next.js, Astro, SvelteKit, React Native, or any HTTP client.
 - Browse and pick media directly inside the block editor
 
 ### Authentication & Security
-- Email/password login with session cookie (7-day expiry)
+- Email/password login with HttpOnly session cookie `brix_auth` (7-day expiry)
 - 2FA (TOTP) — schema ready, UI in progress
 - Role-based access (admin)
 

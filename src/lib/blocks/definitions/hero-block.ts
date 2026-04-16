@@ -15,6 +15,8 @@ registerBlock({
     SubtitleSize: { type: 'string', title: 'Subtitle Size', placeholder: 'e.g. 20px' },
     Description: { type: 'string', title: 'Description' },
     Background: { type: 'image', title: 'Background Image' },
+    BackgroundSize: { type: 'select', title: 'Image Size', options: [{ value: 'cover', label: 'Cover (fill)' }, { value: 'contain', label: 'Contain (full image)' }, { value: 'auto 80%', label: 'Auto 80%' }], defaultValue: 'cover' },
+    BackgroundPosition: { type: 'select', title: 'Image Position', options: [{ value: 'top center', label: 'Top' }, { value: 'center center', label: 'Center' }, { value: 'bottom center', label: 'Bottom' }], defaultValue: 'top center' },
     BackgroundColor: { type: 'color', title: 'Background Color', defaultValue: '#0f172a' },
     OverlayColor: { type: 'color', title: 'Overlay Color', defaultValue: '#000000' },
     OverlayOpacity: { type: 'string', title: 'Overlay Opacity (0–1)', placeholder: 'e.g. 0.4', defaultValue: '0.3' },

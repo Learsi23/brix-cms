@@ -10,7 +10,7 @@ import {
 } from '@/lib/totp';
 
 function getUserIdFromCookie(req: NextRequest): string | null {
-  return req.cookies.get('eden_auth')?.value ?? null;
+  return req.cookies.get('brix_auth')?.value ?? null;
 }
 
 export async function POST(req: NextRequest) {

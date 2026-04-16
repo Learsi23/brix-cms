@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 // Next.js 16+ proxy — replaces middleware.ts
 // Protects /admin/* and handles login redirect
 
-const COOKIE_NAME = 'eden_auth';
+const COOKIE_NAME = 'brix_auth';
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME);

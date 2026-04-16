@@ -53,7 +53,7 @@ export default async function DynamicNavbar() {
 
   const navClasses = [
     settings.paddingVertical || 'py-3',
-    settings.isSticky ? 'sticky top-0 z-50' : '',
+    settings.isSticky ? 'fixed top-0 left-0 right-0 w-full z-50' : '',
     settings.hasShadow ? 'shadow-md' : '',
   ].filter(Boolean).join(' ');
 

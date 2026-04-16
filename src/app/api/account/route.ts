@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 function getUserIdFromCookie(req: NextRequest): string | null {
-  return req.cookies.get('eden_auth')?.value ?? null;
+  return req.cookies.get('brix_auth')?.value ?? null;
 }
 
 // GET — Return current user info
