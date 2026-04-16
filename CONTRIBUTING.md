@@ -8,7 +8,7 @@ This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md). By particip
 
 ## How to report a bug
 
-Open an issue at [github.com/king-lear/brix-cms/issues](https://github.com/king-lear/brix-cms/issues) with:
+Open an issue at [https://github.com/Learsi23/brix-cms/issues](https://github.com/Learsi23/brix-cms/issues) with:
 - Steps to reproduce
 - Expected vs actual behaviour
 - Node version, OS, and database (SQLite / PostgreSQL)
@@ -24,7 +24,7 @@ Open an issue at [github.com/king-lear/brix-cms/issues](https://github.com/king-
 ## Development setup
 
 ```bash
-git clone https://github.com/king-lear/brix-cms
+git clone https://github.com/Learsi23/brix-cms
 cd brix-cms
 npm install
 cp .env.example .env        # set DATABASE_URL
@@ -122,4 +122,4 @@ chore: bump next to 16.2
 
 ## Questions
 
-Open a [GitHub Discussion](https://github.com/king-lear/brix-cms/discussions) or reach out via the Issues tab.
+Open a [GitHub Discussion](https://github.com/Learsi23/brix-cms/discussions) or reach out via the Issues tab.
