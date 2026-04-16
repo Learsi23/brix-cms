@@ -30,7 +30,7 @@ npm run dev
 ```
 
 Open [http://localhost:3000/admin](http://localhost:3000/admin)  
-Default login: `admin@example.com` / `admin123`
+Default login: `admin@brix.com` / `admin123`
 
 ---
 
