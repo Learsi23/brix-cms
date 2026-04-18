@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eden CMS",
-  description: "Eden CMS — Next.js block-based content management system",
+  title: "Brix",
+  description: "Brix — Next.js block-based content management system",
 };
 
 export default function RootLayout({

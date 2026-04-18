@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -43,5 +44,10 @@ export default function ProtectedLayout({
     return null;
   }
 
+=======
+// Auth is handled server-side by middleware.ts
+// If this component renders, the user is already authenticated.
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
   return <>{children}</>;
 }

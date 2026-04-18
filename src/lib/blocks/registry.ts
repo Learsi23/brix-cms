@@ -1,5 +1,5 @@
 // ====================================================================
-// BLOCK REGISTRY - EDEN CMS
+// BLOCK REGISTRY - Brix CMS
 // ====================================================================
 // Equivalente TypeScript al BlockRegistry.cs de .NET
 // Registra y descubre tipos de bloques disponibles en el sistema

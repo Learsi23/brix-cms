@@ -46,15 +46,15 @@ export default async function DynamicFooter() {
     logoWidth: '150px',
     logoPosition: 'left',
     showPagesColumn: true,
-    pagesColumnTitle: 'Páginas',
+    pagesColumnTitle: 'Pages',
     pages: [],
     showSocialMediaColumn: true,
-    socialMediaColumnTitle: 'Síguenos',
+    socialMediaColumnTitle: 'Follow Us',
     socialMedia: [],
     showCopyrightRow: true,
     companyName: '',
     companyNumber: '',
-    copyrightText: 'Todos los derechos reservados',
+    copyrightText: 'All rights reserved',
     showHorizontalLine: true,
     paddingVertical: 'py-6',
     columnsGap: 'gap-8',
@@ -68,25 +68,15 @@ export default async function DynamicFooter() {
         settings = { ...settings, ...parsed.footer };
       }
     }
-  } catch {}
+  } catch (e) {
+    console.error("Error loading footer config:", e);
+  }
 
   const publishedPages = await prisma.page.findMany({
     where: { isPublished: true },
     orderBy: { title: 'asc' },
     select: { title: true, slug: true },
   });
-
-  let columns = 0;
-  if (settings.logo) columns++;
-  if (settings.showPagesColumn) columns++;
-  if (settings.showSocialMediaColumn && settings.socialMedia.length > 0) columns++;
-
-  const gridClass = columns === 1 ? 'grid-cols-1' :
-    columns === 2 ? 'grid-cols-1 md:grid-cols-2' :
-    'grid-cols-1 md:grid-cols-3';
-
-  const logoPositionClass = settings.logoPosition === 'center' ? 'text-center' :
-    settings.logoPosition === 'right' ? 'text-right' : 'text-left';
 
   const getSocialIcon = (platform: string) => {
     const iconMap: Record<string, string> = {
@@ -98,41 +88,49 @@ export default async function DynamicFooter() {
       youtube: 'fab fa-youtube',
       tiktok: 'fab fa-tiktok',
       whatsapp: 'fab fa-whatsapp',
-      pinterest: 'fab fa-pinterest',
-      snapchat: 'fab fa-snapchat',
-      reddit: 'fab fa-reddit',
-      discord: 'fab fa-discord',
-      telegram: 'fab fa-telegram',
+      github: 'fab fa-github',
+      npm: 'fab fa-npm',
     };
     return iconMap[platform?.toLowerCase()] || 'fas fa-link';
   };
+
+  // Cálculo de columnas para el grid
+  let columns = 0;
+  if (settings.logo) columns++;
+  if (settings.showPagesColumn) columns++;
+  if (settings.showSocialMediaColumn && settings.socialMedia.length > 0) columns++;
+
+  const gridClass = columns === 1 ? 'grid-cols-1' :
+    columns === 2 ? 'grid-cols-1 md:grid-cols-2' :
+    'grid-cols-1 md:grid-cols-3';
 
   const currentYear = new Date().getFullYear().toString();
 
   return (
     <footer className={settings.paddingVertical} style={{ backgroundColor: settings.backgroundColor, color: settings.textColor }}>
       <div className="container mx-auto px-4">
-        <div className={`grid ${gridClass} ${settings.columnsGap || 'gap-8'} mb-8 justify-items-center text-center`}>
+        <div className={`grid ${gridClass} ${settings.columnsGap || 'gap-8'} mb-8 items-start`}>
+          
+          {/* Columna 1: Logo */}
           {settings.logo && (
-            <div className={logoPositionClass}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={settings.logo} alt={settings.logoAltText} style={{ width: settings.logoWidth }} className="mb-4" />
+            <div className={settings.logoPosition === 'center' ? 'text-center' : settings.logoPosition === 'right' ? 'text-right' : 'text-left'}>
+              <img src={settings.logo} alt={settings.logoAltText} style={{ width: settings.logoWidth }} className="inline-block mb-4" />
             </div>
           )}
 
+          {/* Columna 2: Páginas */}
           {settings.showPagesColumn && (
-            <div>
+            <div className="text-center md:text-left">
               <h4 className="font-bold mb-4">{settings.pagesColumnTitle}</h4>
               <ul className="space-y-2">
                 {settings.pages.length > 0 ? (
-                  settings.pages.map((item, i) => {
-                    const url = item.isCustomUrl ? item.customUrl : (item.pageSlug ? `/${item.pageSlug}` : '#');
-                    return (
-                      <li key={i}>
-                        <Link href={url} className="hover:opacity-75 transition-opacity">{item.customText || 'Link'}</Link>
-                      </li>
-                    );
-                  })
+                  settings.pages.map((item, i) => (
+                    <li key={i}>
+                      <Link href={item.isCustomUrl ? item.customUrl : `/${item.pageSlug}`} className="hover:opacity-75 transition-opacity">
+                        {item.customText}
+                      </Link>
+                    </li>
+                  ))
                 ) : (
                   publishedPages.map(p => (
                     <li key={p.slug}>
@@ -144,40 +142,42 @@ export default async function DynamicFooter() {
             </div>
           )}
 
+          {/* Columna 3: Redes Sociales */}
           {settings.showSocialMediaColumn && settings.socialMedia.length > 0 && (
-            <div>
+            <div className="text-center md:text-left">
               <h4 className="font-bold mb-4">{settings.socialMediaColumnTitle}</h4>
-              <div className="flex space-x-4">
-                {settings.socialMedia.map((social, i) => (
-                  <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity">
-                    {social.iconType === 'class' && social.iconClass ? (
-                      <i className={`${social.iconClass} text-xl`} />
-                    ) : social.iconClass ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={social.iconClass} alt={social.platform} className="w-6 h-6" />
-                    ) : (
-                      <i className={`${getSocialIcon(social.platform)} text-xl`} />
-                    )}
-                  </a>
-                ))}
+              <div className="flex justify-center md:justify-start space-x-4">
+                {settings.socialMedia.map((social, i) => {
+                  // LÓGICA CRÍTICA: Determinar si es clase o imagen
+                  const isFA = social.iconType === 'class' || 
+                               social.iconClass?.startsWith('fa') || 
+                               !social.iconClass?.includes('/');
+
+                  return (
+                    <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity text-2xl">
+                      {isFA ? (
+                        <i className={social.iconClass || getSocialIcon(social.platform)} />
+                      ) : (
+                        <img src={social.iconClass} alt={social.platform} className="w-6 h-6 object-contain" />
+                      )}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           )}
         </div>
 
         {settings.showHorizontalLine && (
-          <hr className="my-6" style={{ borderColor: settings.textColor, opacity: 0.3 }} />
+          <hr className="my-6" style={{ borderColor: settings.textColor, opacity: 0.2 }} />
         )}
 
-        {settings.showCopyrightRow && (
-          <div className="text-center text-sm opacity-75">
-            <p>
-              © {currentYear} {settings.companyName}
-              {settings.companyNumber && <span> | {settings.companyNumber}</span>}
-              {settings.copyrightText && `. ${settings.copyrightText}`}.
-            </p>
+        <div className="text-center text-sm opacity-75">
+          <p>© {currentYear} {settings.companyName}. {settings.copyrightText}</p>
+          <div className="mt-2 text-xs opacity-50">
+            <a href="https://brix-cms.com" target="_blank" rel="noopener noreferrer">Powered by BrixCMS</a>
           </div>
-        )}
+        </div>
       </div>
     </footer>
   );

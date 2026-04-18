@@ -9,13 +9,14 @@ import ColumnBlock from './ColumnBlock';
 import GalleryBlock from './GalleryBlock';
 import DropdownBlock from './DropdownBlock';
 import EmailButtonBlock from './EmailButtonBlock';
-import ProductCardBlock from './ProductCardBlock';
-import ProductsGalleryBlock from './ProductsGalleryBlock';
 import GridColumn from './GridColumn';
 import FlexibleImageTextBlock from './FlexibleImageTextBlock';
 import TextWithButtonBlock from './TextWithButtonBlock';
+<<<<<<< HEAD
 import ChatBlock from './ChatBlock';
 import FloatingChatBlock from './FloatingChatBlock';
+=======
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
 import CardBlock from './CardBlock';
 import IconCardBlock from './IconCardBlock';
 import IconColumn from './IconColumn';
@@ -27,8 +28,6 @@ import SpacerBlock from './SpacerBlock';
 import DividerBlock from './DividerBlock';
 import LogoStripBlock from './LogoStripBlock';
 import MapBlock from './MapBlock';
-import CatalogItemBlock from './CatalogItemBlock';
-import ProductColumnBlock from './ProductColumnBlock';
 import AccordionBlock from './AccordionBlock';
 import BannerBlock from './BannerBlock';
 import CountdownBlock from './CountdownBlock';
@@ -38,7 +37,6 @@ import TabsBlock from './TabsBlock';
 import TeamBlock from './TeamBlock';
 import TestimonialsBlock from './TestimonialsBlock';
 import TimelineBlock from './TimelineBlock';
-import ExistingProductsBlock from './ExistingProductsBlock';
 
 interface RawChild {
   id: string;
@@ -61,38 +59,28 @@ function renderChildren(blocks: RawChild[] | undefined) {
 
 export default function BlockRenderer({ type, data, blocks }: BlockRendererProps) {
   switch (type) {
-    case 'HeroBlock':
-      return <HeroBlock data={data} />;
-
-    case 'TextBlock':
-      return <TextBlock data={data} />;
-
-    case 'ImageBlock':
-      return <ImageBlock data={data} />;
-
-    case 'MarkdownBlock':
-      return <MarkdownBlock data={data} />;
-
-    case 'ButtonLinkBlock':
-      return <ButtonLinkBlock data={data} />;
-
-    case 'DropdownBlock':
-      return <DropdownBlock data={data} />;
-
-    case 'EmailButtonBlock':
-      return <EmailButtonBlock data={data} />;
-
-    case 'ProductCardBlock':
-      return <ProductCardBlock data={data} />;
-
-    case 'FlexibleImageTextBlock':
-      return <FlexibleImageTextBlock data={data} />;
-
-    case 'TextWithButtonBlock':
-      return <TextWithButtonBlock data={data} />;
-
-    case 'ChatBlock':
-      return <ChatBlock data={data} />;
+    case 'HeroBlock':         return <HeroBlock data={data} />;
+    case 'TextBlock':         return <TextBlock data={data} />;
+    case 'ImageBlock':        return <ImageBlock data={data} />;
+    case 'MarkdownBlock':     return <MarkdownBlock data={data} />;
+    case 'ButtonLinkBlock':   return <ButtonLinkBlock data={data} />;
+    case 'DropdownBlock':     return <DropdownBlock data={data} />;
+    case 'EmailButtonBlock':  return <EmailButtonBlock data={data} />;
+    case 'FlexibleImageTextBlock': return <FlexibleImageTextBlock data={data} />;
+    case 'TextWithButtonBlock':    return <TextWithButtonBlock data={data} />;
+    case 'CardBlock':         return <CardBlock data={data} />;
+    case 'IconCardBlock':     return <IconCardBlock data={data} />;
+    case 'ContactFormBlock':  return <ContactFormBlock data={data} />;
+    case 'CTABannerBlock':    return <CTABannerBlock data={data} />;
+    case 'StatsBlock':        return <StatsBlock data={data} />;
+    case 'VideoBlock':        return <VideoBlock data={data} />;
+    case 'SpacerBlock':       return <SpacerBlock data={data} />;
+    case 'DividerBlock':      return <DividerBlock data={data} />;
+    case 'LogoStripBlock':    return <LogoStripBlock data={data} />;
+    case 'MapBlock':          return <MapBlock data={data} />;
+    case 'BannerBlock':       return <BannerBlock data={data} />;
+    case 'CountdownBlock':    return <CountdownBlock data={data} />;
+    case 'SocialProofBlock':  return <SocialProofBlock data={data} />;
 
     case 'FloatingChatBlock':
       return <FloatingChatBlock data={data} />;
@@ -101,88 +89,22 @@ export default function BlockRenderer({ type, data, blocks }: BlockRendererProps
       const renderedChildren = renderChildren(blocks);
       return <ColumnBlock data={data} renderedChildren={renderedChildren} />;
     }
-
     case 'GridColumn': {
       const renderedChildren = renderChildren(blocks);
       return <GridColumn data={data} renderedChildren={renderedChildren} />;
     }
-
-    case 'GalleryBlock':
-      return <GalleryBlock data={data} blocks={blocks} />;
-
-    case 'ProductsGalleryBlock':
-      return <ProductsGalleryBlock data={data} blocks={blocks} />;
-
-    case 'CardBlock':
-      return <CardBlock data={data} />;
-
-    case 'IconCardBlock':
-      return <IconCardBlock data={data} />;
-
     case 'IconColumn': {
       const renderedChildren = renderChildren(blocks);
       return <IconColumn data={data} renderedChildren={renderedChildren} />;
     }
 
-    case 'ContactFormBlock':
-      return <ContactFormBlock data={data} />;
-
-    case 'CTABannerBlock':
-      return <CTABannerBlock data={data} />;
-
-    case 'StatsBlock':
-      return <StatsBlock data={data} />;
-
-    case 'VideoBlock':
-      return <VideoBlock data={data} />;
-
-    case 'SpacerBlock':
-      return <SpacerBlock data={data} />;
-
-    case 'DividerBlock':
-      return <DividerBlock data={data} />;
-
-    case 'LogoStripBlock':
-      return <LogoStripBlock data={data} />;
-
-    case 'MapBlock':
-      return <MapBlock data={data} />;
-
-    case 'CatalogItemBlock':
-      return <CatalogItemBlock data={data} />;
-
-    case 'ProductColumnBlock':
-      return <ProductColumnBlock data={data} blocks={blocks} />;
-
-    case 'AccordionBlock':
-      return <AccordionBlock data={data} blocks={blocks} />;
-
-    case 'BannerBlock':
-      return <BannerBlock data={data} />;
-
-    case 'CountdownBlock':
-      return <CountdownBlock data={data} />;
-
-    case 'PricingBlock':
-      return <PricingBlock data={data} blocks={blocks} />;
-
-    case 'SocialProofBlock':
-      return <SocialProofBlock data={data} />;
-
-    case 'TabsBlock':
-      return <TabsBlock data={data} blocks={blocks} />;
-
-    case 'TeamBlock':
-      return <TeamBlock data={data} blocks={blocks} />;
-
-    case 'TestimonialsBlock':
-      return <TestimonialsBlock data={data} blocks={blocks} />;
-
-    case 'TimelineBlock':
-      return <TimelineBlock data={data} blocks={blocks} />;
-
-    case 'ExistingProductsBlock':
-      return <ExistingProductsBlock data={data} />;
+    case 'GalleryBlock':      return <GalleryBlock data={data} blocks={blocks} />;
+    case 'AccordionBlock':    return <AccordionBlock data={data} blocks={blocks} />;
+    case 'PricingBlock':      return <PricingBlock data={data} blocks={blocks} />;
+    case 'TabsBlock':         return <TabsBlock data={data} blocks={blocks} />;
+    case 'TeamBlock':         return <TeamBlock data={data} blocks={blocks} />;
+    case 'TestimonialsBlock': return <TestimonialsBlock data={data} blocks={blocks} />;
+    case 'TimelineBlock':     return <TimelineBlock data={data} blocks={blocks} />;
 
     default:
       return (

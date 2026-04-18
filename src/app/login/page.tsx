@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@brix.com');
+  const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -26,10 +27,9 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem('eden_user', JSON.stringify(data.user || data));
-        router.push('/admin');
+        router.replace('/admin');
       } else {
-        setError(data.error || 'Error logging in');
+        setError(data.error || 'Invalid credentials');
       }
     } catch {
       setError('Connection error');
@@ -43,7 +43,11 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
           <div className="text-center mb-8">
+<<<<<<< HEAD
             <h1 className="text-3xl font-black text-slate-800">Brix CMS</h1>
+=======
+            <Image src="/LogoNavbar.png" alt="Brix" width={100} height={100} className="text-3xl font-black text-slate-800"/>
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
             <p className="text-slate-500 text-sm mt-2">Log in to continue</p>
           </div>
 
@@ -62,7 +66,6 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="admin@eden.com"
                 required
                 className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 bg-slate-50"
               />
@@ -76,7 +79,6 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
                 required
                 className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 bg-slate-50"
               />

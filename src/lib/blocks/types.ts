@@ -60,7 +60,7 @@ export interface BlockDefinition {
 // ====================================================================
 // Los datos de cada bloque se almacenan como JSON en `jsonData`
 // Cada campo se almacena como: { "Value": "..." }
-// Igual que en EdenCMS.Pro .NET
+// Igual que en Brix.Pro .NET
 //
 // Ejemplo de jsonData de un HeroBlock:
 // {
