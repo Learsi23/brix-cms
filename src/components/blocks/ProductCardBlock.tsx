@@ -238,11 +238,11 @@ export default function ProductCardBlock({ data }: { data: BlockData }) {
         className="block cursor-pointer"
         style={{ textDecoration: "none", color: "inherit" }}
         onClick={async () => {
-          if (productId) { router.push(`/product/${productId}`); return; }
-          if (autoProductId.current) { router.push(`/product/${autoProductId.current}`); return; }
+          if (productId) { router.push(`/products/${productId}`); return; }
+          if (autoProductId.current) { router.push(`/products/${autoProductId.current}`); return; }
           if (manualName && manualPrice) {
             const id = await resolveProductId();
-            if (id) router.push(`/product/${id}`);
+            if (id) router.push(`/products/${id}`);
           }
         }}
       >

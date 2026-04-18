@@ -1,8 +1,8 @@
 // /api/media — gestión de carpetas y exploración de medios
-// Equivalente al MediaController de .NET (Index, CreateFolder, Delete, DeleteFolder)
+// Equivalente al MediaController de .NET (Index, CreateFolder, Delete, DeleteFolder, DeleteMultiple)
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { mkdir, readdir, rmdir, unlink, stat } from 'fs/promises';
+import { mkdir, readdir, rmdir, unlink, stat, rm } from 'fs/promises';
 import path from 'path';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
@@ -63,7 +63,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, folder, name } = body as { action: string; folder: string; name: string };
+    const { action, folder, name, force } = body as {
+      action: string;
+      folder: string;
+      name: string;
+      force?: boolean;
+    };
     const currentDir = path.join(UPLOADS_DIR, folder || '');
 
     if (!currentDir.startsWith(UPLOADS_DIR)) {
@@ -94,9 +99,45 @@ export async function POST(req: NextRequest) {
       if (!name) return NextResponse.json({ error: 'Nombre requerido' }, { status: 400 });
       const folderPath = path.join(currentDir, name);
       if (!folderPath.startsWith(UPLOADS_DIR)) return NextResponse.json({ error: 'Ruta inválida' }, { status: 400 });
-      const entries = await readdir(folderPath);
-      if (entries.length > 0) return NextResponse.json({ error: 'La carpeta no está vacía' }, { status: 400 });
-      await rmdir(folderPath);
+      if (force) {
+        await rm(folderPath, { recursive: true, force: true });
+      } else {
+        const entries = await readdir(folderPath);
+        if (entries.length > 0) return NextResponse.json({ error: 'La carpeta no está vacía' }, { status: 400 });
+        await rmdir(folderPath);
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'deleteMultiple') {
+      const { files: fileNames = [], folders: folderNames = [] } = body as {
+        files?: string[];
+        folders?: string[];
+      };
+
+      for (const fileName of fileNames) {
+        const filePath = path.join(currentDir, fileName);
+        if (!filePath.startsWith(UPLOADS_DIR)) continue;
+        try {
+          await unlink(filePath);
+          const publicPath = (folder ? `/uploads/${folder}/${fileName}` : `/uploads/${fileName}`).replace(/\\/g, '/');
+          await prisma.media.deleteMany({ where: { path: publicPath } });
+        } catch { /* ignore missing files */ }
+      }
+
+      for (const folderName of folderNames) {
+        const folderPath = path.join(currentDir, folderName);
+        if (!folderPath.startsWith(UPLOADS_DIR)) continue;
+        try {
+          if (force) {
+            await rm(folderPath, { recursive: true, force: true });
+          } else {
+            const entries = await readdir(folderPath);
+            if (entries.length === 0) await rmdir(folderPath);
+          }
+        } catch { /* ignore errors */ }
+      }
+
       return NextResponse.json({ success: true });
     }
 

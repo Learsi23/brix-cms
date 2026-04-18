@@ -20,6 +20,7 @@ interface Frame {
   name: string;
   width: number;
   height: number;
+  pageName?: string;   // canvas page this frame belongs to
 }
 
 interface FigmaPage {
@@ -51,23 +52,60 @@ const GEN_MSGS = [
   'Almost done…',
 ];
 
+// Frame naming conventions shown in the UI
+const NAMING_CONVENTIONS = [
+  { prefix: 'page-',    icon: '📄', color: 'blue',   label: 'Full-page layout',   desc: 'Reference screenshot for the AI. Never used as image src.' },
+  { prefix: 'section-', icon: '📸', color: 'rose',   label: 'Section with photo', desc: 'The AI uses embedded photo fills for this section\'s image block.' },
+  { prefix: 'img-',     icon: '🖼️', color: 'violet', label: 'Standalone image',   desc: 'Reusable photo asset placed in any image field.' },
+  { prefix: 'color-',   icon: '🎨', color: 'amber',  label: 'Design token',       desc: 'Single solid fill → extracted as a brand hex color.' },
+  { prefix: 'cmp-',     icon: '🧩', color: 'emerald',label: 'Component pattern',  desc: 'Repeating card/feature template → generates multiple children.' },
+  { prefix: 'txt-',     icon: '✏️', color: 'slate',  label: 'Text hint',          desc: 'Visible text copied verbatim into block fields.' },
+];
+
+const CONVENTION_COLORS: Record<string, string> = {
+  blue:    'bg-blue-50   border-blue-200   text-blue-700',
+  rose:    'bg-rose-50   border-rose-200   text-rose-700',
+  violet:  'bg-violet-50 border-violet-200 text-violet-700',
+  amber:   'bg-amber-50  border-amber-200  text-amber-700',
+  emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+  slate:   'bg-slate-50  border-slate-200  text-slate-600',
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function frameIcon(name: string): string {
+  const n = name.toLowerCase();
+  if (n.startsWith('page-'))    return '📄';
+  if (n.startsWith('section-')) return '📸';
+  if (n.startsWith('img-'))     return '🖼️';
+  if (n.startsWith('color-'))   return '🎨';
+  if (n.startsWith('cmp-'))     return '🧩';
+  if (n.startsWith('txt-'))     return '✏️';
+  return '📐';
+}
+
+function isSectionFrame(name: string): boolean {
+  return name.toLowerCase().startsWith('section-');
+}
+
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function FigmaImporter() {
   const [step, setStep] = useState<Step>('select');
 
   // Step 1 state
-  const [figmaUrl, setFigmaUrl] = useState('');
-  const [connecting, setConnecting] = useState(false);
-  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
+  const [figmaUrl, setFigmaUrl]         = useState('');
+  const [connecting, setConnecting]     = useState(false);
+  const [fileInfo, setFileInfo]         = useState<FileInfo | null>(null);
   const [connectError, setConnectError] = useState('');
   const [selectedFrames, setSelectedFrames] = useState<Frame[]>([]);
-  const [provider, setProvider] = useState('gemini');
-  const [importMode, setImportMode] = useState<'one-page' | 'multi-page'>('one-page');
+  const [provider, setProvider]         = useState('gemini');
+  const [importMode, setImportMode]     = useState<'one-page' | 'multi-page'>('one-page');
+  const [showConventions, setShowConventions] = useState(false);
 
   // Step 2/3 state
-  const [genStatus, setGenStatus] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [genStatus, setGenStatus]   = useState('');
+  const [errorMsg, setErrorMsg]     = useState('');
   const [createdPages, setCreatedPages] = useState<Array<{ id: string; title: string; slug: string }>>([]);
 
   // ── Step 1: Connect to Figma ─────────────────────────────────────────────
@@ -80,10 +118,19 @@ export default function FigmaImporter() {
     setSelectedFrames([]);
 
     try {
-      const res = await fetch(`/api/figma/file?url=${encodeURIComponent(figmaUrl.trim())}`);
+      const res  = await fetch(`/api/figma/file?url=${encodeURIComponent(figmaUrl.trim())}`);
       const data = await res.json();
       if (!res.ok) { setConnectError(data.error || 'Connection failed'); return; }
-      setFileInfo(data);
+
+      // Augment each frame with its canvas page name
+      const enriched: FileInfo = {
+        ...data,
+        pages: data.pages.map((page: FigmaPage) => ({
+          ...page,
+          frames: page.frames.map((frame: Frame) => ({ ...frame, pageName: page.name })),
+        })),
+      };
+      setFileInfo(enriched);
     } catch {
       setConnectError('Network error — could not reach the server.');
     } finally {
@@ -101,8 +148,7 @@ export default function FigmaImporter() {
 
   function selectAllFrames() {
     if (!fileInfo) return;
-    const all = fileInfo.pages.flatMap(p => p.frames);
-    setSelectedFrames(all);
+    setSelectedFrames(fileInfo.pages.flatMap(p => p.frames));
   }
 
   function clearSelection() {
@@ -122,65 +168,51 @@ export default function FigmaImporter() {
     const ticker = setInterval(() => {
       msgIdx = (msgIdx + 1) % GEN_MSGS.length;
       setGenStatus(GEN_MSGS[msgIdx]);
-    }, 5000);
+    }, 5_000);
 
     try {
-      // ── Export frames from Figma ───────────────────────────────────
+      // ── Export frames from Figma ─────────────────────────────────────────
       setGenStatus('Exporting frames from Figma…');
       const exportRes = await fetch('/api/figma/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileKey: fileInfo.fileKey, frames: selectedFrames }),
+        body: JSON.stringify({
+          fileKey:  fileInfo.fileKey,
+          fileName: fileInfo.fileName,
+          frames:   selectedFrames,
+        }),
       });
       const exportData = await exportRes.json();
       if (!exportRes.ok) throw new Error(exportData.error || 'Figma export failed');
 
-      const exportedFrames: Array<{ id: string; name: string; base64: string }> =
-        exportData.frames || [];
+      const exportedFrames: Array<{
+        id: string;
+        name: string;
+        base64: string;
+        localPath?: string;
+        assetUrls?: string[];
+      }> = exportData.frames || [];
+
+      const perFrameAssets: Record<string, string[]> = exportData.perFrameAssets || {};
 
       if (exportedFrames.length === 0) {
         throw new Error('No frames were exported. They may be empty.');
       }
 
-      // ── Generate pages ─────────────────────────────────────────────
+      // ── Generate pages ───────────────────────────────────────────────────
       setGenStatus('Analyzing design with AI…');
 
       const results: Array<{ id: string; title: string; slug: string }> = [];
 
       if (importMode === 'one-page') {
-        // All frames → single page (pass all images at once)
-        const frameNames = exportedFrames.map(f => f.name).join(', ');
-        const prompt =
-          `Analyze these Figma design frames and recreate them as a complete Eden CMS page.\n` +
-          `Frames included: ${frameNames}\n` +
-          `File: ${fileInfo.fileName}\n\n` +
-          `Requirements:\n` +
-          `- Preserve the visual layout, color scheme and content from the designs\n` +
-          `- Extract all visible text and use it in the blocks\n` +
-          `- Match colors exactly using hex values you observe\n` +
-          `- Map each design section to the most appropriate Eden CMS block\n` +
-          `- Create a complete, well-structured page`;
-
-        const page = await callAIGenerate(
-          prompt,
-          exportedFrames.map(f => f.base64),
-          provider,
-        );
+        const prompt = buildPrompt(exportedFrames.map(f => f.name), fileInfo.fileName, perFrameAssets);
+        const page = await callAIGenerate(prompt, exportedFrames.map(f => f.base64), provider);
         results.push(page);
       } else {
-        // Each frame → separate page
         for (const frame of exportedFrames) {
           setGenStatus(`Generating page for "${frame.name}"…`);
-          const prompt =
-            `Analyze this Figma design frame and recreate it as an Eden CMS page.\n` +
-            `Frame name: "${frame.name}" (from file: ${fileInfo.fileName})\n\n` +
-            `Requirements:\n` +
-            `- Preserve the visual layout, color scheme and content from the design\n` +
-            `- Extract all visible text and use it in the blocks\n` +
-            `- Match colors exactly using hex values you observe\n` +
-            `- Map each section to the most appropriate Eden CMS block\n` +
-            `- Use the frame name as the page title`;
-
+          const framePFA = { [frame.name]: perFrameAssets[frame.name] || [] };
+          const prompt = buildPrompt([frame.name], fileInfo.fileName, framePFA);
           const page = await callAIGenerate(prompt, [frame.base64], provider);
           results.push(page);
         }
@@ -196,30 +228,90 @@ export default function FigmaImporter() {
     }
   }
 
+  /** Build the enriched prompt including section photo associations */
+  function buildPrompt(
+    frameNames: string[],
+    fileName: string,
+    perFrameAssets: Record<string, string[]>,
+  ): string {
+    const lines: string[] = [
+      `Analyze these Figma design frames and recreate them as a complete Eden CMS page.`,
+      `Frames included: ${frameNames.join(', ')}`,
+      `File: ${fileName}`,
+      '',
+      `Requirements:`,
+      `- Preserve the visual layout, color scheme and content from the designs`,
+      `- Extract all visible text and use it in the blocks`,
+      `- Match colors exactly using hex values you observe`,
+      `- Map each design section to the most appropriate Eden CMS block`,
+      `- Create a complete, well-structured page`,
+      '',
+    ];
+
+    // Section frames with their photos
+    const sectionFrames = frameNames.filter(n => isSectionFrame(n));
+    if (sectionFrames.length > 0) {
+      lines.push(`SECTION FRAMES WITH PHOTOS:`);
+      for (const name of sectionFrames) {
+        const assets = perFrameAssets[name] || [];
+        if (assets.length > 0) {
+          lines.push(`  • "${name}" — ${assets.length} photo(s):`);
+          for (const url of assets) {
+            lines.push(`      [photo] ${url}`);
+          }
+          lines.push(`    → Put the [photo] path(s) into the Image field of the block for "${name}".`);
+        }
+      }
+      lines.push('');
+    }
+
+    // Photo assets per page frame
+    const pageFrames = frameNames.filter(n => !isSectionFrame(n));
+    const framesWithAssets = pageFrames.filter(n => (perFrameAssets[n] || []).length > 0);
+    if (framesWithAssets.length > 0) {
+      lines.push(`PHOTO ASSETS BY SECTION:`);
+      for (const name of framesWithAssets) {
+        const assets = perFrameAssets[name];
+        lines.push(`  ► "${name}" — ${assets.length} photo(s):`);
+        for (const url of assets) {
+          lines.push(`      [photo] ${url}`);
+        }
+        lines.push(`    → Assign to the image block(s) that make up section "${name}".`);
+      }
+      lines.push('');
+    }
+
+    // Image rules
+    lines.push(`IMAGE RULES (strictly enforce):`);
+    lines.push(`  1. page-* layout screenshots → NEVER place in any image/src field`);
+    lines.push(`  2. section-* reference screenshots → NEVER in image fields (use the [photo] assets listed above)`);
+    lines.push(`  3. [photo] tagged paths → ONLY these may go into image fields`);
+    lines.push(`  4. If no [photo] assets exist for a section, leave image fields empty ("") — do NOT invent paths`);
+    lines.push(`  5. Section backgrounds → always a solid BackgroundColor hex, never an image path`);
+    lines.push('');
+    lines.push(`Do NOT ask questions — generate the page directly based on what you see in the images.`);
+
+    return lines.join('\n');
+  }
+
   async function callAIGenerate(
     prompt: string,
     images: string[],
     aiProvider: string,
   ): Promise<{ id: string; title: string; slug: string }> {
-    const res = await fetch('/api/ai/generate-page', {
+    const res  = await fetch('/api/ai/generate-page', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, provider: aiProvider, images }),
     });
     const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'AI generation failed');
-    }
+    if (!res.ok || !data.success) throw new Error(data.error || 'AI generation failed');
     if (data.mode === 'questions') {
-      // AI asked questions — regenerate with a note to skip questions
-      const res2 = await fetch('/api/ai/generate-page', {
+      // AI asked questions — retry with explicit instruction
+      const res2  = await fetch('/api/ai/generate-page', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: prompt + '\n\nDo NOT ask questions — generate the page directly based on what you see in the images.',
-          provider: aiProvider,
-          images,
-        }),
+        body: JSON.stringify({ prompt, provider: aiProvider, images }),
       });
       const data2 = await res2.json();
       if (!res2.ok || !data2.success || !data2.page?.id) {
@@ -231,10 +323,11 @@ export default function FigmaImporter() {
     return data.page;
   }
 
-  // ── Render helpers ───────────────────────────────────────────────────────
+  // ── Render helpers ────────────────────────────────────────────────────────
 
   function FrameTag({ frame, pageId }: { frame: Frame; pageId: string }) {
     const selected = selectedFrames.some(f => f.id === frame.id);
+    const icon     = frameIcon(frame.name);
     return (
       <button
         onClick={() => toggleFrame(frame)}
@@ -250,15 +343,14 @@ export default function FigmaImporter() {
         }`}>
           {selected && <span className="text-white text-[9px] font-black">✓</span>}
         </span>
-        <span className="truncate max-w-[180px] font-medium">{frame.name}</span>
+        <span className="text-base leading-none">{icon}</span>
+        <span className="truncate max-w-[160px] font-medium">{frame.name}</span>
         {frame.width > 0 && (
           <span className="ml-auto text-gray-400 whitespace-nowrap">{frame.width}×{frame.height}</span>
         )}
       </button>
     );
   }
-
-  // ── Render ───────────────────────────────────────────────────────────────
 
   // ── Step: Generating ──────────────────────────────────────────────────────
   if (step === 'generating') {
@@ -316,13 +408,7 @@ export default function FigmaImporter() {
           ))}
         </div>
         <button
-          onClick={() => {
-            setStep('select');
-            setFileInfo(null);
-            setFigmaUrl('');
-            setSelectedFrames([]);
-            setCreatedPages([]);
-          }}
+          onClick={() => { setStep('select'); setFileInfo(null); setFigmaUrl(''); setSelectedFrames([]); setCreatedPages([]); }}
           className="text-sm text-gray-400 hover:text-gray-600 underline"
         >
           Import another file
@@ -405,6 +491,40 @@ export default function FigmaImporter() {
         </div>
       </div>
 
+      {/* ── Frame Naming Conventions ─────────────────────────────────── */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <button
+          onClick={() => setShowConventions(prev => !prev)}
+          className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center text-sm">💡</div>
+            <div className="text-left">
+              <p className="text-sm font-black text-gray-800">Frame naming conventions</p>
+              <p className="text-xs text-gray-400">Name your Figma frames to help the AI understand the layout</p>
+            </div>
+          </div>
+          <i className={`fas fa-chevron-${showConventions ? 'up' : 'down'} text-gray-400 text-xs`} />
+        </button>
+        {showConventions && (
+          <div className="border-t border-gray-100 p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {NAMING_CONVENTIONS.map(conv => (
+              <div
+                key={conv.prefix}
+                className={`flex gap-3 px-3 py-2.5 rounded-xl border text-xs ${CONVENTION_COLORS[conv.color]}`}
+              >
+                <span className="text-xl leading-none flex-shrink-0">{conv.icon}</span>
+                <div>
+                  <p className="font-black font-mono">{conv.prefix}*</p>
+                  <p className="font-bold mt-0.5">{conv.label}</p>
+                  <p className="opacity-75 mt-0.5">{conv.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* ── Frame Selection ─────────────────────────────────────────── */}
       {fileInfo && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -466,8 +586,8 @@ export default function FigmaImporter() {
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { id: 'one-page',    icon: 'fa-file',      label: 'Single page',   desc: 'All frames → one page' },
-                    { id: 'multi-page',  icon: 'fa-copy',      label: 'Multiple pages', desc: 'One page per frame' },
+                    { id: 'one-page',   icon: 'fa-file',  label: 'Single page',    desc: 'All frames → one page' },
+                    { id: 'multi-page', icon: 'fa-copy',  label: 'Multiple pages', desc: 'One page per frame' },
                   ].map(opt => (
                     <button
                       key={opt.id}

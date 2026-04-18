@@ -60,6 +60,7 @@ import './definitions/existing-products-block';
 
 // AI / Email
 import './definitions/chat-block';
+import './definitions/floating-chat-block';
 import './definitions/contact-form-block';
 
 // Re-exportar utilidades

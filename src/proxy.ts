@@ -1,21 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 // Next.js 16+ proxy — replaces middleware.ts
-// Handles auth redirect: if already logged in and visiting /login → go to /admin
+// Protects /admin/* and handles login redirect
 
-export function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+const COOKIE_NAME = 'eden_auth';
 
-  if (pathname === "/login") {
-    const token = req.cookies.get("eden_auth");
-    if (token) {
-      return NextResponse.redirect(new URL("/admin", req.url));
-    }
+export function proxy(request: NextRequest) {
+  const token = request.cookies.get(COOKIE_NAME);
+  const { pathname } = request.nextUrl;
+
+  // Protect /admin/* — redirect to login if no session
+  if (pathname.startsWith('/admin') && !token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // Already logged in — skip login page → go to admin
+  if (pathname === '/login' && token) {
+    return NextResponse.redirect(new URL('/admin', request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/login"],
+  matcher: ['/admin/:path*', '/login'],
 };

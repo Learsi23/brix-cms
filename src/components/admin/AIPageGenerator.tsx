@@ -431,7 +431,7 @@ export default function AIPageGenerator({ onClose }: { onClose: () => void }) {
           {/* STEP 2: Questions */}
           {step === 2 && (
             <div className="space-y-5">
-              <p className="text-sm text-gray-500 italic">Answer as many as you can — skip what you don't know:</p>
+              <p className="text-sm text-gray-500 italic">Answer as many as you can — skip what you don@apost know:</p>
               {questions.map(q => (
                 <div key={q.id} className="rounded-xl border border-gray-100 overflow-hidden">
                   <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">

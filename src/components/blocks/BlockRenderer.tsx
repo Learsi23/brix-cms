@@ -15,6 +15,7 @@ import GridColumn from './GridColumn';
 import FlexibleImageTextBlock from './FlexibleImageTextBlock';
 import TextWithButtonBlock from './TextWithButtonBlock';
 import ChatBlock from './ChatBlock';
+import FloatingChatBlock from './FloatingChatBlock';
 import CardBlock from './CardBlock';
 import IconCardBlock from './IconCardBlock';
 import IconColumn from './IconColumn';
@@ -92,6 +93,9 @@ export default function BlockRenderer({ type, data, blocks }: BlockRendererProps
 
     case 'ChatBlock':
       return <ChatBlock data={data} />;
+
+    case 'FloatingChatBlock':
+      return <FloatingChatBlock data={data} />;
 
     case 'ColumnBlock': {
       const renderedChildren = renderChildren(blocks);

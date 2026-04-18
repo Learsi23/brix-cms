@@ -145,13 +145,19 @@ function extractJSON(raw: string): string | null {
 
 // ─── AI provider callers ──────────────────────────────────────────────────────
 
+interface AIResult {
+  text: string;
+  inputTokens: number;
+  outputTokens: number;
+}
+
 async function callOllama(
   systemPrompt: string,
   userMessage: string,
   ollamaUrl: string,
   model: string,
   images?: string[],
-): Promise<string> {
+): Promise<AIResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
@@ -191,8 +197,10 @@ async function callOllama(
 
   const data = await response.json();
   const text = (data.response as string) || "";
-  console.log(`[Ollama] Response received: ${text.length} chars | First 200: ${text.substring(0, 200).replace(/\n/g, " ")}`);
-  return text;
+  const inputTokens: number = (data.prompt_eval_count as number) || Math.round((systemPrompt.length + userMessage.length) / 4);
+  const outputTokens: number = (data.eval_count as number) || Math.round(text.length / 4);
+  console.log(`[Ollama] Response received: ${text.length} chars | tokens in=${inputTokens} out=${outputTokens}`);
+  return { text, inputTokens, outputTokens };
 }
 
 async function callGemini(
@@ -201,7 +209,7 @@ async function callGemini(
   apiKey: string,
   model: string,
   images?: string[],
-): Promise<string> {
+): Promise<AIResult> {
   const geminiModel = model || "gemini-2.5-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
@@ -253,8 +261,10 @@ async function callGemini(
       ?.map((p: { text?: string }) => p.text ?? "")
       .join("") ?? "";
 
-  console.log(`[Gemini] Response received: ${text.length} chars`);
-  return text;
+  const inputTokens: number = (data?.usageMetadata?.promptTokenCount as number) || Math.round((systemPrompt.length + userMessage.length) / 4);
+  const outputTokens: number = (data?.usageMetadata?.candidatesTokenCount as number) || Math.round(text.length / 4);
+  console.log(`[Gemini] Response received: ${text.length} chars | tokens in=${inputTokens} out=${outputTokens}`);
+  return { text, inputTokens, outputTokens };
 }
 
 async function callOpenAICompatible(
@@ -264,7 +274,7 @@ async function callOpenAICompatible(
   model: string,
   baseUrl: string,
   images?: string[],
-): Promise<string> {
+): Promise<AIResult> {
   let userContent: unknown;
   if (images?.length) {
     const contentParts: unknown[] = [{ type: "text", text: userMessage }];
@@ -320,8 +330,10 @@ async function callOpenAICompatible(
 
   const data = await response.json();
   const text = (data?.choices?.[0]?.message?.content as string) ?? "";
-  console.log(`[${baseUrl}] Response received: ${text.length} chars`);
-  return text;
+  const inputTokens: number = (data?.usage?.prompt_tokens as number) || Math.round((systemPrompt.length + userMessage.length) / 4);
+  const outputTokens: number = (data?.usage?.completion_tokens as number) || Math.round(text.length / 4);
+  console.log(`[${baseUrl}] Response received: ${text.length} chars | tokens in=${inputTokens} out=${outputTokens}`);
+  return { text, inputTokens, outputTokens };
 }
 
 // ─── Slug uniqueness ─────────────────────────────────────────────────────────
@@ -479,24 +491,25 @@ export async function POST(req: NextRequest) {
 
     // ── Call AI provider ─────────────────────────────────────────────────────
     console.log('[AI] Calling provider:', provider);
-    let rawResponse: string;
+    let aiResult: AIResult;
 
     switch (provider) {
       case "ollama":
-        rawResponse = await callOllama(systemPrompt, userPrompt, ollamaUrl, model, images);
+        aiResult = await callOllama(systemPrompt, userPrompt, ollamaUrl, model, images);
         break;
       case "gemini":
-        rawResponse = await callGemini(systemPrompt, userPrompt, apiKey!, externalModel || "gemini-2.5-flash-lite", images);
+        aiResult = await callGemini(systemPrompt, userPrompt, apiKey!, externalModel || "gemini-2.5-flash-lite", images);
         break;
       case "deepseek":
-        rawResponse = await callOpenAICompatible(systemPrompt, userPrompt, apiKey!, externalModel || "deepseek-chat", "https://api.deepseek.com/v1", images);
+        aiResult = await callOpenAICompatible(systemPrompt, userPrompt, apiKey!, externalModel || "deepseek-chat", "https://api.deepseek.com/v1", images);
         break;
       case "mistral":
-        rawResponse = await callOpenAICompatible(systemPrompt, userPrompt, apiKey!, externalModel || "mistral-large-latest", "https://api.mistral.ai/v1", images);
+        aiResult = await callOpenAICompatible(systemPrompt, userPrompt, apiKey!, externalModel || "mistral-large-latest", "https://api.mistral.ai/v1", images);
         break;
       default:
         return NextResponse.json({ success: false, error: `Unsupported provider: ${provider}` }, { status: 400 });
     }
+    const rawResponse = aiResult.text;
 
     // ── Extract & validate JSON ───────────────────────────────────────────────
     const jsonStr = extractJSON(rawResponse);
@@ -575,12 +588,9 @@ export async function POST(req: NextRequest) {
       await createBlocksRecursive(page.id, validBlocks);
     }
 
-    // Log AI usage (token estimation - actual counts not available from all providers)
+    // Log AI usage with actual token counts from the API response
     try {
-      const inputChars = systemPrompt.length + userPrompt.length;
-      const outputChars = rawResponse.length;
-      const inputTokens = Math.round(inputChars / 4);
-      const outputTokens = Math.round(outputChars / 4);
+      const { inputTokens, outputTokens } = aiResult;
       const cost = calculateCost(provider, inputTokens, outputTokens);
 
       await prisma.aiUsageLog.create({
@@ -591,7 +601,7 @@ export async function POST(req: NextRequest) {
           outputTokens,
           totalTokens: inputTokens + outputTokens,
           cost,
-          model: model || null,
+          model: (provider === 'ollama' ? model : externalModel) || model || null,
         },
       });
     } catch (logErr) {
