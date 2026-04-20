@@ -1,5 +1,18 @@
-"use client";
+// Server component — runs on the server before ANY content is sent to browser.
+// Reads the auth cookie and redirects to /login if missing or invalid.
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/db';
+import AdminSidebar from './AdminSidebar';
 
+<<<<<<< HEAD
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('eden_auth');
+
+  if (!token?.value) {
+    redirect('/login');
+=======
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedLayout from "@/components/ProtectedLayout";
@@ -20,14 +33,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   async function handleLogout() {
     await fetch("/api/auth", { method: "DELETE" });
     router.push("/login");
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
   }
 
-  function isActive(href: string, exact = false) {
-    if (exact) return pathname === href;
-    return pathname.startsWith(href);
+  // Validate the token against the database
+  try {
+    const user = await prisma.user.findUnique({ where: { id: token.value } });
+    if (!user) redirect('/login');
+  } catch {
+    redirect('/login');
   }
 
   return (
+<<<<<<< HEAD
+    <div className="flex h-screen overflow-hidden">
+      <AdminSidebar />
+      <main id="main-wrapper" className="flex-1 overflow-y-auto">
+        {children}
+      </main>
+    </div>
+=======
     <ProtectedLayout>
       <div className="flex h-screen overflow-hidden">
         <aside className="w-64 bg-slate-900 text-white p-6 flex-shrink-0 flex flex-col">
@@ -76,5 +101,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </main>
       </div>
     </ProtectedLayout>
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
   );
 }

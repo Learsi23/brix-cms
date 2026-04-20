@@ -43,7 +43,11 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
           <div className="text-center mb-8">
+<<<<<<< HEAD
+            <h1 className="text-3xl font-black text-slate-800">Brix CMS</h1>
+=======
             <Image src="/LogoNavbar.png" alt="Brix" width={100} height={100} className="text-3xl font-black text-slate-800"/>
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
             <p className="text-slate-500 text-sm mt-2">Log in to continue</p>
           </div>
 

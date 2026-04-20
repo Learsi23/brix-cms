@@ -12,6 +12,11 @@ import EmailButtonBlock from './EmailButtonBlock';
 import GridColumn from './GridColumn';
 import FlexibleImageTextBlock from './FlexibleImageTextBlock';
 import TextWithButtonBlock from './TextWithButtonBlock';
+<<<<<<< HEAD
+import ChatBlock from './ChatBlock';
+import FloatingChatBlock from './FloatingChatBlock';
+=======
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
 import CardBlock from './CardBlock';
 import IconCardBlock from './IconCardBlock';
 import IconColumn from './IconColumn';
@@ -76,6 +81,9 @@ export default function BlockRenderer({ type, data, blocks }: BlockRendererProps
     case 'BannerBlock':       return <BannerBlock data={data} />;
     case 'CountdownBlock':    return <CountdownBlock data={data} />;
     case 'SocialProofBlock':  return <SocialProofBlock data={data} />;
+
+    case 'FloatingChatBlock':
+      return <FloatingChatBlock data={data} />;
 
     case 'ColumnBlock': {
       const renderedChildren = renderChildren(blocks);

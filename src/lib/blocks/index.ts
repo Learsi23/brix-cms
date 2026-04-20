@@ -46,6 +46,14 @@ import './definitions/tabs-block';
 import './definitions/tab-item-block';
 import './definitions/countdown-block';
 import './definitions/email-button-block';
+<<<<<<< HEAD
+import './definitions/existing-products-block';
+
+// AI / Email
+import './definitions/chat-block';
+import './definitions/floating-chat-block';
+=======
+>>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
 import './definitions/contact-form-block';
 
 // Re-export utilities
