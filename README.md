@@ -21,7 +21,7 @@ No vendor lock-in. Your data, your server, your rules.
 ## Quick Start
 
 ```bash
-git clone https://github.com/king-lear/brix-cms
+git clone https://github.com/Learsi23/brix-cms
 cd brix-cms
 cp .env.example .env
 npm install
