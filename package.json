@@ -1,6 +1,6 @@
 {
   "name": "brix-cms",
-  "version": "2.2.2",
+  "version": "2.2.5",
   "description": "Open-source self-hosted block-based CMS. Visual page builder, 38 blocks, drag-and-drop, headless REST API, Next.js 16, SQLite/PostgreSQL.",
   "private": false,
   "license": "MIT",
@@ -62,7 +62,7 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "setup": "prisma db push && npx tsx prisma/seed.ts"
+    "setup": "prisma generate && prisma db push && npx tsx prisma/seed.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

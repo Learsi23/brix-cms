@@ -36,7 +36,7 @@ export default function AdminSidebar() {
               <img src="/images/logo-menu.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </div>
             <div>
-              <p className="font-black text-white text-sm leading-none">EdenCMS</p>
+              <p className="font-black text-white text-sm leading-none">BrixCMS</p>
               <p className="text-slate-500 text-[10px]">admin</p>
             </div>
           </div>
@@ -67,7 +67,7 @@ export default function AdminSidebar() {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition"
           >
             <span className="text-xs w-4 text-center">🚪</span>
-            Cerrar sesión
+            Logout
           </button>
         </div>
       </aside>

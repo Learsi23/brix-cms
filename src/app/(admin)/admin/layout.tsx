@@ -7,7 +7,7 @@ import AdminSidebar from './AdminSidebar';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
-  const token = cookieStore.get('eden_auth');
+  const token = cookieStore.get('brix_auth');
 
   if (!token?.value) {
     redirect('/login');

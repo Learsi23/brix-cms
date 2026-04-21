@@ -314,8 +314,8 @@ async function main() {
   });
   console.log('✅ Site config (navbar + footer)');
 
-  console.log('\n🎉 Brix initialized!');
-  console.log('📧 Email:    admin@example.com');
+  console.log('\n🎉 Brix CMS initialized!');
+  console.log('📧 Email:    admin@brix.com');
   console.log('🔑 Password: admin123');
   console.log('🌐 Home:     http://localhost:3000');
   console.log('🔧 Admin:    http://localhost:3000/admin');
