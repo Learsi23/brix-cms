@@ -248,7 +248,7 @@ async function main() {
         Subtitle:        v('Clone the repo, run npm run setup, and you\'re live in under 2 minutes.'),
         SubtitleColor:   v('rgba(255,255,255,0.7)'),
         Btn1Text:        v('View on GitHub'),
-        Btn1Url:         v('https://github.com/king-lear/brix-cms'),
+        Btn1Url:         v('https://github.com/Learsi23/brix-cms'),
         Btn1BgColor:     v('#10b981'),
         Btn1TextColor:   v('#ffffff'),
         Btn2Text:        v('Open Admin Panel'),
@@ -273,7 +273,7 @@ async function main() {
         navbar: {
           backgroundColor:  '#ffffff',
           textColor:        '#0f172a',
-          logo:             '/images/LogoNavbar.png',
+          logo:             '/images/logo-menu.png',
           logoAltText:      'Brix CMS',
           logoWidth:        '120px',
           logoLink:         '/',
@@ -281,14 +281,14 @@ async function main() {
           hasShadow:        true,
           paddingVertical:  'py-3',
           menuItems: [
-            { customText: 'GitHub',  customUrl: 'https://github.com/king-lear/brix-cms', isCustomUrl: true, pageSlug: '' },
+            { customText: 'GitHub',  customUrl: 'https://github.com/Learsi23/brix-cms', isCustomUrl: true, pageSlug: '' },
             { customText: 'Admin',   customUrl: '/admin',  isCustomUrl: true, pageSlug: '' },
           ],
         },
         footer: {
           backgroundColor:        '#0f172a',
           textColor:              '#94a3b8',
-          logo:                   '/images/LogoNavbar.png',
+          logo:                   '/images/logo-menu.png',
           logoAltText:            'Brix CMS',
           logoWidth:              '100px',
           logoPosition:           'left',
@@ -298,7 +298,7 @@ async function main() {
           showSocialMediaColumn:  true,
           socialMediaColumnTitle: 'Links',
           socialMedia: [
-            { platform: 'github',   url: 'https://github.com/king-lear/brix-cms', iconClass: 'fab fa-github' },
+            { platform: 'github',   url: 'https://github.com/Learsi23/brix-cms', iconClass: 'fab fa-github' },
             { platform: 'npm',      url: 'https://www.npmjs.com/package/brix-cms', iconClass: 'fab fa-npm' },
           ],
           showCopyrightRow:       true,

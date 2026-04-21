@@ -157,9 +157,6 @@ NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 
 Features planned or in active development:
 
-- [ ] **E-Commerce** — product catalog, shopping cart, Stripe Checkout
-- [ ] **PDF → Products** — upload a catalogue PDF, extract products
-- [ ] **2FA (TOTP)** — schema done, completing UI + verification flow
 - [ ] **Webhook support** (on publish, on form submit)
 - [ ] **Plugin system** — installable block packs
 - [ ] **i18n / multi-language content**
@@ -182,8 +179,14 @@ Features planned or in active development:
 | Free forever | ✅ | ✅ | ✅ | Limited |
 | TypeScript | ✅ | ✅ | ✅ | ✅ |
 | REST API | ✅ | ✅ | ✅ | ✅ |
-| AI generation | ❌ | ❌ | ❌ | ❌ |
-| E-Commerce *(roadmap)* | 🔜 | ❌ | Plugin | ❌ |
+
+---
+
+## Community
+
+Join the conversation:
+- [GitHub Discussions](https://github.com/Learsi23/brix-cms/discussions) — ask questions, share your projects, feedback
+- [Issues](https://github.com/Learsi23/brix-cms/issues) — report bugs
 
 ---
 
