@@ -12,8 +12,6 @@ import EmailButtonBlock from './EmailButtonBlock';
 import GridColumn from './GridColumn';
 import FlexibleImageTextBlock from './FlexibleImageTextBlock';
 import TextWithButtonBlock from './TextWithButtonBlock';
-import ChatBlock from './ChatBlock';
-import FloatingChatBlock from './FloatingChatBlock';
 import CardBlock from './CardBlock';
 import IconCardBlock from './IconCardBlock';
 import IconColumn from './IconColumn';

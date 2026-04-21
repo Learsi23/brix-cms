@@ -157,13 +157,9 @@ NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 
 Features planned or in active development:
 
-- [ ] **AI Page Generator** — describe a page, AI generates the full block structure (BYOK: Gemini, DeepSeek, Mistral, Ollama)
 - [ ] **E-Commerce** — product catalog, shopping cart, Stripe Checkout
-- [ ] **PDF → Products** — upload a catalogue PDF, AI extracts products
-- [ ] **Admin AI Assistant** — chatbot that knows your site and CMS
+- [ ] **PDF → Products** — upload a catalogue PDF, extract products
 - [ ] **2FA (TOTP)** — schema done, completing UI + verification flow
-- [ ] **Encrypted API key storage** (AES-256-GCM)
-- [ ] **Figma → Blocks import** — AI maps Figma frames to Brix blocks
 - [ ] **Webhook support** (on publish, on form submit)
 - [ ] **Plugin system** — installable block packs
 - [ ] **i18n / multi-language content**
@@ -171,8 +167,6 @@ Features planned or in active development:
 - [ ] **Scheduled publishing**
 - [ ] **GraphQL API**
 - [ ] **Official Docker image**
-
-> Looking for AI + Ecommerce + PDF import **right now**? Check out [BrixCMS Standard / Pro](https://brixcms.io) — the full-featured version built on the same block system.
 
 ---
 
@@ -188,7 +182,7 @@ Features planned or in active development:
 | Free forever | ✅ | ✅ | ✅ | Limited |
 | TypeScript | ✅ | ✅ | ✅ | ✅ |
 | REST API | ✅ | ✅ | ✅ | ✅ |
-| AI generation *(roadmap)* | 🔜 | ❌ | ❌ | ❌ |
+| AI generation | ❌ | ❌ | ❌ | ❌ |
 | E-Commerce *(roadmap)* | 🔜 | ❌ | Plugin | ❌ |
 
 ---

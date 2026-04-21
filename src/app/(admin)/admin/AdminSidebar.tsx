@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import AdminChatButton from "@/components/AdminChatButton";
 
 const navItems = [
   { href: "/admin",              label: "Pages",         icon: "📄", exact: true },
@@ -11,10 +10,6 @@ const navItems = [
   { href: "/admin/products",     label: "Products",      icon: "📦" },
   { href: "/admin/orders",       label: "Orders",        icon: "🛒" },
   { href: "/admin/backup",       label: "Backup",        icon: "💾" },
-  { href: "/admin/ai-config",    label: "Configuration", icon: "⚙️" },
-  { href: "/admin/ai-generator", label: "AI Generator",  icon: "🤖" },
-  { href: "/admin/pdf-products", label: "PDF → Products",icon: "📑" },
-  { href: "/admin/figma",        label: "Figma Import",  icon: "🎨" },
   { href: "/admin/account",      label: "Account",       icon: "👤" },
 ];
 
@@ -78,9 +73,6 @@ export default function AdminSidebar() {
           </button>
         </div>
       </aside>
-
-      {/* Floating admin chat button */}
-      <AdminChatButton />
     </>
   );
 }
