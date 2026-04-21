@@ -78,7 +78,7 @@ export default function ProductCardBlock({ data }: { data: BlockData }) {
   const displayPrice = manualPrice || (product ? product.price.toString() : "");
   const displayOriginalPrice = originalPrice || (product?.originalPrice?.toString() || "");
   const displayImage = selectedImage || product?.imageUrl || "";
-  const displayCategory = category || (product?.category?.name ? String(product.category.name) : "") || (product?.category && typeof product.category === 'object' ? '' : String(product?.category || ''));
+  const displayCategory = category || product?.category || "";
   const displayBadge = badge || product?.badge || "";
   const displayRating = rating || (product?.rating?.toString() || "");
   const displayReviewCount = reviewCount || (product?.reviewCount?.toString() || "");

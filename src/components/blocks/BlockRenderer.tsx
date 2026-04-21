@@ -77,9 +77,6 @@ export default function BlockRenderer({ type, data, blocks }: BlockRendererProps
     case 'CountdownBlock':    return <CountdownBlock data={data} />;
     case 'SocialProofBlock':  return <SocialProofBlock data={data} />;
 
-    case 'FloatingChatBlock':
-      return <FloatingChatBlock data={data} />;
-
     case 'ColumnBlock': {
       const renderedChildren = renderChildren(blocks);
       return <ColumnBlock data={data} renderedChildren={renderedChildren} />;

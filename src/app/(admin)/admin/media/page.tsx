@@ -107,7 +107,6 @@ export default function MediaPage() {
     }
   }
 
-<<<<<<< HEAD
   // ── Single delete ─────────────────────────────────────────────────────────
 
   function openDeleteModal(type: 'file' | 'folder', name: string) {
@@ -119,10 +118,6 @@ export default function MediaPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     const action = deleteTarget.type === 'file' ? 'deleteFile' : 'deleteFolder';
-=======
-  async function deleteFolder(name: string) {
-    if (!confirm(`Delete folder "${name}"? Only if empty`)) return;
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
     const res = await fetch('/api/media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -139,7 +134,6 @@ export default function MediaPage() {
     }
   }
 
-<<<<<<< HEAD
   // ── Multi-select ──────────────────────────────────────────────────────────
 
   function toggleSelectFile(name: string) {
@@ -172,10 +166,6 @@ export default function MediaPage() {
 
   async function confirmBatchDelete() {
     setBatchDeleting(true);
-=======
-  async function deleteFile(name: string) {
-    if (!confirm(`Delete "${name}"?`)) return;
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
     const res = await fetch('/api/media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -199,7 +189,6 @@ export default function MediaPage() {
     loadMedia();
   }
 
-<<<<<<< HEAD
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   function copyUrl(p: string) {
@@ -209,17 +198,6 @@ export default function MediaPage() {
   function selectImage(p: string) {
     navigator.clipboard.writeText(p);
     window.opener?.postMessage({ type: 'selectImage', url: p }, '*');
-=======
-  function copyUrl(path: string) {
-    navigator.clipboard.writeText(path);
-    alert('✅ URL copied to clipboard: ' + path);
-  }
-
-  function selectImage(path: string) {
-    navigator.clipboard.writeText(path);
-    window.opener?.postMessage({ type: 'selectImage', url: path }, '*');
-    alert('✅ Image selected. Return to editor and paste (Ctrl+V)');
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
     window.close();
   }
 
@@ -360,13 +338,7 @@ export default function MediaPage() {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header className="mb-6">
         <h1 className="text-3xl font-black text-slate-800">Media Library</h1>
-<<<<<<< HEAD
         <p className="text-xs text-slate-400 font-mono mt-1">/uploads/{currentFolder}</p>
-=======
-        <p className="text-xs text-slate-400 font-mono mt-1">
-          /uploads/{currentFolder}
-        </p>
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
       </header>
 
       {/* ── Breadcrumbs ─────────────────────────────────────────────────── */}
@@ -410,11 +382,7 @@ export default function MediaPage() {
         <label className="flex flex-col items-center gap-3 cursor-pointer">
           <span className="text-4xl">{uploading ? '⏳' : '📸'}</span>
           <span className="text-sm font-bold text-slate-600">
-<<<<<<< HEAD
             {uploading ? 'Uploading…' : 'Drag images here or click to upload'}
-=======
-            {uploading ? 'Uploading...' : 'Drag images or click to upload'}
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
           </span>
           <input
             ref={inputRef}
@@ -429,7 +397,6 @@ export default function MediaPage() {
         {error && <p className="mt-3 text-sm text-red-500 font-semibold">{error}</p>}
       </div>
 
-<<<<<<< HEAD
       {/* ── Toolbar ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
@@ -477,63 +444,9 @@ export default function MediaPage() {
           <div className="text-xs text-slate-400">
             {files.length} file{files.length !== 1 ? 's' : ''} · {folders.length} folder{folders.length !== 1 ? 's' : ''}
           </div>
-        </div>
-      </div>
+</div>
 
-      {/* ── New Folder Modal ─────────────────────────────────────────────── */}
-=======
-      {/* Toolbar */}
-      <div className="flex justify-between items-center mb-4">
-        <button
-          onClick={() => setShowNewFolder(true)}
-          className="bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-colors"
-        >
-          📁 New Folder
-        </button>
-        <div className="text-xs text-slate-400">
-          {files.length} file{files.length !== 1 ? 's' : ''} · {folders.length} folder{folders.length !== 1 ? 's' : ''}
-        </div>
-      </div>
-
-      {/* New Folder Modal */}
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
-      {showNewFolder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-xl font-black mb-4">Create New Folder</h3>
-            <input
-              type="text"
-              value={newFolderName}
-              onChange={e => setNewFolderName(e.target.value)}
-              placeholder="Folder name"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl mb-4 focus:outline-none focus:border-emerald-500"
-              autoFocus
-              onKeyDown={e => e.key === 'Enter' && createFolder()}
-            />
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => { setShowNewFolder(false); setNewFolderName(''); }}
-                className="px-6 py-2 border border-slate-200 rounded-xl hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={createFolder}
-                disabled={!newFolderName.trim()}
-                className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 disabled:opacity-50"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-<<<<<<< HEAD
       {/* ── Folders grid ─────────────────────────────────────────────────── */}
-=======
-      {/* Folders Grid */}
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
       {folders.length > 0 && (
         <div className="mb-8">
           <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Folders</h3>
@@ -564,7 +477,6 @@ export default function MediaPage() {
                     <div className="text-3xl mb-1">📁</div>
                     <div className="text-xs truncate font-medium text-slate-700">{folder}</div>
                   </button>
-<<<<<<< HEAD
                   {!selectMode && (
                     <button
                       onClick={() => openDeleteModal('folder', folder)}
@@ -574,15 +486,6 @@ export default function MediaPage() {
                       ×
                     </button>
                   )}
-=======
-                  <button
-                    onClick={() => deleteFolder(folder)}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Delete folder"
-                  >
-                    ×
-                  </button>
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
                 </div>
               );
             })}
@@ -590,11 +493,7 @@ export default function MediaPage() {
         </div>
       )}
 
-<<<<<<< HEAD
       {/* ── Files grid ───────────────────────────────────────────────────── */}
-=======
-      {/* Files Grid */}
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
       {files.length > 0 ? (
         <div>
           <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Files</h3>
@@ -652,37 +551,18 @@ export default function MediaPage() {
                     </div>
                   )}
                 </div>
-<<<<<<< HEAD
               );
             })}
-=======
-                {/* Actions Overlay */}
-                <div className="absolute inset-0 bg-slate-900/60 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => copyUrl(file.path)}
-                    className="px-3 py-1.5 bg-white text-slate-800 text-xs font-bold rounded-lg hover:bg-emerald-50"
-                  >
-                    📋 Copy
-                  </button>
-                  <button
-                    onClick={() => deleteFile(file.filename)}
-                    className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600"
-                  >
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-            ))}
->>>>>>> 90af1658ebb35b19d7726df9dd2269a65a682d86
           </div>
         </div>
-      ) : folders.length === 0 && (
+      ) : (
         <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-slate-200">
           <div className="text-5xl mb-4">📪</div>
           <p className="text-slate-400">This folder is empty</p>
           <p className="text-xs text-slate-300 mt-2">Upload images or create folders to organize</p>
         </div>
       )}
+    </div>
     </div>
   );
 }
