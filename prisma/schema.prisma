@@ -82,7 +82,7 @@ model Product {
   category      String?
   badge         String?
   imageUrl      String?
-  slug          String   @unique
+  slug          String   @unique @default("")
   isActive      Boolean  @default(true)
   isFeatured    Boolean  @default(false)
   sizes         String?
