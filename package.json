@@ -1,6 +1,6 @@
 {
   "name": "brix-cms",
-  "version": "2.2.5",
+  "version": "2.2.8",
   "description": "Open-source self-hosted block-based CMS. Visual page builder, 38 blocks, drag-and-drop, headless REST API, Next.js 16, SQLite/PostgreSQL.",
   "private": false,
   "license": "MIT",
