@@ -21,21 +21,36 @@ async function main() {
   });
   console.log('✅ Admin user:', adminUser.email);
 
-  // ── Home page ────────────────────────────────────────────────────────────────
-  const homePage = await prisma.page.upsert({
-    where:  { slug: '' },
-    update: {},
-    create: {
-      title:       'Home',
-      slug:        '',
-      description: 'Brix — open-source block-based CMS. Build pages visually, ship anywhere.',
-      isPublished:  true,
-      publishedAt:  new Date(),
-      pageType:    'standard',
-      jsonData:    JSON.stringify({ BackgroundColor: v('#ffffff') }),
-    },
+// ── Home page ────────────────────────────────────────────────────────────────
+  // Check if home page already exists with blocks
+  const existingHome = await prisma.page.findFirst({
+    where: { slug: '' },
+    include: { blocks: true }
   });
-  console.log('✅ Home page created');
+
+  let homePage;
+  if (existingHome && existingHome.blocks.length > 0) {
+    // Delete existing blocks to avoid duplicates
+    await prisma.block.deleteMany({ where: { pageId: existingHome.id } });
+    homePage = existingHome;
+    console.log('✅ Home page blocks cleared');
+  } else {
+    homePage = await prisma.page.upsert({
+      where:  { slug: '' },
+      update: {},
+      create: {
+        title:       'Home',
+        slug:        '',
+        description: 'Brix — open-source block-based CMS. Build pages visually, ship anywhere.',
+        isPublished:  true,
+        publishedAt:  new Date(),
+        pageType:    'standard',
+        jsonData:    JSON.stringify({ BackgroundColor: v('#ffffff') }),
+      },
+    });
+    console.log('✅ Home page created');
+  }
+  }
 
   // ── Block 1: Hero ─────────────────────────────────────────────────────────────
   await prisma.block.create({
