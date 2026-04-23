@@ -50,7 +50,6 @@ async function main() {
     });
     console.log('✅ Home page created');
   }
-  }
 
   // ── Block 1: Hero ─────────────────────────────────────────────────────────────
   await prisma.block.create({
