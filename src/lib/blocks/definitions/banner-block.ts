@@ -4,7 +4,7 @@ registerBlock({
   type: 'BannerBlock',
   name: 'Banner / Announcement',
   category: 'Layout',
-  icon: '📢',
+  icon: 'fa-bullhorn',
   description: 'Announcement or notification bar: free shipping, discount, new feature. Can be dismissed.',
   fields: {
     Icon: { type: 'string', title: 'Icon (emoji or fas class)', defaultValue: '🎉' },

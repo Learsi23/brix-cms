@@ -8,6 +8,9 @@ const navItems = [
   { href: "/admin/settings",     label: "Navbar & Footer", icon: "🎨" },
   { href: "/admin/media",        label: "Media",         icon: "🖼️" },
   { href: "/admin/backup",       label: "Backup",        icon: "💾" },
+  { href: "/admin/admins",       label: "Team",          icon: "👥" },
+  { href: "/admin/chatbot",      label: "Chatbot",       icon: "🤖" },
+  { href: "/admin/security",     label: "Security",      icon: "🔐" },
   { href: "/admin/account",      label: "Account",       icon: "👤" },
 ];
 

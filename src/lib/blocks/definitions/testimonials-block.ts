@@ -4,7 +4,7 @@ registerBlock({
   type: 'TestimonialsBlock',
   name: 'Testimonials',
   category: 'Content',
-  icon: '💬',
+  icon: 'fa-comments',
   description: 'Carousel of customer reviews with avatar, name, role and stars. Add TestimonialItem blocks inside.',
   isGroup: true,
   fields: {

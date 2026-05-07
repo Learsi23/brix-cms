@@ -4,7 +4,7 @@ registerBlock({
   type: 'AccordionItemBlock',
   name: 'Accordion Item',
   category: 'Interactive',
-  icon: '📄',
+  icon: 'fa-file',
   description: 'Single accordion item with a question and collapsible answer. Add inside AccordionBlock.',
   fields: {
     Question: { type: 'string', title: 'Question / Title' },

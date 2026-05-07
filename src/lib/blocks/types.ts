@@ -5,6 +5,7 @@
 // ====================================================================
 
 /** Tipos de campo disponibles — equivalentes a los Fields de .NET */
+// Acepta tanto el formato original como el nuevo
 export type FieldType =
   | 'string'          // StringField
   | 'textarea'        // TextAreaField
@@ -16,7 +17,11 @@ export type FieldType =
   | 'number'          // NumberField
   | 'url'             // UrlField
   | 'product-select'   // Selector dinámico de productos (carga /api/product)
-  | 'category-select'; // Selector dinámico de categorías (carga /api/category)
+  | 'category-select'  // Selector dinámico de categorías (carga /api/category)
+  // Alias para el nuevo formato
+  | 'text'
+  | 'richtext'
+  | 'boolean';
 
 /** Opción para campos de tipo select */
 export interface SelectOption {
@@ -25,8 +30,9 @@ export interface SelectOption {
   icon?: string;
 }
 
-/** Definición de un campo dentro de un bloque */
+/** Definición de un campo dentro de un bloque (formato objeto) */
 export interface FieldDefinition {
+  key?: string;
   type: FieldType;
   title: string;
   placeholder?: string;
@@ -35,6 +41,17 @@ export interface FieldDefinition {
   options?: SelectOption[];
   /** Valor por defecto */
   defaultValue?: string;
+}
+
+/** Campo en formato array (nuevo formato) */
+export interface FieldDefinitionNew {
+  name: string;
+  type: FieldType;
+  title: string;
+  placeholder?: string;
+  description?: string;
+  options?: SelectOption[];
+  defaultValue?: string | boolean;
 }
 
 /** Definición de un tipo de bloque (equivalente a [BlockType(...)] en .NET) */
@@ -51,8 +68,10 @@ export interface BlockDefinition {
   isGroup?: boolean;
   /** Descripción corta del bloque — se muestra en el tooltip del editor y la usa la IA */
   description?: string;
-  /** Campos del bloque — equivalentes a las propiedades con [Field] en .NET */
-  fields: Record<string, FieldDefinition>;
+  /** Campos del bloque — originales (objeto) */
+  fields?: Record<string, FieldDefinition>;
+  /** Campos del bloque — nuevo formato (array) */
+  fieldsArray?: FieldDefinitionNew[];
 }
 
 // ====================================================================
@@ -116,10 +135,31 @@ export function getFieldValue(data: BlockData | undefined, field: string, fallba
   return data?.[field]?.Value ?? fallback;
 }
 
+/** Normaliza los fields al formato objeto (acepta array u objeto) */
+function normalizeFields(def: BlockDefinition): Record<string, FieldDefinition> {
+  if (def.fields) return def.fields as Record<string, FieldDefinition>;
+  if (def.fieldsArray) {
+    const result: Record<string, FieldDefinition> = {};
+    for (const f of def.fieldsArray) {
+      result[f.name] = {
+        type: f.type as FieldType,
+        title: f.title,
+        placeholder: f.placeholder,
+        description: f.description,
+        options: f.options,
+        defaultValue: String(f.defaultValue ?? ''),
+      };
+    }
+    return result;
+  }
+  return {};
+}
+
 /** Crea un BlockData vacío con los valores por defecto de una definición */
 export function createDefaultData(def: BlockDefinition): BlockData {
+  const fields = normalizeFields(def);
   const data: BlockData = {};
-  for (const [key, field] of Object.entries(def.fields)) {
+  for (const [key, field] of Object.entries(fields)) {
     data[key] = { Value: field.defaultValue ?? '' };
   }
   return data;

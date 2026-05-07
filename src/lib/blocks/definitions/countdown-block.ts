@@ -4,7 +4,7 @@ registerBlock({
   type: 'CountdownBlock',
   name: 'Countdown Timer',
   category: 'Interactive',
-  icon: '⏱️',
+  icon: 'fa-clock',
   description: 'Countdown timer for offers, launches, or events. Set the target date.',
   fields: {
     Title: { type: 'string', title: 'Title', placeholder: 'e.g. Offer ends soon!' },

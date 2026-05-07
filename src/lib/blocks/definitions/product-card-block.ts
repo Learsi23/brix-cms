@@ -1,0 +1,33 @@
+import { registerBlock } from '../registry';
+
+registerBlock({
+  type: 'ProductCardBlock',
+  name: 'Product Card',
+  category: 'Commerce',
+  icon: 'fa-cart-shopping',
+  description: 'Single product card with image gallery, sizes, colors, stock, rating, and add-to-cart. Can link to an existing product by ID or be defined manually.',
+  fieldsArray: [
+    { name: 'productId', type: 'text', title: 'Product ID (from catalogue)', placeholder: 'Leave blank to define manually' },
+    { name: 'name', type: 'text', title: 'Product Name', placeholder: 'e.g. Blue T-Shirt' },
+    { name: 'description', type: 'richtext', title: 'Short Description' },
+    { name: 'longDescription', type: 'richtext', title: 'Full Description (HTML/Markdown)' },
+    { name: 'price', type: 'text', title: 'Price', placeholder: 'e.g. 29.99' },
+    { name: 'originalPrice', type: 'text', title: 'Original Price (crossed-out)', placeholder: 'e.g. 49.99' },
+    { name: 'currencySymbol', type: 'text', title: 'Currency Symbol', defaultValue: 'kr' },
+    { name: 'stock', type: 'text', title: 'Stock Count', defaultValue: '999' },
+    { name: 'image', type: 'image', title: 'Main Image' },
+    { name: 'imagesJson', type: 'richtext', title: 'Extra Images (JSON array)', placeholder: '["url1","url2"]' },
+    { name: 'badge', type: 'text', title: 'Badge Label (e.g. "Sale")', placeholder: 'New, Sale, Hot' },
+    { name: 'category', type: 'text', title: 'Category' },
+    { name: 'tags', type: 'text', title: 'Tags (comma-separated)' },
+    { name: 'sizes', type: 'text', title: 'Sizes (comma-separated)', placeholder: 'S, M, L, XL' },
+    { name: 'colors', type: 'text', title: 'Colors (comma-separated)', placeholder: 'Red, Blue, Green' },
+    { name: 'rating', type: 'text', title: 'Rating (0–5)', placeholder: '4.5' },
+    { name: 'reviewCount', type: 'text', title: 'Review Count', placeholder: '128' },
+    { name: 'showStock', type: 'select', title: 'Show Stock', options: [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }], defaultValue: 'true' },
+    { name: 'showRating', type: 'select', title: 'Show Star Rating', options: [{ label: 'No', value: 'false' }, { label: 'Yes', value: 'true' }], defaultValue: 'false' },
+    { name: 'isRestaurant', type: 'select', title: 'Restaurant Mode (redirect to /checkout)', options: [{ label: 'No', value: 'false' }, { label: 'Yes', value: 'true' }], defaultValue: 'false' },
+    { name: 'buttonText', type: 'text', title: 'Add-to-Cart Button Text', defaultValue: 'Add to cart' },
+    { name: 'backgroundColor', type: 'color', title: 'Card Background Color', defaultValue: '#ffffff' },
+  ],
+});

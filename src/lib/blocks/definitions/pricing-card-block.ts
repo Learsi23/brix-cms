@@ -4,7 +4,7 @@ registerBlock({
   type: 'PricingCardBlock',
   name: 'Pricing Card',
   category: 'Content',
-  icon: '💳',
+  icon: 'fa-credit-card',
   description: 'Individual pricing plan card with feature list and CTA. Add inside PricingBlock.',
   fields: {
     PlanName: { type: 'string', title: 'Plan Name', placeholder: 'Basic, Pro, Enterprise' },

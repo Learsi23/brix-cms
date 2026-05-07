@@ -4,7 +4,7 @@ registerBlock({
   type: 'FlexibleImageTextBlock',
   name: 'Flexible Image + Text',
   category: 'Content',
-  icon: '🖼️',
+  icon: 'fa-image',
   description: 'Section with image and text side by side. Image can go left or right. Ideal for alternating sections.',
   fields: {
     BackgroundColor: { type: 'color', title: 'Background Color', defaultValue: 'transparent' },

@@ -4,7 +4,7 @@ registerBlock({
   type: 'TabItemBlock',
   name: 'Tab Item',
   category: 'Interactive',
-  icon: '📑',
+  icon: 'fa-tags',
   description: 'A single tab with label and HTML content. Add inside TabsBlock.',
   fields: {
     TabLabel: { type: 'string', title: 'Tab Label' },

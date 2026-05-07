@@ -4,7 +4,7 @@ registerBlock({
   type: 'PricingBlock',
   name: 'Pricing',
   category: 'Content',
-  icon: '💰',
+  icon: 'fa-dollar-sign',
   description: 'Pricing table with multiple plans (Basic/Pro/Enterprise), feature list, and CTA button. Add PricingCard blocks inside.',
   isGroup: true,
   fields: {

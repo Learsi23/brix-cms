@@ -4,7 +4,7 @@ registerBlock({
   type: 'TimelineItemBlock',
   name: 'Timeline Item',
   category: 'Content',
-  icon: '📍',
+  icon: 'fa-map-marker',
   description: 'A single step or milestone in a timeline. Add inside TimelineBlock.',
   fields: {
     StepLabel: { type: 'string', title: 'Step Label', placeholder: 'e.g. Step 1, 2021' },

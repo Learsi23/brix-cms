@@ -4,7 +4,7 @@ registerBlock({
   type: 'ButtonLinkBlock',
   name: 'Button Link',
   category: 'Content',
-  icon: '🔗',
+  icon: 'fa-link',
   description: 'Styled button or link. Simple CTA, internal or external link. Multiple color and size styles available.',
   fields: {
     Text: { type: 'string', title: 'Button Text', placeholder: 'Click here' },

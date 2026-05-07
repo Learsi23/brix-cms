@@ -4,7 +4,7 @@ registerBlock({
   type: 'EmailButtonBlock',
   name: 'Email Button',
   category: 'Email',
-  icon: '✉️',
+  icon: 'fa-envelope',
   description: 'Special button that opens the email client with a predefined recipient. Ideal for quick contact.',
   fields: {
     Text: { type: 'string', title: 'Button Text', placeholder: 'Ex: Contact us' },

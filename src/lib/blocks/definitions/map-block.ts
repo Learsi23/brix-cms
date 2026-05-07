@@ -4,7 +4,7 @@ registerBlock({
   type: 'MapBlock',
   name: 'Map',
   category: 'Media',
-  icon: '📍',
+  icon: 'fa-map-marker-alt',
   description: 'Embedded Google Maps or other service map. Requires the map iframe URL.',
   fields: {
     Address: { type: 'string', title: 'Address', placeholder: 'e.g. Gran Via 1, Madrid, Spain' },

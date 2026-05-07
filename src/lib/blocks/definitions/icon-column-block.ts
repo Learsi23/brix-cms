@@ -5,7 +5,7 @@ registerBlock({
   type: 'IconColumn',
   name: 'Icon Column',
   category: 'Columns',
-  icon: '⊞',
+  icon: 'fa-th',
   description: 'Column container optimized for IconCardBlock. Adds global icon support to the group.',
   isGroup: true,
   fields: {

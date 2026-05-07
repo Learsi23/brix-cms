@@ -65,7 +65,8 @@ model User {
   email            String   @unique
   password         String
   name             String?
-  role             String   @default("admin")
+  role             String   @default("member")
+  permissions      String   @default("[]")
   twoFactorEnabled Boolean  @default(false)
   twoFactorSecret  String?
   createdAt        DateTime @default(now())

@@ -5,7 +5,7 @@ registerBlock({
   type: 'GalleryBlock',
   name: 'Gallery',
   category: 'Media',
-  icon: '🖼️',
+  icon: 'fa-images',
   description: 'Image gallery in a responsive grid. Select multiple images from the media library.',
   isGroup: true,
   fields: {

@@ -4,7 +4,7 @@ registerBlock({
   type: 'DividerBlock',
   name: 'Divider',
   category: 'Layout',
-  icon: '➖',
+  icon: 'fa-minus',
   description: 'Horizontal dividing line with configurable styles. Visually separates content sections.',
   fields: {
     Style: { type: 'select', title: 'Style', defaultValue: 'solid', options: [

@@ -4,7 +4,7 @@ registerBlock({
   type: 'CTABannerBlock',
   name: 'CTA Banner',
   category: 'Content',
-  icon: '📣',
+  icon: 'fa-bullhorn',
   description: 'Call-to-action banner with colored background, text and button. Ideal for closing sections or as a page footer.',
   fields: {
     Title: { type: 'string', title: 'Main Title' },

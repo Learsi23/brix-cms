@@ -5,7 +5,7 @@ registerBlock({
   type: 'IconCardBlock',
   name: 'Icon Card',
   category: 'Content',
-  icon: '🪪',
+  icon: 'fa-id-card',
   description: 'Card with large icon, title and description. Perfect for listing features, services or benefits in a 3-4 column grid.',
   fields: {
     // Container

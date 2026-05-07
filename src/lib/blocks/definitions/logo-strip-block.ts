@@ -4,7 +4,7 @@ registerBlock({
   type: 'LogoStripBlock',
   name: 'Logos / Partners',
   category: 'Content',
-  icon: '🤝',
+  icon: 'fa-handshake',
   description: 'Horizontal strip of client or partner logos. Displays multiple images in a row, ideal for social proof.',
   fields: {
     Heading: { type: 'string', title: 'Heading Text', placeholder: 'e.g. Companies that trust us' },

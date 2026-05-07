@@ -4,7 +4,7 @@ registerBlock({
   type: 'DropdownBlock',
   name: 'Dropdown',
   category: 'Media',
-  icon: '🔽',
+  icon: 'fa-chevron-down',
   description: 'Accordion-style dropdown menu. Ideal for FAQs or collapsible content.',
   fields: {
     Title: { type: 'string', title: 'Block Title', placeholder: 'Write the title (optional)' },

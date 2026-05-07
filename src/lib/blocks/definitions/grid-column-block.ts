@@ -4,7 +4,7 @@ registerBlock({
   type: 'GridColumn',
   name: 'Grid Column',
   category: 'Columns',
-  icon: '🔲',
+  icon: 'fa-border-all',
   description: 'Grid with large decorative title in the background. Use children for the elements. Impactful visual effect for feature sections.',
   isGroup: true,
   fields: {

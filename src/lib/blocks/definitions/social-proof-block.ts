@@ -4,7 +4,7 @@ registerBlock({
   type: 'SocialProofBlock',
   name: 'Social Proof / Logos',
   category: 'Content',
-  icon: '🏆',
+  icon: 'fa-trophy',
   description: 'Client logos + Google/Trustpilot review count and score. Builds instant trust.',
   fields: {
     Title: { type: 'string', title: 'Title' },

@@ -5,7 +5,7 @@ registerBlock({
   type: 'CardBlock',
   name: 'Universal Hero Card',
   category: 'Content',
-  icon: '🃏',
+  icon: 'fa-id-card-alt',
   description: 'Tarjeta visual con imagen, título, descripción y botón. Soporta layout vertical, horizontal y overlay. Ideal para grids de servicios o features.',
   fields: {
     // Content

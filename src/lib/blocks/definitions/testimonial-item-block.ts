@@ -4,7 +4,7 @@ registerBlock({
   type: 'TestimonialItemBlock',
   name: 'Testimonial Item',
   category: 'Content',
-  icon: '⭐',
+  icon: 'fa-star',
   description: 'Single customer review with text, avatar, name and star rating. Add inside TestimonialsBlock.',
   fields: {
     ReviewText: { type: 'textarea', title: 'Review Text' },

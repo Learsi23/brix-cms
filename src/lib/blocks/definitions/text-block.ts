@@ -4,7 +4,7 @@ registerBlock({
   type: 'TextBlock',
   name: 'Text Block',
   category: 'Content',
-  icon: '📝',
+  icon: 'fa-paragraph',
   description: 'Text block with title, subtitle and body. Controls typography, colors, alignment and margins. Versatile for any section.',
   fields: {
     // Position

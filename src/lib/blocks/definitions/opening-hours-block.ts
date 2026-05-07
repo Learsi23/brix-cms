@@ -1,0 +1,32 @@
+import { registerBlock } from '../registry';
+
+registerBlock({
+  type: 'OpeningHoursBlock',
+  name: 'Opening Hours',
+  category: 'Content',
+  icon: 'fa-clock',
+  description: 'Weekly opening hours table with a live open/closed status indicator.',
+  fieldsArray: [
+    { name: 'title', type: 'text', title: 'Section Title', placeholder: 'Opening Hours', defaultValue: 'Opening Hours' },
+    { name: 'closedLabel', type: 'text', title: 'Closed Label', defaultValue: 'Closed' },
+    { name: 'nowOpenLabel', type: 'text', title: 'Now Open Label', defaultValue: "We're open now!" },
+    { name: 'nowClosedLabel', type: 'text', title: 'Now Closed Label', defaultValue: "We're closed right now" },
+    { name: 'mondayOpen', type: 'text', title: 'Monday — Open', placeholder: '09:00', defaultValue: '09:00' },
+    { name: 'mondayClose', type: 'text', title: 'Monday — Close', placeholder: '17:00', defaultValue: '17:00' },
+    { name: 'tuesdayOpen', type: 'text', title: 'Tuesday — Open', defaultValue: '09:00' },
+    { name: 'tuesdayClose', type: 'text', title: 'Tuesday — Close', defaultValue: '17:00' },
+    { name: 'wednesdayOpen', type: 'text', title: 'Wednesday — Open', defaultValue: '09:00' },
+    { name: 'wednesdayClose', type: 'text', title: 'Wednesday — Close', defaultValue: '17:00' },
+    { name: 'thursdayOpen', type: 'text', title: 'Thursday — Open', defaultValue: '09:00' },
+    { name: 'thursdayClose', type: 'text', title: 'Thursday — Close', defaultValue: '17:00' },
+    { name: 'fridayOpen', type: 'text', title: 'Friday — Open', defaultValue: '09:00' },
+    { name: 'fridayClose', type: 'text', title: 'Friday — Close', defaultValue: '15:00' },
+    { name: 'saturdayOpen', type: 'text', title: 'Saturday — Open', defaultValue: '' },
+    { name: 'saturdayClose', type: 'text', title: 'Saturday — Close', defaultValue: '' },
+    { name: 'sundayOpen', type: 'text', title: 'Sunday — Open', defaultValue: '' },
+    { name: 'sundayClose', type: 'text', title: 'Sunday — Close', defaultValue: '' },
+    { name: 'openColor', type: 'color', title: 'Open Badge Color', defaultValue: '#16a34a' },
+    { name: 'closedColor', type: 'color', title: 'Closed Badge Color', defaultValue: '#dc2626' },
+    { name: 'highlightToday', type: 'boolean', title: 'Highlight Today', defaultValue: true },
+  ],
+});

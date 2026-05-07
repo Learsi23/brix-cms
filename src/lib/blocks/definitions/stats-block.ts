@@ -4,7 +4,7 @@ registerBlock({
   type: 'StatsBlock',
   name: 'Statistics',
   category: 'Content',
-  icon: '📊',
+  icon: 'fa-chart-bar',
   description: 'Block of eye-catching numeric statistics (e.g. 500+ clients, 98% satisfaction). High visual impact.',
   fields: {
     Title: { type: 'string', title: 'Section Title' },

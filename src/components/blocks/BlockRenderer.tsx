@@ -32,6 +32,26 @@ import TabsBlock from './TabsBlock';
 import TeamBlock from './TeamBlock';
 import TestimonialsBlock from './TestimonialsBlock';
 import TimelineBlock from './TimelineBlock';
+import TrustBadgesBlock from './TrustBadgesBlock';
+import NewsletterBlock from './NewsletterBlock';
+import TableBlock from './TableBlock';
+import OpeningHoursBlock from './OpeningHoursBlock';
+import MenuBlock from './MenuBlock';
+import FeatureGridBlock from './FeatureGridBlock';
+import FeatureListBlock from './FeatureListBlock';
+import CodeBlock from './CodeBlock';
+import AudioBlock from './AudioBlock';
+import QRCodeBlock from './QRCodeBlock';
+import BrixGridDemoBlock from './BrixGridDemoBlock';
+import LottieBlock from './LottieBlock';
+import CookieBannerBlock from './CookieBannerBlock';
+import BeforeAfterBlock from './BeforeAfterBlock';
+import FAQBlock from './FAQBlock';
+import FloatingChatBlock from './FloatingChatBlock';
+import FullColumnBlock from './FullColumnBlock';
+import ChatBlock from './ChatBlock';
+import ExistingProductsBlock from './ExistingProductsBlock';
+import ProductsGalleryBlock from './ProductsGalleryBlock';
 
 interface RawChild {
   id: string;
@@ -97,6 +117,31 @@ export default function BlockRenderer({ type, data, blocks }: BlockRendererProps
     case 'TeamBlock':         return <TeamBlock data={data} blocks={blocks} />;
     case 'TestimonialsBlock': return <TestimonialsBlock data={data} blocks={blocks} />;
     case 'TimelineBlock':     return <TimelineBlock data={data} blocks={blocks} />;
+    case 'FAQBlock':          return <FAQBlock data={data} blocks={blocks} />;
+    case 'ProductsGalleryBlock': return <ProductsGalleryBlock data={data} blocks={blocks} />;
+
+    case 'FullColumnBlock': {
+      const renderedChildren = renderChildren(blocks);
+      return <FullColumnBlock data={data} renderedChildren={renderedChildren} />;
+    }
+
+    case 'TrustBadgesBlock':    return <TrustBadgesBlock data={data} />;
+    case 'NewsletterBlock':     return <NewsletterBlock data={data} />;
+    case 'TableBlock':          return <TableBlock data={data} />;
+    case 'OpeningHoursBlock':   return <OpeningHoursBlock data={data} />;
+    case 'MenuBlock':           return <MenuBlock data={data} />;
+    case 'FeatureGridBlock':    return <FeatureGridBlock data={data} />;
+    case 'FeatureListBlock':    return <FeatureListBlock data={data} />;
+    case 'CodeBlock':           return <CodeBlock data={data} />;
+    case 'AudioBlock':          return <AudioBlock data={data} />;
+    case 'QRCodeBlock':         return <QRCodeBlock data={data} />;
+    case 'BrixGridDemoBlock':   return <BrixGridDemoBlock data={data} />;
+    case 'LottieBlock':         return <LottieBlock data={data} />;
+    case 'CookieBannerBlock':   return <CookieBannerBlock data={data} />;
+    case 'BeforeAfterBlock':    return <BeforeAfterBlock data={data} />;
+    case 'FloatingChatBlock':   return <FloatingChatBlock data={data} />;
+    case 'ChatBlock':           return <ChatBlock data={data} />;
+    case 'ExistingProductsBlock': return <ExistingProductsBlock data={data} />;
 
     default:
       return (

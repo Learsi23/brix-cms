@@ -4,7 +4,7 @@ registerBlock({
   type: 'TeamBlock',
   name: 'Team',
   category: 'Content',
-  icon: '👥',
+  icon: 'fa-users',
   description: 'Grid of team members with photo, name, position and social links. Add TeamMember blocks inside.',
   isGroup: true,
   fields: {

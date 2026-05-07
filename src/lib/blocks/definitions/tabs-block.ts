@@ -4,7 +4,7 @@ registerBlock({
   type: 'TabsBlock',
   name: 'Tabs',
   category: 'Interactive',
-  icon: '📂',
+  icon: 'fa-folder',
   description: 'Content organized in tabs. Ideal for Description / Specifications / Reviews. Add TabItem blocks inside.',
   isGroup: true,
   fields: {

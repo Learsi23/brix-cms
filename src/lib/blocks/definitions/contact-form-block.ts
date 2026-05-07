@@ -4,7 +4,7 @@ registerBlock({
   type: 'ContactFormBlock',
   name: 'Contact Form',
   category: 'Email',
-  icon: '📧',
+  icon: 'fa-envelope-open',
   description: 'Complete contact form with name, email and message. Sends email notifications to the administrator.',
   fields: {
     Title: { type: 'string', title: 'Form Title' },

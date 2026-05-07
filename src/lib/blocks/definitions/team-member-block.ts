@@ -4,7 +4,7 @@ registerBlock({
   type: 'TeamMemberBlock',
   name: 'Team Member',
   category: 'Content',
-  icon: '👤',
+  icon: 'fa-user',
   description: 'Individual team member card with photo, name, role and social links. Add inside TeamBlock.',
   fields: {
     Photo: { type: 'image', title: 'Photo' },

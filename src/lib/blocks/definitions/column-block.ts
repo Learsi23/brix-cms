@@ -6,7 +6,7 @@ registerBlock({
   type: 'ColumnBlock',
   name: 'Columns',
   category: 'Columns',
-  icon: '⬜',
+  icon: 'fa-square',
   description: 'Container that organizes child blocks into responsive columns (1-4 cols). Drag other blocks inside. Base of all grid layouts.',
   isGroup: true,
   fields: {

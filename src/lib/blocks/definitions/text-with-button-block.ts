@@ -4,7 +4,7 @@ registerBlock({
   type: 'TextWithButtonBlock',
   name: 'Text with Button',
   category: 'Content',
-  icon: '🔤',
+  icon: 'fa-font',
   description: 'Combination of a text block with an integrated action button. Useful for sections with inline CTA.',
   fields: {
     Title: { type: 'string', title: 'Title' },

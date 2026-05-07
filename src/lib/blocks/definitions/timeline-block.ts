@@ -4,7 +4,7 @@ registerBlock({
   type: 'TimelineBlock',
   name: 'Timeline / Steps',
   category: 'Content',
-  icon: '📅',
+  icon: 'fa-calendar',
   description: 'Timeline of steps or milestones. Ideal for "How it works", company history, or process. Add TimelineItem blocks inside.',
   isGroup: true,
   fields: {
