@@ -1,47 +1,57 @@
-// /api/chat/config — Get/Set Ollama configuration
+// /api/chat/config — Get / Set AI chatbot configuration
+// Supports: Ollama (local) and Gemini (cloud, OpenAI-compat endpoint)
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+const KEYS = ['ollama_url', 'ollama_model', 'ai_provider', 'gemini_api_key', 'gemini_model'] as const;
+
 export async function GET() {
   try {
-    const config = await prisma.siteConfig.findMany({
-      where: { key: { startsWith: 'ollama' } }
+    const rows = await prisma.siteConfig.findMany({
+      where: { key: { in: [...KEYS] } },
     });
 
-    const ollamaConfig: Record<string, string> = {};
-    for (const c of config) {
-      ollamaConfig[c.key] = c.value;
-    }
+    const cfg: Record<string, string> = {};
+    for (const row of rows) cfg[row.key] = row.value;
 
-    return NextResponse.json(ollamaConfig);
-  } catch (error) {
+    // Mask the Gemini key — only expose whether it is set
+    return NextResponse.json({
+      ...cfg,
+      gemini_api_key:     cfg.gemini_api_key ? '••••••••' : '',
+      gemini_key_is_set:  !!cfg.gemini_api_key,
+    });
+  } catch {
     return NextResponse.json({ error: 'Failed to get config' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { url, model } = body;
+    const body = await req.json() as Record<string, string>;
 
-    if (url) {
-      await prisma.siteConfig.upsert({
-        where: { key: 'ollama_url' },
-        update: { value: url },
-        create: { key: 'ollama_url', value: url }
-      });
-    }
+    const allowed: (typeof KEYS[number])[] = [...KEYS];
 
-    if (model) {
-      await prisma.siteConfig.upsert({
-        where: { key: 'ollama_model' },
-        update: { value: model },
-        create: { key: 'ollama_model', value: model }
-      });
+    for (const key of allowed) {
+      const val = body[key];
+      if (val === undefined) continue;
+
+      // Empty string on gemini_api_key = delete the key
+      if (key === 'gemini_api_key' && val === '') {
+        await prisma.siteConfig.deleteMany({ where: { key } });
+        continue;
+      }
+
+      if (val !== '') {
+        await prisma.siteConfig.upsert({
+          where:  { key },
+          update: { value: val },
+          create: { key, value: val },
+        });
+      }
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to save config' }, { status: 500 });
   }
 }

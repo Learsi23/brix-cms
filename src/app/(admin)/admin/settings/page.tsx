@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 
 interface MenuItem {
   customText: string;
@@ -55,6 +56,20 @@ interface SiteSettings {
   footer: FooterSettings;
 }
 
+interface PageItem {
+  id: string;
+  title: string;
+  slug: string;
+  isPublished: boolean;
+  sortOrder: number;
+  parentId: string | null;
+}
+
+interface PageTreeNode extends PageItem {
+  children: PageTreeNode[];
+  depth: number;
+}
+
 const defaultSettings: SiteSettings = {
   navbar: {
     backgroundColor: '#ffffff', textColor: '#000000', logo: '', logoAltText: 'Logo',
@@ -73,8 +88,14 @@ const defaultSettings: SiteSettings = {
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [saving, setSaving] = useState(false);
-  const [tab, setTab] = useState<'navbar' | 'footer'>('navbar');
+  const [tab, setTab] = useState<'navbar' | 'footer' | 'pages'>('navbar');
   const [success, setSuccess] = useState(false);
+
+  // Pages state
+  const [pages, setPages] = useState<PageItem[]>([]);
+  const [pagesLoading, setPagesLoading] = useState(true);
+  const [newTitle, setNewTitle] = useState('');
+  const [newParentId, setNewParentId] = useState<string>('');
 
   useEffect(() => {
     fetch('/api/config?key=site').then(async res => {
@@ -84,6 +105,92 @@ export default function SettingsPage() {
       }
     });
   }, []);
+
+  const loadPages = useCallback(async () => {
+    setPagesLoading(true);
+    const res = await fetch('/api/pages');
+    const data = await res.json();
+    setPages(data);
+    setPagesLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (tab === 'pages') loadPages();
+  }, [tab, loadPages]);
+
+  function buildTree(allPages: PageItem[]): PageTreeNode[] {
+    const map = new Map<string, PageTreeNode>();
+    const roots: PageTreeNode[] = [];
+    for (const p of allPages) {
+      map.set(p.id, { ...p, children: [], depth: 0 });
+    }
+    for (const p of allPages) {
+      const node = map.get(p.id)!;
+      if (p.parentId && map.has(p.parentId)) {
+        const parent = map.get(p.parentId)!;
+        node.depth = parent.depth + 1;
+        parent.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+    const sortFn = (a: PageTreeNode, b: PageTreeNode) => a.sortOrder - b.sortOrder;
+    for (const r of roots) r.children.sort(sortFn);
+    roots.sort(sortFn);
+    return roots;
+  }
+
+  function flattenTree(tree: PageTreeNode[]): PageTreeNode[] {
+    const result: PageTreeNode[] = [];
+    for (const node of tree) {
+      result.push(node);
+      if (node.children.length > 0) result.push(...flattenTree(node.children));
+    }
+    return result;
+  }
+
+  function getFullPathSlug(page: PageItem): string {
+    const parts: string[] = [];
+    let current: PageItem | undefined = page;
+    const visited = new Set<string>();
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id);
+      if (current.slug) parts.unshift(current.slug);
+      current = current.parentId ? pages.find(p => p.id === current!.parentId) : undefined;
+    }
+    return '/' + parts.join('/');
+  }
+
+  async function handleCreatePage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+    const slug = newTitle.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    await fetch('/api/pages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: newTitle, slug, parentId: newParentId || null }),
+    });
+    setNewTitle('');
+    setNewParentId('');
+    loadPages();
+  }
+
+  async function handleDeletePage(id: string) {
+    if (!confirm('Delete this page and ALL its subpages?')) return;
+    await fetch(`/api/pages/${id}`, { method: 'DELETE' });
+    loadPages();
+  }
+
+  async function handleMovePage(id: string, direction: 'up' | 'down') {
+    await fetch('/api/pages/move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pageId: id, direction }),
+    });
+    loadPages();
+  }
 
   function updateNavbar(field: string, value: string | boolean) {
     setSettings(prev => ({ ...prev, navbar: { ...prev.navbar, [field]: value } }));
@@ -167,12 +274,15 @@ export default function SettingsPage() {
       </header>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         <button onClick={() => setTab('navbar')} className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-colors ${tab === 'navbar' ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
           🎨 Navbar
         </button>
         <button onClick={() => setTab('footer')} className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-colors ${tab === 'footer' ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
           🦶 Footer
+        </button>
+        <button onClick={() => setTab('pages')} className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-colors ${tab === 'pages' ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+          📄 Pages
         </button>
       </div>
 
@@ -249,6 +359,89 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* PAGES */}
+      {tab === 'pages' && (
+        <div className="space-y-6">
+          {/* Create page */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <h3 className="text-sm font-bold text-slate-800 mb-4">Create Page</h3>
+            <form onSubmit={handleCreatePage} className="flex gap-3 items-end flex-wrap">
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Title</label>
+                <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Page title..." required className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:outline-none focus:border-emerald-500" />
+              </div>
+              <div className="w-44">
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Parent</label>
+                <select value={newParentId} onChange={e => setNewParentId(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:outline-none focus:border-emerald-500">
+                  <option value="">— Top-level —</option>
+                  {pages.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+                </select>
+              </div>
+              <button type="submit" className="px-5 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 transition">+ Create</button>
+            </form>
+          </div>
+
+          {/* Pages table */}
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            {pagesLoading ? (
+              <div className="p-8 text-center text-sm text-slate-400">Loading pages...</div>
+            ) : pages.length === 0 ? (
+              <div className="p-8 text-center text-sm text-slate-400">No pages yet.</div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-[10px] font-bold">
+                  <tr>
+                    <th className="px-4 py-3 text-left w-20">Order</th>
+                    <th className="px-4 py-3 text-left">Title</th>
+                    <th className="px-4 py-3 text-left hidden md:table-cell">URL</th>
+                    <th className="px-4 py-3 text-left w-24">Status</th>
+                    <th className="px-4 py-3 text-right w-36">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(() => {
+                    const tree = buildTree(pages);
+                    const flat = flattenTree(tree);
+                    const firstPub = flat.find(p => p.isPublished);
+                    return flat.map((page, i) => (
+                      <tr key={page.id} className="hover:bg-slate-50 transition">
+                        <td className="px-4 py-3">
+                          <div className="flex gap-1">
+                            {i > 0 && <button onClick={() => handleMovePage(page.id, 'up')} className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded text-xs">↑</button>}
+                            {i < flat.length - 1 && <button onClick={() => handleMovePage(page.id, 'down')} className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded text-xs">↓</button>}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 font-medium">
+                          <div className="flex items-center gap-2">
+                            {page.depth > 0 && <span className="text-slate-300 text-xs select-none" style={{ paddingLeft: `${page.depth * 16}px` }}>└─</span>}
+                            {page.id === firstPub?.id && <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase px-2 py-0.5 rounded-full">Home</span>}
+                            {page.title}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-slate-500 font-mono text-xs hidden md:table-cell">{getFullPathSlug(page)}</td>
+                        <td className="px-4 py-3">
+                          {page.isPublished ? (
+                            <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full">Published</span>
+                          ) : (
+                            <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full">Draft</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Link href={`/admin/pages/${page.id}/edit`} className="text-blue-600 hover:underline text-xs font-semibold">Edit</Link>
+                            <button onClick={() => handleDeletePage(page.id)} className="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* FOOTER */}
       {tab === 'footer' && (
         <div className="space-y-6">
@@ -288,10 +481,6 @@ export default function SettingsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4 pt-2">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={settings.footer.showPagesColumn} onChange={e => updateFooter('showPagesColumn', e.target.checked)} className="w-4 h-4 accent-emerald-600 rounded" />
-                <span className="text-sm text-slate-600">Show pages column</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={settings.footer.showSocialMediaColumn} onChange={e => updateFooter('showSocialMediaColumn', e.target.checked)} className="w-4 h-4 accent-emerald-600 rounded" />
                 <span className="text-sm text-slate-600">Show social media</span>
               </label>
@@ -304,6 +493,46 @@ export default function SettingsPage() {
                 <span className="text-sm text-slate-600">Show horizontal line</span>
               </label>
             </div>
+          </div>
+
+          {/* Footer Pages */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={settings.footer.showPagesColumn} onChange={e => updateFooter('showPagesColumn', e.target.checked)} className="w-4 h-4 accent-emerald-600 rounded" />
+                <span className="text-sm font-bold text-slate-700">Show pages column</span>
+              </label>
+            </div>
+            <div>
+              <label className={labelCls}>Column Title</label>
+              <input value={settings.footer.pagesColumnTitle} onChange={e => updateFooter('pagesColumnTitle', e.target.value)} placeholder="Pages" className={`${inputCls} max-w-xs`} />
+            </div>
+            {settings.footer.pages.map((item, i) => (
+              <div key={i} className="flex gap-2 items-end p-3 bg-slate-50 rounded-xl">
+                <div className="flex-1">
+                  <label className={labelCls}>Label</label>
+                  <input value={item.customText} onChange={e => {
+                    const newPages = [...settings.footer.pages];
+                    newPages[i] = { ...newPages[i], customText: e.target.value };
+                    setSettings(prev => ({ ...prev, footer: { ...prev.footer, pages: newPages } }));
+                  }} placeholder="About" className={inputCls} />
+                </div>
+                <div className="flex-1">
+                  <label className={labelCls}>URL</label>
+                  <input value={item.customUrl} onChange={e => {
+                    const newPages = [...settings.footer.pages];
+                    newPages[i] = { ...newPages[i], customUrl: e.target.value };
+                    setSettings(prev => ({ ...prev, footer: { ...prev.footer, pages: newPages } }));
+                  }} placeholder="/about" className={inputCls} />
+                </div>
+                <button onClick={() => {
+                  setSettings(prev => ({ ...prev, footer: { ...prev.footer, pages: prev.footer.pages.filter((_, j) => j !== i) } }));
+                }} className="px-2 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 text-xs">✕</button>
+              </div>
+            ))}
+            <button onClick={() => {
+              setSettings(prev => ({ ...prev, footer: { ...prev.footer, pages: [...prev.footer.pages, { customText: '', customUrl: '', isCustomUrl: true, pageSlug: '' }] } }));
+            }} className="text-blue-500 hover:text-blue-700 text-sm font-semibold">+ Add Page Link</button>
           </div>
 
           {/* Social Media */}

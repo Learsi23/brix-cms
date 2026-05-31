@@ -36,7 +36,8 @@ export default function TableBlock({ data }: TableBlockProps) {
 
   return (
     <section id={sectionId || undefined} className="py-8 px-4">
-      <div className={mobileScroll ? 'overflow-x-auto' : ''}>
+    <div className="container mx-auto">
+        <div className={mobileScroll ? 'overflow-x-auto' : ''}>
         <table
           className="w-full text-sm"
           style={{
@@ -93,6 +94,7 @@ export default function TableBlock({ data }: TableBlockProps) {
           </tbody>
         </table>
       </div>
+    </div>
     </section>
   );
 }

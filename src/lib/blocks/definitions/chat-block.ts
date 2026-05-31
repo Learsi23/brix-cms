@@ -32,7 +32,7 @@ registerBlock({
     { name: 'inputPlaceholderColor', type: 'color', title: 'Input Placeholder Color', defaultValue: '#94A3B8' },
     { name: 'sendButtonColor', type: 'color', title: 'Send Button Color', defaultValue: '#6366F1' },
     { name: 'aiProvider', type: 'select', title: 'AI Provider', options: [{ label: 'Auto (site default)', value: 'auto' }, { label: 'Ollama (local)', value: 'ollama' }], defaultValue: 'auto' },
-    { name: 'customPrompt', type: 'text', title: 'Custom System Prompt (persona only)', placeholder: "Dile a la IA cómo actuar..." },
-    { name: 'welcomeMessage', type: 'text', title: 'Welcome Message', placeholder: '¡Hola! ¿En qué puedo ayudarte?' },
+    { name: 'customPrompt', type: 'text', title: 'Custom System Prompt (persona only)', placeholder: "Tell the AI how to behave..." },
+    { name: 'welcomeMessage', type: 'text', title: 'Welcome Message', placeholder: 'Hello! How can I help you?' }
   ],
 });

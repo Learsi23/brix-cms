@@ -6,7 +6,7 @@ import type { NextRequest } from 'next/server';
 
 const COOKIE_NAME = 'brix_auth';
 
-export function proxy(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME);
   const { pathname } = request.nextUrl;
 

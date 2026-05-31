@@ -136,7 +136,7 @@ export function getFieldValue(data: BlockData | undefined, field: string, fallba
 }
 
 /** Normaliza los fields al formato objeto (acepta array u objeto) */
-function normalizeFields(def: BlockDefinition): Record<string, FieldDefinition> {
+export function normalizeFields(def: BlockDefinition): Record<string, FieldDefinition> {
   if (def.fields) return def.fields as Record<string, FieldDefinition>;
   if (def.fieldsArray) {
     const result: Record<string, FieldDefinition> = {};

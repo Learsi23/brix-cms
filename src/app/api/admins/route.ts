@@ -15,13 +15,13 @@ interface AdminUser {
   createdAt: Date;
 }
 
-function getCurrentUserId(): string | null {
-  const cookieStore = cookies();
+async function getCurrentUserId(): Promise<string | null> {
+  const cookieStore = await cookies();
   return cookieStore.get('brix_auth')?.value ?? null;
 }
 
 async function isCurrentUserOwner(): Promise<boolean> {
-  const userId = getCurrentUserId();
+  const userId = await getCurrentUserId();
   if (!userId) return false;
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -32,7 +32,7 @@ async function isCurrentUserOwner(): Promise<boolean> {
 
 // GET — List all admins (accessible to authenticated users)
 export async function GET() {
-  const userId = getCurrentUserId();
+  const userId = await getCurrentUserId();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -54,7 +54,7 @@ export async function GET() {
 
 // POST — Create new admin (owner only)
 export async function POST(req: NextRequest) {
-  const currentUserId = getCurrentUserId();
+  const currentUserId = await getCurrentUserId();
   if (!currentUserId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
 // PATCH — Edit permissions (owner only)
 export async function PATCH(req: NextRequest) {
-  const currentUserId = getCurrentUserId();
+  const currentUserId = await getCurrentUserId();
   if (!currentUserId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -123,7 +123,7 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE — Remove admin (owner only)
 export async function DELETE(req: NextRequest) {
-  const currentUserId = getCurrentUserId();
+  const currentUserId = await getCurrentUserId();
   if (!currentUserId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

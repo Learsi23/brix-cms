@@ -1,29 +1,38 @@
 // Ruta catch-all del frontend — equivalente a CmsController.cs en .NET
-// Resuelve el slug → busca la página → renderiza sus bloques
+// Resuelve el slug por segmentos para soportar subpages: /parent/child/grandchild
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import BlockRenderer from '@/components/blocks/BlockRenderer';
 import type { BlockData } from '@/lib/blocks/types';
+import { resolvePageByPath } from '@/lib/page-utils';
 
 export default async function CmsPage({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug: slugParts = [] } = await params;
 
-  // admin cannot be accessed via frontend routes
   if (slugParts[0] === 'admin') return notFound();
 
-  const slug = slugParts.length > 0 ? slugParts.join('/') : '';
+  const joined = slugParts.join('/');
+  let page: Awaited<ReturnType<typeof resolvePageByPath>>;
 
-  const page = await prisma.page.findFirst({
-    where: {
-      slug: slug || undefined,
-      // without slug, try to find page with empty slug or 'home' or 'inicio' (for spanish sites)
-      ...(slug === '' ? { OR: [{ slug: '' }, { slug: 'home' }, { slug: 'inicio' }] } : {}),
-      isPublished: true,
-    },
-    include: {
-      blocks: { orderBy: { sortOrder: 'asc' } },
-    },
-  });
+  if (joined === '') {
+    page = await prisma.page.findFirst({
+      where: {
+        OR: [{ slug: '' }, { slug: 'home' }, { slug: 'inicio' }],
+        parentId: null,
+        isPublished: true,
+      },
+      include: { blocks: { orderBy: { sortOrder: 'asc' } } },
+    });
+    if (!page) {
+      page = await prisma.page.findFirst({
+        where: { isPublished: true },
+        orderBy: { sortOrder: 'asc' },
+        include: { blocks: { orderBy: { sortOrder: 'asc' } } },
+      });
+    }
+  } else {
+    page = await resolvePageByPath(joined);
+  }
 
   if (!page) return notFound();
 
@@ -63,18 +72,28 @@ export default async function CmsPage({ params }: { params: Promise<{ slug?: str
   );
 }
 
-// generer metadata for SEO and social sharing based on page content
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug: slugParts = [] } = await params;
-  const slug = slugParts.join('/');
-  
-  const page = await prisma.page.findFirst({
-    where: { slug, isPublished: true },
-    select: { title: true, description: true, ogImage: true },
-  });
+  const joined = slugParts.join('/');
+
+  let page;
+  if (joined === '') {
+    page = await prisma.page.findFirst({
+      where: { OR: [{ slug: '' }, { slug: 'home' }, { slug: 'inicio' }], parentId: null, isPublished: true },
+      select: { title: true, description: true, ogImage: true },
+    });
+  } else {
+    page = await resolvePageByPath(joined);
+    if (page) {
+      page = await prisma.page.findUnique({
+        where: { id: page.id },
+        select: { title: true, description: true, ogImage: true },
+      });
+    }
+  }
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://brix-cms.com';
-  const pageUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
+  const pageUrl = joined ? `${baseUrl}/${joined}` : baseUrl;
 
   return {
     title: page?.title || 'Brix',

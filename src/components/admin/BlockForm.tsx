@@ -1,16 +1,29 @@
 'use client';
 
 // ====================================================================
-// BLOCK FORM — EDEN CMS
+// BLOCK FORM — BRIX CMS
 // ====================================================================
-// Dynamically renders the edit form for a block
-// based on field definitions from the block registry.
-// Equivalent to the Razor views of the block editor in .NET
+// Dynamically renders the edit form for a block based on field
+// definitions from the block registry.
 // ====================================================================
 
 import { useEffect, useState } from 'react';
 import type { BlockDefinition, FieldDefinition, BlockData } from '@/lib/blocks/types';
+import { normalizeFields } from '@/lib/blocks';
 import MediaPickerModal from './MediaPickerModal';
+
+// ── Icon helper ────────────────────────────────────────────────────────────────
+// Definitions store FA class names like 'fa-robot'.
+// Render them as <i> tags; plain emoji/text falls through as-is.
+function BlockIcon({ icon, className = '' }: { icon: string; className?: string }) {
+  if (!icon) return <span className={className}>🟦</span>;
+  // FontAwesome: 'fa-robot', 'fab fa-github', 'fas fa-star', etc.
+  if (icon.includes('fa-')) {
+    const cls = icon.startsWith('fa-') ? `fas ${icon}` : icon;
+    return <i className={`${cls} ${className}`} aria-hidden="true" />;
+  }
+  return <span className={className}>{icon}</span>;
+}
 
 interface CategoryOption {
   id: string;
@@ -133,7 +146,9 @@ function FieldInput({
   const base = 'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors';
 
   switch (field.type) {
+    // ── Text / string inputs ─────────────────────────────────────────────────
     case 'string':
+    case 'text':    // alias used in fieldsArray definitions
     case 'url':
       return (
         <input
@@ -145,7 +160,9 @@ function FieldInput({
         />
       );
 
+    // ── Multi-line text ──────────────────────────────────────────────────────
     case 'textarea':
+    case 'richtext': // alias
       return (
         <textarea
           value={value}
@@ -167,6 +184,7 @@ function FieldInput({
         />
       );
 
+    // ── Colour picker ────────────────────────────────────────────────────────
     case 'color':
       return (
         <div className="flex items-center gap-3">
@@ -180,12 +198,13 @@ function FieldInput({
             type="text"
             value={value}
             onChange={e => onChange(e.target.value)}
-            placeholder="#000000 o transparent"
+            placeholder="#000000 or transparent"
             className="flex-1 px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm font-mono focus:outline-none focus:border-emerald-500"
           />
         </div>
       );
 
+    // ── Image picker ─────────────────────────────────────────────────────────
     case 'image': {
       const [showPicker, setShowPicker] = useState(false);
       return (
@@ -220,6 +239,7 @@ function FieldInput({
       );
     }
 
+    // ── Select dropdown ──────────────────────────────────────────────────────
     case 'select':
       return (
         <select value={value} onChange={e => onChange(e.target.value)} className={base}>
@@ -229,7 +249,9 @@ function FieldInput({
         </select>
       );
 
+    // ── Boolean toggle ───────────────────────────────────────────────────────
     case 'bool':
+    case 'boolean': // alias
       return (
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -242,6 +264,7 @@ function FieldInput({
         </label>
       );
 
+    // ── Number ───────────────────────────────────────────────────────────────
     case 'number':
       return (
         <input
@@ -253,6 +276,7 @@ function FieldInput({
         />
       );
 
+    // ── Dynamic selectors ────────────────────────────────────────────────────
     case 'product-select':
       return <ProductSelectInput value={value} onChange={onChange} initialCategoryId={blockData?.['CategoryId']?.Value ?? ''} />;
 
@@ -265,6 +289,9 @@ function FieldInput({
 }
 
 export default function BlockForm({ definition, data, onChange }: BlockFormProps) {
+  // Normalise: handles both `fields` (object) and `fieldsArray` (array) formats.
+  const fields = normalizeFields(definition);
+
   function handleFieldChange(fieldName: string, val: string) {
     onChange({
       ...data,
@@ -274,13 +301,17 @@ export default function BlockForm({ definition, data, onChange }: BlockFormProps
 
   return (
     <div className="space-y-4">
+      {/* Block header */}
       <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-        <span className="text-lg">{definition.icon}</span>
+        <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 text-sm">
+          <BlockIcon icon={definition.icon} />
+        </span>
         <h3 className="font-bold text-slate-800 text-sm">{definition.name}</h3>
         <span className="ml-auto text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{definition.category}</span>
       </div>
 
-      {Object.entries(definition.fields).map(([fieldName, field]) => (
+      {/* Field list */}
+      {Object.entries(fields).map(([fieldName, field]) => (
         <div key={fieldName} className="space-y-1.5">
           <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
             {field.title}

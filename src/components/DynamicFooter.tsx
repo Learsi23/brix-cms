@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
+import { buildMenuEntries } from '@/lib/utils/pageTree';
+import type { PageNode } from '@/lib/utils/pageTree';
 
 interface MenuItem {
-  customText: string;
-  customUrl: string;
-  isCustomUrl: boolean;
-  pageSlug: string;
+  customText?: string;
+  customUrl?: string;
+  isCustomUrl?: boolean;
+  pageSlug?: string;
 }
 
 interface SocialMedia {
@@ -37,28 +39,30 @@ interface FooterSettings {
   columnsGap: string;
 }
 
+const DEFAULTS: FooterSettings = {
+  backgroundColor: '#1a1a1a',
+  textColor: '#ffffff',
+  logo: '',
+  logoAltText: 'Logo',
+  logoWidth: '150px',
+  logoPosition: 'left',
+  showPagesColumn: true,
+  pagesColumnTitle: 'P\u00e1ginas',
+  pages: [],
+  showSocialMediaColumn: true,
+  socialMediaColumnTitle: 'S\u00edguenos',
+  socialMedia: [],
+  showCopyrightRow: true,
+  companyName: '',
+  companyNumber: '',
+  copyrightText: 'Todos los derechos reservados',
+  showHorizontalLine: true,
+  paddingVertical: 'py-6',
+  columnsGap: 'gap-8',
+};
+
 export default async function DynamicFooter() {
-  let settings: FooterSettings = {
-    backgroundColor: '#1a1a1a',
-    textColor: '#ffffff',
-    logo: '',
-    logoAltText: 'Logo',
-    logoWidth: '150px',
-    logoPosition: 'left',
-    showPagesColumn: true,
-    pagesColumnTitle: 'Pages',
-    pages: [],
-    showSocialMediaColumn: true,
-    socialMediaColumnTitle: 'Follow Us',
-    socialMedia: [],
-    showCopyrightRow: true,
-    companyName: '',
-    companyNumber: '',
-    copyrightText: 'All rights reserved',
-    showHorizontalLine: true,
-    paddingVertical: 'py-6',
-    columnsGap: 'gap-8',
-  };
+  let settings: FooterSettings = { ...DEFAULTS };
 
   try {
     const config = await prisma.siteConfig.findUnique({ where: { key: 'site' } });
@@ -72,11 +76,13 @@ export default async function DynamicFooter() {
     console.error("Error loading footer config:", e);
   }
 
-  const publishedPages = await prisma.page.findMany({
+  const publishedPages: PageNode[] = await prisma.page.findMany({
     where: { isPublished: true },
-    orderBy: { title: 'asc' },
-    select: { title: true, slug: true },
+    orderBy: { sortOrder: 'asc' },
+    select: { id: true, title: true, slug: true, parentId: true, sortOrder: true, isPublished: true },
   });
+
+  const footerEntries = buildMenuEntries(settings.pages ?? [], publishedPages);
 
   const getSocialIcon = (platform: string) => {
     const iconMap: Record<string, string> = {
@@ -94,7 +100,6 @@ export default async function DynamicFooter() {
     return iconMap[platform?.toLowerCase()] || 'fas fa-link';
   };
 
-  // Cálculo de columnas para el grid
   let columns = 0;
   if (settings.logo) columns++;
   if (settings.showPagesColumn) columns++;
@@ -110,47 +115,48 @@ export default async function DynamicFooter() {
     <footer className={settings.paddingVertical} style={{ backgroundColor: settings.backgroundColor, color: settings.textColor }}>
       <div className="container mx-auto px-4">
         <div className={`grid ${gridClass} ${settings.columnsGap || 'gap-8'} mb-8 items-start`}>
-          
-          {/* Columna 1: Logo */}
+
           {settings.logo && (
             <div className={settings.logoPosition === 'center' ? 'text-center' : settings.logoPosition === 'right' ? 'text-right' : 'text-left'}>
               <img src={settings.logo} alt={settings.logoAltText} style={{ width: settings.logoWidth }} className="inline-block mb-4" />
             </div>
           )}
 
-          {/* Columna 2: Páginas */}
           {settings.showPagesColumn && (
             <div className="text-center md:text-left">
               <h4 className="font-bold mb-4">{settings.pagesColumnTitle}</h4>
               <ul className="space-y-2">
-                {settings.pages.length > 0 ? (
-                  settings.pages.map((item, i) => (
+                {footerEntries.length > 0 ? (
+                  footerEntries.map((entry, i) => (
                     <li key={i}>
-                      <Link href={item.isCustomUrl ? item.customUrl : `/${item.pageSlug}`} className="hover:opacity-75 transition-opacity">
-                        {item.customText}
-                      </Link>
+                      <Link href={entry.url} className="hover:opacity-75 transition-opacity">{entry.text}</Link>
+                      {entry.children.length > 0 && (
+                        <ul className="ml-4 mt-1 space-y-1 border-l border-gray-600 pl-3">
+                          {entry.children.map((c, j) => (
+                            <li key={j}>
+                              <Link href={c.url} className="hover:opacity-75 transition-opacity text-sm opacity-80">
+                                — {c.text}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))
                 ) : (
-                  publishedPages.map(p => (
-                    <li key={p.slug}>
-                      <Link href={`/${p.slug}`} className="hover:opacity-75 transition-opacity">{p.title}</Link>
-                    </li>
-                  ))
+                  <li className="text-sm opacity-60">No pages configured</li>
                 )}
               </ul>
             </div>
           )}
 
-          {/* Columna 3: Redes Sociales */}
           {settings.showSocialMediaColumn && settings.socialMedia.length > 0 && (
             <div className="text-center md:text-left">
               <h4 className="font-bold mb-4">{settings.socialMediaColumnTitle}</h4>
               <div className="flex justify-center md:justify-start space-x-4">
                 {settings.socialMedia.map((social, i) => {
-                  // LÓGICA CRÍTICA: Determinar si es clase o imagen
-                  const isFA = social.iconType === 'class' || 
-                               social.iconClass?.startsWith('fa') || 
+                  const isFA = social.iconType === 'class' ||
+                               social.iconClass?.startsWith('fa') ||
                                !social.iconClass?.includes('/');
 
                   return (
@@ -172,12 +178,14 @@ export default async function DynamicFooter() {
           <hr className="my-6" style={{ borderColor: settings.textColor, opacity: 0.2 }} />
         )}
 
-        <div className="text-center text-sm opacity-75">
-          <p>© {currentYear} {settings.companyName}. {settings.copyrightText}</p>
-          <div className="mt-2 text-xs opacity-50">
-            <a href="https://brix-cms.com" target="_blank" rel="noopener noreferrer">Powered by BrixCMS</a>
+        {settings.showCopyrightRow && (
+          <div className="text-center text-sm opacity-75">
+            <p>&copy; {currentYear} {settings.companyName}. {settings.copyrightText}</p>
+            <div className="mt-2 text-xs opacity-50">
+              <a href="https://brix-cms.com" target="_blank" rel="noopener noreferrer">Powered by BrixCMS</a>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </footer>
   );

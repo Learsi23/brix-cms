@@ -8,6 +8,7 @@ interface PageData {
   id: string;
   title: string;
   slug: string;
+  parentId: string | null;
   description: string | null;
   ogImage: string | null;
   jsonData: string | null;
@@ -55,6 +56,7 @@ export default function EditPageRoute({ params }: { params: Promise<{ id: string
       pageId={page.id}
       pageTitle={page.title}
       pageSlug={page.slug}
+      pageParentId={page.parentId}
       pageIsPublished={page.isPublished}
       pageJsonData={page.jsonData}
       pageDescription={page.description}

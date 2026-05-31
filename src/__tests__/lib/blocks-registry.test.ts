@@ -107,7 +107,7 @@ describe('Block definitions — integrity', () => {
       'select', 'bool', 'number', 'url', 'product-select', 'category-select',
     ]);
     for (const def of getAllBlockDefinitions()) {
-      for (const [, field] of Object.entries(def.fields)) {
+      for (const [, field] of Object.entries(def.fields ?? {})) {
         expect(allowed.has(field.type)).toBe(true);
       }
     }
@@ -115,9 +115,9 @@ describe('Block definitions — integrity', () => {
 
   it('HeroBlock has required fields: Title, Background, ButtonText', () => {
     const def = getBlockDefinition('HeroBlock')!;
-    expect(def.fields.Title).toBeDefined();
-    expect(def.fields.Background).toBeDefined();
-    expect(def.fields.ButtonText).toBeDefined();
+    expect(def.fields!.Title).toBeDefined();
+    expect(def.fields!.Background).toBeDefined();
+    expect(def.fields!.ButtonText).toBeDefined();
   });
 });
 
@@ -126,7 +126,7 @@ describe('createDefaultData', () => {
   it('fills all fields with Value key', () => {
     const def  = getBlockDefinition('HeroBlock')!;
     const data = createDefaultData(def);
-    for (const key of Object.keys(def.fields)) {
+    for (const key of Object.keys(def.fields ?? {})) {
       expect(data[key]).toHaveProperty('Value');
     }
   });

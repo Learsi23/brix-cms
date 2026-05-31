@@ -20,6 +20,9 @@ export async function GET() {
         id: page.id,
         title: page.title,
         slug: page.slug,
+        parentId: page.parentId,
+        description: page.description,
+        ogImage: page.ogImage,
         isPublished: page.isPublished,
         publishedAt: page.publishedAt?.toISOString() || null,
         pageType: page.pageType,
@@ -63,6 +66,9 @@ export async function POST(req: NextRequest) {
         id: string;
         title: string;
         slug: string;
+        parentId: string | null;
+        description: string | null;
+        ogImage: string | null;
         isPublished: boolean;
         publishedAt: string | null;
         pageType: string;
@@ -96,8 +102,8 @@ export async function POST(req: NextRequest) {
     let imported = 0;
     for (const page of backup.pages) {
       // Check if page with same slug exists
-      const existing = await prisma.page.findUnique({
-        where: { slug: page.slug },
+      const existing = await prisma.page.findFirst({
+        where: { slug: page.slug, parentId: page.parentId ?? null },
       });
 
       if (existing && !replaceAll) {
@@ -105,27 +111,20 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      const savedPage = await prisma.page.upsert({
-        where: { slug: page.slug },
-        update: {
-          title: page.title,
-          isPublished: page.isPublished,
-          publishedAt: page.publishedAt ? new Date(page.publishedAt) : null,
-          pageType: page.pageType,
-          sortOrder: page.sortOrder,
-          jsonData: page.jsonData,
-        },
-        create: {
-          id: page.id,
-          title: page.title,
-          slug: page.slug,
-          isPublished: page.isPublished,
-          publishedAt: page.publishedAt ? new Date(page.publishedAt) : null,
-          pageType: page.pageType,
-          sortOrder: page.sortOrder,
-          jsonData: page.jsonData,
-        },
-      });
+      const savedPage = existing
+        ? await prisma.page.update({ where: { id: existing.id }, data: { title: page.title, isPublished: page.isPublished, publishedAt: page.publishedAt ? new Date(page.publishedAt) : null, pageType: page.pageType, description: page.description, ogImage: page.ogImage, jsonData: page.jsonData, sortOrder: page.sortOrder, parentId: page.parentId ?? null } })
+        : await prisma.page.create({
+            data: {
+              id: page.id,
+              title: page.title,
+              slug: page.slug,
+              isPublished: page.isPublished,
+              publishedAt: page.publishedAt ? new Date(page.publishedAt) : null,
+              pageType: page.pageType,
+              sortOrder: page.sortOrder,
+              jsonData: page.jsonData,
+            },
+          });
 
       // Import blocks
       if (page.blocks && Array.isArray(page.blocks)) {

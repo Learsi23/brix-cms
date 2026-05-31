@@ -42,6 +42,7 @@ interface BlockEditorProps {
   pageId: string;
   pageTitle: string;
   pageSlug: string;
+  pageParentId?: string | null;
   pageIsPublished?: boolean;
   pageJsonData?: string | null;
   pageDescription?: string | null;
@@ -52,6 +53,16 @@ interface BlockEditorProps {
 // ──────────────────────────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────────────────────────
+
+/** Renders a block icon — FA class name ('fa-robot') or emoji ('📋'). */
+function BlockIcon({ icon, className = '' }: { icon?: string; className?: string }) {
+  if (!icon) return <span className={className}>🟦</span>;
+  if (icon.includes('fa-')) {
+    const cls = icon.startsWith('fa-') ? `fas ${icon}` : icon;
+    return <i className={`${cls} ${className}`} aria-hidden="true" />;
+  }
+  return <span className={className}>{icon}</span>;
+}
 
 function parseBlocks(raw: BlockEditorProps['initialBlocks']): EditorBlock[] {
   const roots = raw
@@ -110,13 +121,23 @@ function BlockItem({
   const def = getBlockDefinition(block.type);
   const isGroup = def?.isGroup ?? false;
 
+  const [collapsedChildren, setCollapsedChildren] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    for (const child of block.children ?? []) init[child.id] = true;
+    return init;
+  });
+
+  function toggleChild(childId: string) {
+    setCollapsedChildren(prev => ({ ...prev, [childId]: !prev[childId] }));
+  }
+
   return (
     <div className={`border rounded-3xl shadow-sm overflow-hidden ${isGroup ? 'border-purple-200 bg-purple-50/30' : 'border-gray-200 bg-white'}`}>
       {/* Block header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <span className={`p-1.5 rounded-lg text-sm ${isGroup ? 'bg-purple-100 text-purple-600' : 'bg-emerald-100 text-emerald-600'}`}>
-            {def?.icon ?? '🟦'}
+          <span className={`w-8 h-8 flex items-center justify-center rounded-lg ${isGroup ? 'bg-purple-100 text-purple-600' : 'bg-emerald-100 text-emerald-600'}`}>
+            <BlockIcon icon={def?.icon} />
           </span>
           <div>
             <span className="text-xs font-black text-gray-700 uppercase tracking-tighter">{def?.name ?? block.type}</span>
@@ -165,29 +186,43 @@ function BlockItem({
             <div className="mt-6 pl-6 border-l-2 border-purple-200 space-y-4">
               {(block.children ?? []).map(child => {
                 const childDef = getBlockDefinition(child.type);
+                const childCollapsed = collapsedChildren[child.id] ?? true;
                 return (
                   <div key={child.id} className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-2 bg-purple-50 border-b border-purple-100">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">{childDef?.icon ?? '🟦'}</span>
+                        <span className="w-6 h-6 flex items-center justify-center rounded bg-purple-100 text-purple-600 text-xs">
+                          <BlockIcon icon={childDef?.icon} />
+                        </span>
                         <span className="text-xs font-black uppercase text-purple-700">{childDef?.name ?? child.type}</span>
                       </div>
-                      <button
-                        onClick={() => { if (confirm('Delete?')) onDeleteChild(block.id, child.id); }}
-                        className="w-6 h-6 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
-                      >
-                        ×
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => toggleChild(child.id)}
+                          className={`w-6 h-6 flex items-center justify-center rounded text-xs transition ${childCollapsed ? 'bg-purple-200 text-purple-700' : 'bg-purple-100 text-purple-500 hover:bg-purple-200'}`}
+                          title={childCollapsed ? 'Expand' : 'Collapse'}
+                        >
+                          {childCollapsed ? '▼' : '▲'}
+                        </button>
+                        <button
+                          onClick={() => { if (confirm('Delete?')) onDeleteChild(block.id, child.id); }}
+                          className="w-6 h-6 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
-                    <div className="p-4">
-                      {childDef && (
-                        <BlockForm
-                          definition={childDef}
-                          data={child.data}
-                          onChange={data => onChildDataChange(block.id, child.id, data)}
-                        />
-                      )}
-                    </div>
+                    {!childCollapsed && (
+                      <div className="p-4">
+                        {childDef && (
+                          <BlockForm
+                            definition={childDef}
+                            data={child.data}
+                            onChange={data => onChildDataChange(block.id, child.id, data)}
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -220,6 +255,7 @@ export default function BlockEditor({
   pageId,
   pageTitle,
   pageSlug,
+  pageParentId,
   pageIsPublished = false,
   pageJsonData,
   pageDescription,
@@ -232,6 +268,7 @@ export default function BlockEditor({
   const [savedMsg, setSavedMsg] = useState(false);
   const [title, setTitle] = useState(pageTitle);
   const [slug, setSlug] = useState(pageSlug);
+  const [parentId] = useState(pageParentId ?? null);
   const [description, setDescription] = useState(pageDescription || '');
   const [ogImage, setOgImage] = useState(pageOgImage || '');
   const parsedPageData = pageJsonData ? JSON.parse(pageJsonData) : {};
@@ -382,7 +419,7 @@ export default function BlockEditor({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title, slug, description, ogImage,
+          title, slug, description, ogImage, parentId,
           jsonData: JSON.stringify({ BackgroundColor: { Value: pageBgColor } }),
           blocks: buildFlatBlocks(),
           publish: false,
@@ -412,7 +449,7 @@ export default function BlockEditor({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title, slug, description, ogImage,
+          title, slug, description, ogImage, parentId,
           jsonData: JSON.stringify({ BackgroundColor: { Value: pageBgColor } }),
           blocks: flatBlocks,
         }),
@@ -706,7 +743,7 @@ export default function BlockEditor({
         >
           <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gray-900" />
           <p className="font-bold text-emerald-400 text-[11px] mb-1 flex items-center gap-1.5">
-            <span>{hoveredBlock.def.icon}</span>
+            <BlockIcon icon={hoveredBlock.def.icon} />
             {hoveredBlock.def.name}
           </p>
           <p className="text-[11px] text-gray-300 leading-relaxed">{hoveredBlock.def.description}</p>
@@ -764,8 +801,8 @@ export default function BlockEditor({
                       onClick={() => addBlock(def.type)}
                       className="w-full bg-white p-6 rounded-[2rem] border-2 border-transparent hover:border-emerald-500 transition-all flex flex-col items-center shadow-sm group"
                     >
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-3 group-hover:scale-110 transition text-2xl">
-                        {def.icon}
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-3 group-hover:scale-110 transition text-xl">
+                        <BlockIcon icon={def.icon} />
                       </div>
                       <span className="text-[10px] font-black uppercase text-gray-600 text-center">{def.name}</span>
                       {def.isGroup && (

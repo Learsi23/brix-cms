@@ -4,6 +4,7 @@
 Build pages visually with blocks. Headless REST API. Zero lock-in. Deploy anywhere.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/brix-cms.svg)](https://www.npmjs.com/package/brix-cms)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://typescriptlang.org)
 [![Prisma](https://img.shields.io/badge/Prisma-6-teal)](https://prisma.io)
@@ -21,25 +22,34 @@ No vendor lock-in. Your data, your server, your rules.
 ## Quick Start
 
 ```bash
-git clone https://github.com/Learsi23/brix-cms
-cd brix-cms
-cp .env.example .env
-npm install
-npm run setup     # prisma db push + seed
+npx create-brix-app my-site
+cd my-site
+npm run setup   # prisma db push + seed
 npm run dev
 ```
 
 Open [http://localhost:3000/admin](http://localhost:3000/admin)  
 Default login: `admin@brix.com` / `admin123`
 
+### Alternative — clone from GitHub
+
+```bash
+git clone https://github.com/Learsi23/brix-cms
+cd brix-cms
+cp .env.example .env
+npm install
+npm run setup
+npm run dev
+```
+
 ---
 
 ## Features
 
 ### Visual Block Editor
-- **38 pre-built blocks** — Hero, Pricing, Testimonials, Team, Accordion, Tabs, Gallery, Map, Countdown, and more
+- **58 pre-built blocks** — Hero, Pricing, Testimonials, Team, Accordion, Tabs, Gallery, Map, Countdown, and more
 - **Drag-and-drop reordering** via [@dnd-kit](https://dndkit.com)
-- **Nested layouts** — columns and grids hold child blocks
+- **Nested layouts** — columns and grids hold child blocks with collapsible accordion panels
 - **Live preview** — see the page as you build it
 
 ### Headless REST API
@@ -54,6 +64,12 @@ PUT  /api/blocks/:id     → update block
 
 Works with Next.js, Astro, SvelteKit, React Native, or any HTTP client.
 
+### AI Chatbot
+- **Ollama** — run any local model (llama3, mistral, phi3…), completely free, no API key
+- **Gemini** — Google's cloud API (free tier available)
+- Floating chat widget or embedded ChatBlock
+- Configurable system prompt, model, and provider from the admin panel
+
 ### Pages & Publishing
 - Create, edit and publish pages with a slug-based URL system
 - SEO fields: meta description, OG image
@@ -67,7 +83,7 @@ Works with Next.js, Astro, SvelteKit, React Native, or any HTTP client.
 
 ### Authentication & Security
 - Email/password login with HttpOnly session cookie `brix_auth` (7-day expiry)
-- 2FA (TOTP) — schema ready, UI in progress
+- **2FA (TOTP)** — fully working, no external dependencies (RFC 6238 pure implementation)
 - Role-based access (admin)
 
 ### Backup & Restore
@@ -76,18 +92,21 @@ Works with Next.js, Astro, SvelteKit, React Native, or any HTTP client.
 
 ---
 
-## 38 Block Types
+## 58 Block Types
 
 | Category | Blocks |
 |----------|--------|
 | **Heroes** | HeroBlock |
-| **Content** | TextBlock, ImageBlock, VideoBlock, MarkdownBlock, FlexibleImageTextBlock |
-| **Layout** | ColumnBlock, GridColumnBlock, IconColumnBlock, CardBlock, BannerBlock, SpacerBlock, DividerBlock |
-| **Interactive** | AccordionBlock, AccordionItemBlock, TabsBlock, TabItemBlock, DropdownBlock, CountdownBlock, ContactFormBlock |
+| **Content** | TextBlock, ImageBlock, VideoBlock, AudioBlock, MarkdownBlock, CodeBlock, FlexibleImageTextBlock, FeatureGridBlock, FeatureListBlock |
+| **Layout** | ColumnBlock, FullColumnBlock, GridColumnBlock, IconColumnBlock, IconCardBlock, CardBlock, BannerBlock, SpacerBlock, DividerBlock |
+| **Navigation** | MenuBlock, DropdownBlock |
+| **Interactive** | AccordionBlock, AccordionItemBlock, TabsBlock, TabItemBlock, CountdownBlock, ContactFormBlock, CookieBannerBlock, FAQBlock, TableBlock, QRCodeBlock, BeforeAfterBlock, OpeningHoursBlock, LottieBlock |
 | **Media** | GalleryBlock, MapBlock, LogoStripBlock |
-| **Social Proof** | StatsBlock, TestimonialsBlock, TestimonialItemBlock, TeamBlock, TeamMemberBlock, SocialProofBlock, TimelineBlock, TimelineItemBlock |
+| **AI / Chat** | ChatBlock, FloatingChatBlock |
+| **Social Proof** | StatsBlock, TestimonialsBlock, TestimonialItemBlock, TeamBlock, TeamMemberBlock, SocialProofBlock, TimelineBlock, TimelineItemBlock, TrustBadgesBlock |
 | **Pricing** | PricingBlock, PricingCardBlock |
-| **CTAs** | CTABannerBlock, TextWithButtonBlock, ButtonLinkBlock, EmailButtonBlock |
+| **CTAs** | CTABannerBlock, TextWithButtonBlock, ButtonLinkBlock, EmailButtonBlock, NewsletterBlock |
+| **Commerce** | ProductCardBlock, ProductsGalleryBlock, ExistingProductsBlock |
 
 > Need a new block? See [BLOCKS-MANUAL.md](BLOCKS-MANUAL.md) — adding a block = 1 definition file + 1 renderer component.
 
@@ -114,12 +133,12 @@ src/
   app/(admin)/           → Protected admin UI
   app/(public)/          → Public-facing SSR pages
   app/api/               → REST API (pages, blocks, media, auth, backup, config, upload)
-  components/blocks/     → 38 block renderers (.tsx)
-  lib/blocks/            → Block registry + 38 type definitions
+  components/blocks/     → 58 block renderers (.tsx)
+  lib/blocks/            → Block registry + 58 type definitions
   lib/db.ts              → Prisma client singleton
 prisma/
   schema.prisma          → Page, Block, SiteConfig, User, Media models
-  seed.ts                → Default admin user + demo page
+  seed.ts                → Default admin user + demo pages
 ```
 
 **Block registry pattern** — each block is self-describing. A block definition declares its type, label, fields, and defaults. The editor and renderer both use the same definition — no duplication.
@@ -176,6 +195,8 @@ Features planned or in active development:
 | Self-hosted | ✅ | ✅ | ✅ | ❌ |
 | SQLite support | ✅ | ❌ | ❌ | ❌ |
 | Zero config setup | ✅ | ❌ | ❌ | ❌ |
+| AI chatbot built-in | ✅ | ❌ | ❌ | ❌ |
+| 2FA (TOTP) | ✅ | ✅ | ✅ | ✅ |
 | Free forever | ✅ | ✅ | ✅ | Limited |
 | TypeScript | ✅ | ✅ | ✅ | ✅ |
 | REST API | ✅ | ✅ | ✅ | ✅ |

@@ -1,334 +1,745 @@
-// prisma/seed.ts — Initialization script
+// prisma/seed.ts — Seeds 3 showcase pages matching BrixCMS.Open
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// ─── Helper: shorthand for block jsonData field ───────────────────────────────
+// ── Brand palette ─────────────────────────────────────────────────────────────
+const BG       = '#0A0A0B';
+const SURFACE  = '#111113';
+const SURFACE2 = '#18181C';
+const ACCENT   = '#5B6EF5';
+const SUCCESS  = '#22C55E';
+const WARNING  = '#F59E0B';
+const TEXT     = '#F0F0F5';
+const TEXT2    = '#9696A6';
+const BORDER   = '#2A2A30';
+
+// ── Category accent colours (for block-library headings) ─────────────────────
+const CAT_LAYOUT      = '#7C3AED';   // purple
+const CAT_CONTENT     = ACCENT;      // indigo
+const CAT_MEDIA       = '#0EA5E9';   // sky
+const CAT_INTERACTIVE = WARNING;     // amber
+const CAT_AI          = SUCCESS;     // green
+const CAT_COMMERCE    = '#EC4899';   // pink
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const v = (value: string) => ({ Value: value });
-const b = (data: Record<string, { Value: string }>) => JSON.stringify(data);
+function b(data: Record<string, { Value: string }>) { return JSON.stringify(data); }
 
-async function main() {
-  // ── Admin user ───────────────────────────────────────────────────────────────
-  const adminUser = await prisma.user.upsert({
-    where:  { email: 'admin@brix.com' },
-    update: {},
-    create: {
-      email:    'admin@brix.com',
-      password: 'admin123',  // Change this after first login
-      name:     'Administrator',
-      role:     'admin',
-    },
-  });
-  console.log('✅ Admin user:', adminUser.email);
+// ══════════════════════════════════════════════════════════════════════════════
+//  PAGE 1 — HOME  (slug: "")
+// ══════════════════════════════════════════════════════════════════════════════
 
-// ── Home page ────────────────────────────────────────────────────────────────
-  // Check if home page already exists with blocks
-  const existingHome = await prisma.page.findFirst({
-    where: { slug: '' },
-    include: { blocks: true }
-  });
-
-  let homePage;
-  if (existingHome && existingHome.blocks.length > 0) {
-    // Delete existing blocks to avoid duplicates
-    await prisma.block.deleteMany({ where: { pageId: existingHome.id } });
-    homePage = existingHome;
-    console.log('✅ Home page blocks cleared');
+async function seedHomePage() {
+  let page = await prisma.page.findFirst({ where: { slug: '', parentId: null } });
+  if (page) {
+    await prisma.block.deleteMany({ where: { pageId: page.id } });
+    page = await prisma.page.update({
+      where:  { id: page.id },
+      data:   { title: 'Home', isPublished: true, publishedAt: new Date(), pageType: 'standard', jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
+    });
   } else {
-    homePage = await prisma.page.upsert({
-      where:  { slug: '' },
-      update: {},
-      create: {
+    page = await prisma.page.create({
+      data: {
         title:       'Home',
         slug:        '',
-        description: 'Brix — open-source block-based CMS. Build pages visually, ship anywhere.',
+        description: 'BrixCMS.Open — free, self-hosted, open-source Next.js 16 CMS. 50+ blocks, Ollama AI chatbot, SQLite, MIT license.',
         isPublished:  true,
         publishedAt:  new Date(),
+        sortOrder:    0,
         pageType:    'standard',
-        jsonData:    JSON.stringify({ BackgroundColor: v('#ffffff') }),
+        jsonData:    JSON.stringify({ BackgroundColor: v(BG) }),
       },
     });
-    console.log('✅ Home page created');
   }
 
-  // ── Block 1: Hero ─────────────────────────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'HeroBlock',
-      pageId:    homePage.id,
-      sortOrder: 0,
-      jsonData:  b({
-        Title:          v('Build pages visually. Ship in minutes.'),
-        TitleColor:     v('#ffffff'),
-        TitleSize:      v('3.75rem'),
-        Subtitle:       v('Open-source block-based CMS — 38 blocks, headless REST API, one-command setup.'),
-        SubtitleColor:  v('#94a3b8'),
-        SubtitleSize:   v('1.2rem'),
-        Description:    v(''),
-        Background:     v('/images/HeroBrix.png'),
-        BackgroundColor:v('#0f172a'),
-        OverlayColor:   v('#0f172a'),
-        OverlayOpacity: v('0.78'),
-        Height:         v('half-screen'),
-        TextAlign:      v('center'),
-        ButtonText:     v('Open Admin →'),
-        ButtonUrl:      v('/admin'),
-        ButtonColor:    v('#10b981'),
-        ButtonTextColor:v('#ffffff'),
+  const pid = page!.id;
+  await prisma.block.deleteMany({ where: { pageId: pid } });
+  let sort = 0;
+
+  // ── Announcement bar ──────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'BannerBlock', pageId: pid, sortOrder: sort++,
+    jsonData: b({
+      Icon:            v('✦'),
+      Text:            v('These pages are built 100% with BrixCMS — visual editor, zero custom code.'),
+      LinkText:        v('Watch on YouTube →'),
+      LinkUrl:         v('https://www.youtube.com/@BrixCMS'),
+      BackgroundColor: v(ACCENT),
+      TextColor:       v('#ffffff'),
+      Closeable:       v('true'),
+    }),
+  }});
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'HeroBlock', pageId: pid, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('50+ blocks. Zero config.'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('3.25rem'),
+      Subtitle:        v('Every block in BrixCMS.Open — visual editor, live preview, and AI chatbot (Ollama local or Gemini cloud) built in.'),
+      SubtitleColor:   v(TEXT2),
+      BackgroundColor: v(BG),
+      OverlayOpacity:  v('0.0'),
+      Height:          v('compact'),
+      PaddingTop:      v('calc(3rem + 64px)'),
+      TextAlign:       v('center'),
+      ButtonText:      v('Open Admin →'),
+      ButtonUrl:       v('/admin'),
+      ButtonColor:     v(ACCENT),
+      ButtonTextColor: v('#ffffff'),
+    }),
+  }});
+
+  // ── AI Section ────────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'TextBlock', pageId: pid, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('AI — Ollama (local, free) + Gemini (cloud)'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('1.9rem'),
+      TitleWeight:     v('800'),
+      TitleAlignment:  v('left'),
+      BackgroundColor: v(BG),
+      Padding:         v('4rem 1.5rem 0.5rem'),
+    }),
+  }});
+
+  const aiGrid = await prisma.block.create({ data: {
+    type: 'GridColumn', pageId: page.id, sortOrder: sort++,
+    jsonData: b({ MaxColumns: v('2'), Gap: v('gap-5'), PaddingY: v('1rem'), PaddingX: v('1.5rem'), BackgroundColor: v(BG) }),
+  }});
+
+  await prisma.block.create({ data: {
+    type: 'IconCardBlock', pageId: page.id, parentId: aiGrid.id, sortOrder: 0,
+    jsonData: b({
+      LeftIconClass: v('fas fa-robot'), LeftIconColor: v(SUCCESS), LeftIconFaSize: v('1.75rem'),
+      IconPosition: v('left'), TextAlign: v('left'),
+      Title: v('ChatBlock — inline AI chat'), TitleColor: v(TEXT), TitleSize: v('1.05rem'),
+      Text: v('Drop ChatBlock anywhere on a page for a fully functional inline chat. Choose Ollama (local, free, 100% private) or Gemini (Google cloud — paste your API key in Admin → Chatbot). Responds in the user\'s own language.'),
+      TextColor: v(TEXT2), BackgroundColor: v(SURFACE), BorderColor: v(BORDER), BorderWidth: v('1px'), BorderRadius: v('12px'), Padding: v('1.5rem'),
+    }),
+  }});
+
+  await prisma.block.create({ data: {
+    type: 'IconCardBlock', pageId: page.id, parentId: aiGrid.id, sortOrder: 1,
+    jsonData: b({
+      LeftIconClass: v('fas fa-comment-dots'), LeftIconColor: v(ACCENT), LeftIconFaSize: v('1.75rem'),
+      IconPosition: v('left'), TextAlign: v('left'),
+      Title: v('FloatingChatBlock — site-wide bubble'), TitleColor: v(TEXT), TitleSize: v('1.05rem'),
+      Text: v('Add FloatingChatBlock once in your layout and it appears on every page as a persistent bubble. Configure the model, system prompt and appearance in Admin → Chatbot. Works with Ollama (local, free) and Gemini (Google cloud).'),
+      TextColor: v(TEXT2), BackgroundColor: v(SURFACE), BorderColor: v(BORDER), BorderWidth: v('1px'), BorderRadius: v('12px'), Padding: v('1.5rem'),
+    }),
+  }});
+
+  // ── Block library heading ─────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'TextBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('Block library — 50+ blocks'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('1.9rem'),
+      TitleWeight:     v('800'),
+      TitleAlignment:  v('left'),
+      Subtitle:        v('Organised by category. Every block is configurable from the visual editor — no code needed.'),
+      SubtitleColor:   v(TEXT2),
+      SubtitleAlignment:v('left'),
+      BackgroundColor: v(BG),
+      Padding:         v('3.5rem 1.5rem 1rem'),
+    }),
+  }});
+
+  console.log('✅ Home page seeded');
+  return page;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  PAGE 2 — FEATURES  (slug: "features")
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function seedFeaturesPage() {
+  let page = await prisma.page.findFirst({ where: { slug: 'features', parentId: null } });
+  if (page) {
+    await prisma.block.deleteMany({ where: { pageId: page.id } });
+    page = await prisma.page.update({
+      where:  { id: page.id },
+      data:   { title: 'Features', isPublished: true, publishedAt: new Date(), pageType: 'standard', jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
+    });
+  } else {
+    page = await prisma.page.create({
+      data: {
+        title:       'Features',
+        slug:        'features',
+        description: 'BrixCMS.Open features — 50+ blocks, Ollama AI chatbot, visual page editor, SQLite, MIT license.',
+        isPublished:  true,
+        publishedAt:  new Date(),
+        sortOrder:    1,
+        pageType:    'standard',
+        jsonData:    JSON.stringify({ BackgroundColor: v(BG) }),
+      },
+    });
+  }
+
+  const pid = page!.id;
+  await prisma.block.deleteMany({ where: { pageId: pid } });
+  let sort = 0;
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'HeroBlock', pageId: pid, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('50+ blocks. Zero config.'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('3.25rem'),
+      Subtitle:        v('Every block in BrixCMS.Open — visual editor, live preview, and AI chatbot (Ollama local or Gemini cloud) built in.'),
+      SubtitleColor:   v(TEXT2),
+      BackgroundColor: v(BG),
+      OverlayOpacity:  v('0.0'),
+      Height:          v('compact'),
+      PaddingTop:      v('calc(3rem + 64px)'),
+      TextAlign:       v('center'),
+      ButtonText:      v('Open Admin →'),
+      ButtonUrl:       v('/admin'),
+      ButtonColor:     v(ACCENT),
+      ButtonTextColor: v('#ffffff'),
+    }),
+  }});
+
+  // ── AI Section ────────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'TextBlock', pageId: pid, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('AI — Ollama (local, free) + Gemini (cloud)'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('1.9rem'),
+      TitleWeight:     v('800'),
+      TitleAlignment:  v('left'),
+      BackgroundColor: v(BG),
+      Padding:         v('4rem 1.5rem 0.5rem'),
+    }),
+  }});
+
+  const aiGrid = await prisma.block.create({ data: {
+    type: 'GridColumn', pageId: pid, sortOrder: sort++,
+    jsonData: b({ MaxColumns: v('2'), Gap: v('gap-5'), PaddingY: v('1rem'), PaddingX: v('1.5rem'), BackgroundColor: v(BG) }),
+  }});
+
+  await prisma.block.create({ data: {
+    type: 'IconCardBlock', pageId: pid, parentId: aiGrid.id, sortOrder: 0,
+    jsonData: b({
+      LeftIconClass: v('fas fa-robot'), LeftIconColor: v(SUCCESS), LeftIconFaSize: v('1.75rem'),
+      IconPosition: v('left'), TextAlign: v('left'),
+      Title: v('ChatBlock — inline AI chat'), TitleColor: v(TEXT), TitleSize: v('1.05rem'),
+      Text: v('Drop ChatBlock anywhere on a page for a fully functional inline chat. Choose Ollama (local, free, 100% private) or Gemini (Google cloud — paste your API key in Admin → Chatbot). Responds in the user\'s own language.'),
+      TextColor: v(TEXT2), BackgroundColor: v(SURFACE), BorderColor: v(BORDER), BorderWidth: v('1px'), BorderRadius: v('12px'), Padding: v('1.5rem'),
+    }),
+  }});
+
+  await prisma.block.create({ data: {
+    type: 'IconCardBlock', pageId: pid, parentId: aiGrid.id, sortOrder: 1,
+    jsonData: b({
+      LeftIconClass: v('fas fa-comment-dots'), LeftIconColor: v(ACCENT), LeftIconFaSize: v('1.75rem'),
+      IconPosition: v('left'), TextAlign: v('left'),
+      Title: v('FloatingChatBlock — site-wide bubble'), TitleColor: v(TEXT), TitleSize: v('1.05rem'),
+      Text: v('Add FloatingChatBlock once in your layout and it appears on every page as a persistent bubble. Configure the model, system prompt and appearance in Admin → Chatbot. Works with Ollama (local, free) and Gemini (Google cloud).'),
+      TextColor: v(TEXT2), BackgroundColor: v(SURFACE), BorderColor: v(BORDER), BorderWidth: v('1px'), BorderRadius: v('12px'), Padding: v('1.5rem'),
+    }),
+  }});
+
+  // ── Block library heading ─────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'TextBlock', pageId: pid, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('Block library — 50+ blocks'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('1.9rem'),
+      TitleWeight:     v('800'),
+      TitleAlignment:  v('left'),
+      Subtitle:        v('Organised by category. Every block is configurable from the visual editor — no code needed.'),
+      SubtitleColor:   v(TEXT2),
+      SubtitleAlignment:v('left'),
+      BackgroundColor: v(BG),
+      Padding:         v('3.5rem 1.5rem 1rem'),
+    }),
+  }});
+
+  // ── Helper: category heading ──────────────────────────────────────────────
+  async function catHeading(label: string, color: string, s: number) {
+    await prisma.block.create({ data: {
+      type: 'TextBlock', pageId: pid, sortOrder: s,
+      jsonData: b({
+        Title:           v(label),
+        TitleColor:      v(color),
+        TitleSize:       v('0.7rem'),
+        TitleWeight:     v('700'),
+        TitleAlignment:  v('left'),
+        BackgroundColor: v(BG),
+        Padding:         v('2rem 1.5rem 0.4rem'),
       }),
-    },
-  });
-  console.log('✅ Block 1: HeroBlock');
+    }});
+  }
 
-  // ── Block 2: Stats ────────────────────────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'StatsBlock',
-      pageId:    homePage.id,
-      sortOrder: 1,
-      jsonData:  b({
-        Title:        v(''),
-        Subtitle:     v(''),
-        Stat1Number:  v('38'),
-        Stat1Label:   v('Pre-built blocks'),
-        Stat1Icon:    v('fas fa-th-large'),
-        Stat2Number:  v('MIT'),
-        Stat2Label:   v('Open source license'),
-        Stat2Icon:    v('fas fa-code-branch'),
-        Stat3Number:  v('1 cmd'),
-        Stat3Label:   v('Setup (npm run setup)'),
-        Stat3Icon:    v('fas fa-bolt'),
-        Stat4Number:  v('0'),
-        Stat4Label:   v('Config files needed'),
-        Stat4Icon:    v('fas fa-leaf'),
-        NumberColor:  v('#10b981'),
-        LabelColor:   v('#94a3b8'),
-        BackgroundColor: v('#0f172a'),
-        CardBgColor:  v('#1e293b'),
-        PaddingY:     v('4rem'),
+  // ── Helper: block grid ────────────────────────────────────────────────────
+  async function blockGrid(blocks: readonly (readonly [string, string, string])[], s: number) {
+    const grid = await prisma.block.create({ data: {
+      type: 'GridColumn', pageId: pid, sortOrder: s,
+      jsonData: b({ MaxColumns: v('4'), Gap: v('gap-3'), PaddingY: v('0.25rem'), PaddingX: v('1.5rem'), BackgroundColor: v(BG) }),
+    }});
+    for (let i = 0; i < blocks.length; i++) {
+      const [icon, name, desc] = blocks[i];
+      await prisma.block.create({ data: {
+        type: 'IconCardBlock', pageId: pid, parentId: grid.id, sortOrder: i,
+        jsonData: b({
+          LeftIconClass: v(icon), LeftIconColor: v(ACCENT), LeftIconFaSize: v('1rem'),
+          IconPosition: v('top'), TextAlign: v('left'),
+          Title: v(name), TitleColor: v(TEXT), TitleSize: v('0.82rem'), TitleWeight: v('600'),
+          Text: v(desc), TextColor: v(TEXT2), TextSize: v('0.75rem'),
+          BackgroundColor: v(SURFACE), BorderColor: v(BORDER), BorderWidth: v('1px'), BorderRadius: v('10px'), Padding: v('1rem'),
+        }),
+      }});
+    }
+  }
+
+  // ── LAYOUT ────────────────────────────────────────────────────────────────
+  await catHeading('LAYOUT', CAT_LAYOUT, sort++);
+  await blockGrid([
+    ['fas fa-columns',      'GridColumnBlock',   'Responsive grid container — 2 to 4 columns'],
+    ['fas fa-grip-lines',   'SpacerBlock',       'Vertical spacing between sections'],
+    ['fas fa-minus',        'DividerBlock',      'Styled horizontal rule with width and colour options'],
+    ['fas fa-bullhorn',     'BannerBlock',       'Top announcement bar with icon, text and CTA link'],
+    ['fas fa-expand',       'FullColumnBlock',   'Full-width padded content wrapper'],
+  ] as const, sort++);
+
+  // ── CONTENT ───────────────────────────────────────────────────────────────
+  await catHeading('CONTENT', CAT_CONTENT, sort++);
+  await blockGrid([
+    ['fas fa-image',            'HeroBlock',          'Full-screen hero with badge, CTA buttons and social proof'],
+    ['fas fa-font',             'TextBlock',          'Title + subtitle + body with full padding control'],
+    ['fas fa-photo-video',      'ImageBlock',         'Responsive image with caption and optional link'],
+    ['fab fa-markdown',         'MarkdownBlock',      'Markdown-rendered content block'],
+    ['fas fa-id-card',          'CardBlock',          'Card with image, title and body text'],
+    ['fas fa-th-large',         'IconCardBlock',      'Card with FontAwesome icon, title and text'],
+    ['fas fa-chart-bar',        'StatsBlock',         '4 key metrics with icons and labels'],
+    ['fas fa-bullseye',         'CTABannerBlock',     'Call-to-action banner with 2 buttons'],
+    ['fas fa-building',         'LogoStripBlock',     'Scrolling or static client logo band'],
+    ['fas fa-trophy',           'SocialProofBlock',   'Review count + average score + trust logos'],
+    ['fas fa-star',             'TestimonialsBlock',  'Review carousel with avatars and star ratings'],
+    ['fas fa-users',            'TeamBlock',          'Team grid with photo, name & role'],
+    ['fas fa-tags',             'PricingBlock',       'Pricing cards container with popular badge'],
+    ['fas fa-stream',           'TimelineBlock',      'Step-by-step process or company history'],
+    ['fas fa-bars',             'MenuBlock',          'Navigation / link list block'],
+    ['fas fa-clock',            'OpeningHoursBlock',  'Business hours table with open/closed indicator'],
+    ['fas fa-list-check',       'FeatureListBlock',   'Icon bullet list of features or benefits'],
+    ['fas fa-grip',             'FeatureGridBlock',   'Inline feature grid — no child blocks needed'],
+    ['fas fa-table',            'TableBlock',         'Data table — pipe-separated, striped, bordered or minimal'],
+    ['fas fa-code',             'CodeBlock',          'Syntax-highlighted code block with copy button'],
+  ] as const, sort++);
+
+  // ── MEDIA ─────────────────────────────────────────────────────────────────
+  await catHeading('MEDIA', CAT_MEDIA, sort++);
+  await blockGrid([
+    ['fas fa-images',         'GalleryBlock',           'Image gallery with lightbox viewer'],
+    ['fas fa-columns',        'FlexibleImageTextBlock', 'Image + text side by side — left or right'],
+    ['fas fa-play-circle',    'VideoBlock',             'YouTube / Vimeo / self-hosted video embed'],
+    ['fas fa-map-marker-alt', 'MapBlock',               'Embedded Google or OpenStreetMap'],
+    ['fas fa-magic',          'LottieBlock',            'Lottie JSON animations — auto-play, loop, speed'],
+    ['fas fa-exchange-alt',   'BeforeAfterBlock',       'Before / after image comparison slider'],
+    ['fas fa-music',          'AudioBlock',             'Audio player — minimal, card or full style'],
+    ['fas fa-qrcode',         'QRCodeBlock',            'QR generator — URL, WiFi, vCard, Email'],
+  ] as const, sort++);
+
+  // ── INTERACTIVE ───────────────────────────────────────────────────────────
+  await catHeading('INTERACTIVE', CAT_INTERACTIVE, sort++);
+  await blockGrid([
+    ['fas fa-layer-group',  'AccordionBlock',     'Expandable accordion sections with smooth animation'],
+    ['fas fa-folder-open',  'TabsBlock',          'Tabbed content panels — switch without page reload'],
+    ['fas fa-chevron-down', 'DropdownBlock',      'Select dropdown with configurable options'],
+    ['fas fa-mouse-pointer','ButtonLinkBlock',    'Standalone call-to-action button'],
+    ['fas fa-align-center', 'TextWithButtonBlock','Text + inline button side by side'],
+    ['fas fa-hourglass',    'CountdownBlock',     'Live countdown timer to a target date'],
+    ['fas fa-envelope',     'EmailButtonBlock',   'mailto button — pre-fills subject and body'],
+    ['fas fa-paper-plane',  'ContactFormBlock',   'Full contact form with validation and email'],
+    ['fas fa-question',     'FAQBlock',           'Accordion FAQ — cards, bordered or list style'],
+    ['fas fa-cookie-bite',  'CookieBannerBlock',  'GDPR-compliant cookie consent banner'],
+    ['fas fa-at',           'NewsletterBlock',    'Email signup form with configurable endpoint'],
+  ] as const, sort++);
+
+  // ── AI ────────────────────────────────────────────────────────────────────
+  await catHeading('AI', CAT_AI, sort++);
+  await blockGrid([
+    ['fas fa-robot',       'ChatBlock',         'Inline AI chat — Ollama (local, free) or Gemini (Google cloud)'],
+    ['fas fa-comment-alt', 'FloatingChatBlock', 'Persistent floating chat bubble — Ollama or Gemini, zero config'],
+  ] as const, sort++);
+
+  // ── COMMERCE ─────────────────────────────────────────────────────────────
+  await catHeading('COMMERCE', CAT_COMMERCE, sort++);
+  await blockGrid([
+    ['fas fa-shield-check', 'TrustBadgesBlock',      'Payment & trust badge strip — Visa, PayPal and more'],
+    ['fas fa-box',          'ProductCardBlock',       'Individual product card with price and buy button'],
+    ['fas fa-store',        'ExistingProductsBlock',  'Display products from your Admin catalogue'],
+    ['fas fa-shopping-bag', 'ProductsGalleryBlock',   'Full product grid with category filters'],
+  ] as const, sort++);
+
+  // ── Quick start ───────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'TextBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('Get started in seconds'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('1.9rem'),
+      TitleWeight:     v('800'),
+      TitleAlignment:  v('center'),
+      BackgroundColor: v(SURFACE),
+      Padding:         v('4rem 1.5rem 1rem'),
+    }),
+  }});
+
+  await prisma.block.create({ data: {
+    type: 'CodeBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      code:            v('# 1. Clone the repo\ngit clone https://github.com/Learsi23/brix-cms\ncd brix-cms\n\n# 2. Install & setup (creates SQLite DB + seeds pages)\nnpm install\nnpm run setup\n\n# 3. Run\nnpm run dev\n# → http://localhost:3000\n# → Admin: /admin  (admin@brix.com / admin123)'),
+      language:        v('bash'),
+      title:           v('Quick start'),
+      showLineNumbers: v('false'),
+      showCopyButton:  v('true'),
+      fontSize:        v('14px'),
+      borderRadius:    v('12px'),
+    }),
+  }});
+
+  await prisma.block.create({ data: {
+    type: 'SpacerBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({ Height: v('2rem'), BackgroundColor: v(SURFACE) }),
+  }});
+
+  await prisma.block.create({ data: {
+    type: 'CTABannerBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('Want the full platform?'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('2rem'),
+      Subtitle:        v('Multi-tenant · White label · BYOK AI (Gemini, OpenAI, Claude, DeepSeek, Mistral, Groq, Ollama) · Stripe e-commerce · Figma import'),
+      SubtitleColor:   v(TEXT2),
+      Btn1Text:        v('See BrixCMS Pro →'),
+      Btn1Url:         v('https://brix-cms.com'),
+      Btn1BgColor:     v(ACCENT),
+      Btn1TextColor:   v('#ffffff'),
+      Btn2Text:        v('View on GitHub'),
+      Btn2Url:         v('https://github.com/Learsi23/brix-cms'),
+      Btn2Color:       v(BORDER),
+      BackgroundColor: v(SURFACE),
+      BackgroundColor2:v(BG),
+      PaddingY:        v('5rem'),
+      TextAlign:       v('center'),
+    }),
+  }});
+
+  console.log('✅ Features page seeded');
+  return page;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  PAGE 3 — PRO  (slug: "pro")  —  Coming Soon
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function seedProPage() {
+  let page = await prisma.page.findFirst({ where: { slug: 'pro', parentId: null } });
+  if (page) {
+    await prisma.block.deleteMany({ where: { pageId: page.id } });
+    page = await prisma.page.update({
+      where:  { id: page.id },
+      data:   { title: 'BrixCMS Pro', isPublished: true, publishedAt: new Date(), pageType: 'standard', jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
+    });
+  } else {
+    page = await prisma.page.create({
+      data: {
+        title:       'BrixCMS Pro',
+        slug:        'pro',
+        description: 'BrixCMS Pro — coming soon. Multi-tenant, white label, BYOK AI (Gemini, OpenAI, Claude, DeepSeek, Mistral, Groq, Ollama), Stripe e-commerce, Figma import.',
+        isPublished:  true,
+        publishedAt:  new Date(),
+        sortOrder:    2,
+        pageType:    'standard',
+        jsonData:    JSON.stringify({ BackgroundColor: v(BG) }),
+      },
+    });
+  }
+
+  await prisma.block.deleteMany({ where: { pageId: page.id } });
+  let sort = 0;
+
+  // ── Announcement bar ──────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'BannerBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Icon:            v('🚀'),
+      Text:            v('BrixCMS Pro is launching soon — the full platform for agencies.'),
+      LinkText:        v('Get early access →'),
+      LinkUrl:         v('mailto:israel231075@gmail.com?subject=BrixCMS Pro — Early Access'),
+      BackgroundColor: v(ACCENT),
+      TextColor:       v('#ffffff'),
+      Closeable:       v('true'),
+    }),
+  }});
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'HeroBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title:              v('BrixCMS Pro'),
+      TitleColor:         v(TEXT),
+      TitleSize:          v('clamp(3rem, 7vw, 5rem)'),
+      TitleWeight:        v('900'),
+      Subtitle:           v('The complete CMS platform for agencies and professional developers.\nMulti-tenant · White label · 7 AI providers · Stripe · Figma import.'),
+      SubtitleColor:      v(TEXT2),
+      SubtitleSize:       v('1.15rem'),
+      Description:        v(''),
+      BackgroundColor:    v(BG),
+      BackgroundGradient: v('radial-gradient(ellipse 80% 60% at 50% -10%, rgba(91,110,245,0.14) 0%, transparent 65%)'),
+      Height:             v('half-screen'),
+      PaddingTop:         v('calc(4rem + 64px)'),
+      TextAlign:          v('center'),
+      ButtonText:         v('Get early access →'),
+      ButtonUrl:          v('mailto:israel231075@gmail.com?subject=BrixCMS Pro — Early Access'),
+      ButtonColor:        v(ACCENT),
+      ButtonTextColor:    v('#ffffff'),
+      Button2Text:        v('Try Open for free →'),
+      Button2Url:         v('https://github.com/Learsi23/brix-cms'),
+      Button2Color:       v('transparent'),
+      Button2TextColor:   v(TEXT),
+      Button2BorderColor: v(BORDER),
+      ShowSocialProof:    v('true'),
+      SocialProofItems:   v('🚀 Launching soon,Multi-tenant,White label,7 AI providers'),
+      SocialProofColor:   v(TEXT2),
+      SocialProofIconColor: v(ACCENT),
+    }),
+  }});
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'StatsBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title: v(''), Subtitle: v(''),
+      Stat1Number: v('7'),      Stat1Label: v('AI providers — BYOK'),           Stat1Icon: v('fas fa-brain'),
+      Stat2Number: v('∞'),      Stat2Label: v('Client sites — multi-tenant'),   Stat2Icon: v('fas fa-sitemap'),
+      Stat3Number: v('1%'),     Stat3Label: v('Transaction fee — Stripe'),       Stat3Icon: v('fas fa-shopping-cart'),
+      Stat4Number: v('White'),  Stat4Label: v('Label — your brand'),             Stat4Icon: v('fas fa-tag'),
+      NumberColor:     v(ACCENT),
+      LabelColor:      v(TEXT2),
+      BackgroundColor: v(SURFACE),
+      CardBgColor:     v(SURFACE2),
+      PaddingY:        v('3rem'),
+    }),
+  }});
+
+  // ── "Everything in Open, plus:" ───────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'TextBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title:             v('Everything in Open, plus:'),
+      TitleColor:        v(TEXT),
+      TitleSize:         v('2rem'),
+      TitleWeight:       v('800'),
+      TitleAlignment:    v('center'),
+      Subtitle:          v('All the blocks, editor and AI you know — with the agency tools you need.'),
+      SubtitleColor:     v(TEXT2),
+      SubtitleAlignment: v('center'),
+      BackgroundColor:   v(BG),
+      Padding:           v('4rem 1.5rem 1.5rem'),
+    }),
+  }});
+
+  // ── Pro feature cards (2 cols) ────────────────────────────────────────────
+  const proGrid = await prisma.block.create({ data: {
+    type: 'GridColumn', pageId: page.id, sortOrder: sort++,
+    jsonData: b({ MaxColumns: v('2'), Gap: v('gap-5'), PaddingY: v('0.5rem'), PaddingX: v('1.5rem'), BackgroundColor: v(BG) }),
+  }});
+
+  const proFeatures = [
+    ['fas fa-sitemap',       SUCCESS,   'Multi-tenant panel',           'Manage unlimited client websites from one admin. Each site has its own pages, blocks, media and settings — fully isolated.'],
+    ['fas fa-tag',           ACCENT,    'White label',                  'Your logo, your domain, your colours. Clients see your CMS, not ours.'],
+    ['fas fa-key',           WARNING,   'BYOK — 7 AI providers',        'Ollama (local, free) + Gemini, OpenAI, Claude, DeepSeek, Mistral and Groq with your own keys. Zero AI markup.'],
+    ['fab fa-figma',         '#7C5CBF', 'Figma → CMS import',          'AI reads your Figma frames and builds the blocks automatically. Pixel-perfect with exact colours and typography.'],
+    ['fas fa-shopping-cart', SUCCESS,   'Stripe e-commerce — 1% fee',  'Sell products from any page via Stripe Connect. Full cart, checkout and order management. Just 1% per transaction.'],
+    ['fas fa-headset',       ACCENT,    'Priority support + SLA',       'Direct channel to the BrixCMS team. Guaranteed response times and an on-boarding call on signup.'],
+  ] as const;
+
+  for (let i = 0; i < proFeatures.length; i++) {
+    const [icon, color, title, text] = proFeatures[i];
+    await prisma.block.create({ data: {
+      type: 'IconCardBlock', pageId: page.id, parentId: proGrid.id, sortOrder: i,
+      jsonData: b({
+        LeftIconClass: v(icon), LeftIconColor: v(color), LeftIconFaSize: v('1.75rem'),
+        IconPosition: v('left'), TextAlign: v('left'),
+        Title: v(title), TitleColor: v(TEXT), TitleSize: v('1rem'),
+        Text: v(text), TextColor: v(TEXT2), TextSize: v('0.875rem'),
+        BackgroundColor: v(SURFACE), BorderColor: v(BORDER), BorderWidth: v('1px'), BorderRadius: v('12px'), Padding: v('1.5rem'),
       }),
-    },
-  });
-  console.log('✅ Block 2: StatsBlock');
+    }});
+  }
 
-  // ── Block 3: Section heading ──────────────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'TextBlock',
-      pageId:    homePage.id,
-      sortOrder: 2,
-      jsonData:  b({
-        Title:          v('Everything you need to build fast'),
-        TitleColor:     v('#0f172a'),
-        TitleSize:      v('2.25rem'),
-        TitleWeight:    v('800'),
-        TitleAlignment: v('center'),
-        Subtitle:       v('No vendor lock-in. Your data, your server, your rules.'),
-        SubtitleColor:  v('#64748b'),
-        SubtitleSize:   v('1.1rem'),
-        SubtitleAlignment: v('center'),
-        Body:           v(''),
-        PaddingTop:     v('4rem'),
-        PaddingBottom:  v('0.5rem'),
-        PaddingLeft:    v('1.5rem'),
-        PaddingRight:   v('1.5rem'),
+  // ── AI Providers heading ──────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'TextBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title:             v('BYOK — Bring Your Own Key'),
+      TitleColor:        v(TEXT),
+      TitleSize:         v('1.9rem'),
+      TitleWeight:       v('800'),
+      TitleAlignment:    v('center'),
+      Subtitle:          v('Connect your own API keys. Pay providers directly at their published rates. Zero markup from BrixCMS.'),
+      SubtitleColor:     v(TEXT2),
+      SubtitleAlignment: v('center'),
+      BackgroundColor:   v(SURFACE),
+      Padding:           v('4rem 1.5rem 1.5rem'),
+    }),
+  }});
+
+  // ── AI provider cards (4 cols) ────────────────────────────────────────────
+  const aiGrid = await prisma.block.create({ data: {
+    type: 'GridColumn', pageId: page.id, sortOrder: sort++,
+    jsonData: b({ MaxColumns: v('4'), Gap: v('gap-3'), PaddingY: v('0.5rem'), PaddingX: v('1.5rem'), BackgroundColor: v(SURFACE) }),
+  }});
+
+  const aiProviders = [
+    ['fas fa-robot',       '#4285F4', 'Gemini',            'Google — free tier available. Best for multimodal tasks.'],
+    ['fas fa-comment-alt', '#10A37F', 'OpenAI · ChatGPT',  'GPT-4o and o-series models. Industry standard.'],
+    ['fas fa-brain',       '#D97706', 'Claude · Anthropic','Long context, precise reasoning, safe outputs.'],
+    ['fas fa-microchip',   '#3B82F6', 'DeepSeek',          'Open-weights model. Strong at code and reasoning.'],
+    ['fas fa-wind',        '#8B5CF6', 'Mistral',           'European, lightweight, fast and open.'],
+    ['fas fa-bolt',        '#F59E0B', 'Groq',              'Ultra-fast inference. Same models, 10× speed.'],
+    ['fas fa-server',      SUCCESS,   'Ollama · local',    'Run any model on your own server. Free, private, offline.'],
+  ] as const;
+
+  for (let i = 0; i < aiProviders.length; i++) {
+    const [icon, color, title, text] = aiProviders[i];
+    await prisma.block.create({ data: {
+      type: 'IconCardBlock', pageId: page.id, parentId: aiGrid.id, sortOrder: i,
+      jsonData: b({
+        LeftIconClass: v(icon), LeftIconColor: v(color), LeftIconFaSize: v('1rem'),
+        IconPosition: v('top'), TextAlign: v('left'),
+        Title: v(title), TitleColor: v(TEXT), TitleSize: v('0.875rem'), TitleWeight: v('700'),
+        Text: v(text), TextColor: v(TEXT2), TextSize: v('0.78rem'),
+        BackgroundColor: v(SURFACE2), BorderColor: v(BORDER), BorderWidth: v('1px'), BorderRadius: v('10px'), Padding: v('1rem'),
       }),
-    },
-  });
-  console.log('✅ Block 3: TextBlock (heading)');
+    }});
+  }
 
-  // ── Block 4: ColumnBlock (3 cols) ─────────────────────────────────────────────
-  const featuresColumn = await prisma.block.create({
-    data: {
-      type:      'ColumnBlock',
-      pageId:    homePage.id,
-      sortOrder: 3,
-      jsonData:  b({
-        Columns: v('3'),
-        Gap:     v('gap-6'),
-      }),
-    },
-  });
-  console.log('✅ Block 4: ColumnBlock (features)');
+  // ── Final CTA ─────────────────────────────────────────────────────────────
+  await prisma.block.create({ data: {
+    type: 'CTABannerBlock', pageId: page.id, sortOrder: sort++,
+    jsonData: b({
+      Title:           v('Already need a CMS today?'),
+      TitleColor:      v(TEXT),
+      TitleSize:       v('2.25rem'),
+      Subtitle:        v('BrixCMS Open is free, MIT licensed and ready to use right now. No subscriptions, no vendor lock-in.'),
+      SubtitleColor:   v(TEXT2),
+      Btn1Text:        v('Try Open for free →'),
+      Btn1Url:         v('https://github.com/Learsi23/brix-cms'),
+      Btn1BgColor:     v(ACCENT),
+      Btn1TextColor:   v('#ffffff'),
+      Btn2Text:        v('Get early access to Pro'),
+      Btn2Url:         v('mailto:israel231075@gmail.com?subject=BrixCMS Pro — Early Access'),
+      Btn2Color:       v(BORDER),
+      BackgroundColor: v(SURFACE),
+      BackgroundColor2:v(BG),
+      PaddingY:        v('6rem'),
+      TextAlign:       v('center'),
+    }),
+  }});
 
-  // ── Block 4.1: Feature card — Blocks ─────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'IconCardBlock',
-      pageId:    homePage.id,
-      parentId:  featuresColumn.id,
-      sortOrder: 0,
-      jsonData:  b({
-        LeftIconClass:    v('fas fa-th-large'),
-        LeftIconColor:    v('#10b981'),
-        LeftIconFaSize:   v('2rem'),
-        IconPosition:     v('top'),
-        TextAlign:        v('left'),
-        Title:            v('38 pre-built blocks'),
-        TitleColor:       v('#0f172a'),
-        TitleSize:        v('1.15rem'),
-        Text:             v('Hero, Pricing, Testimonials, Team, Gallery, Map, Countdown, Timeline, Accordion, Tabs — and more. Add your own in minutes.'),
-        TextColor:        v('#64748b'),
-        TextSize:         v('0.95rem'),
-        BackgroundColor:  v('#f8fafc'),
-        BorderColor:      v('#e2e8f0'),
-        BorderWidth:      v('1px'),
-        BorderRadius:     v('16px'),
-        Padding:          v('1.75rem'),
-        Shadow:           v('0 1px 4px rgba(0,0,0,0.06)'),
-      }),
-    },
-  });
+  console.log('✅ Pro page (coming soon) seeded');
+  return page;
+}
 
-  // ── Block 4.2: Feature card — API ────────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'IconCardBlock',
-      pageId:    homePage.id,
-      parentId:  featuresColumn.id,
-      sortOrder: 1,
-      jsonData:  b({
-        LeftIconClass:    v('fas fa-plug'),
-        LeftIconColor:    v('#6366f1'),
-        LeftIconFaSize:   v('2rem'),
-        IconPosition:     v('top'),
-        TextAlign:        v('left'),
-        Title:            v('Headless REST API'),
-        TitleColor:       v('#0f172a'),
-        TitleSize:        v('1.15rem'),
-        Text:             v('Every page and block accessible via REST. Pair with Next.js, Astro, SvelteKit, React Native, or any HTTP client.'),
-        TextColor:        v('#64748b'),
-        TextSize:         v('0.95rem'),
-        BackgroundColor:  v('#f8fafc'),
-        BorderColor:      v('#e2e8f0'),
-        BorderWidth:      v('1px'),
-        BorderRadius:     v('16px'),
-        Padding:          v('1.75rem'),
-        Shadow:           v('0 1px 4px rgba(0,0,0,0.06)'),
-      }),
-    },
-  });
+// ══════════════════════════════════════════════════════════════════════════════
+//  SITE CONFIG — dark navbar + footer
+// ══════════════════════════════════════════════════════════════════════════════
 
-  // ── Block 4.3: Feature card — Deploy ─────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'IconCardBlock',
-      pageId:    homePage.id,
-      parentId:  featuresColumn.id,
-      sortOrder: 2,
-      jsonData:  b({
-        LeftIconClass:    v('fas fa-rocket'),
-        LeftIconColor:    v('#f59e0b'),
-        LeftIconFaSize:   v('2rem'),
-        IconPosition:     v('top'),
-        TextAlign:        v('left'),
-        Title:            v('Deploy anywhere'),
-        TitleColor:       v('#0f172a'),
-        TitleSize:        v('1.15rem'),
-        Text:             v('Vercel in one click. Railway, Render, or any VPS. SQLite by default — zero database config needed.'),
-        TextColor:        v('#64748b'),
-        TextSize:         v('0.95rem'),
-        BackgroundColor:  v('#f8fafc'),
-        BorderColor:      v('#e2e8f0'),
-        BorderWidth:      v('1px'),
-        BorderRadius:     v('16px'),
-        Padding:          v('1.75rem'),
-        Shadow:           v('0 1px 4px rgba(0,0,0,0.06)'),
-      }),
+async function seedSiteConfig() {
+  const config = JSON.stringify({
+    navbar: {
+      backgroundColor:  BG,
+      textColor:        TEXT,
+      logo:             '/images/logo-menu.png',
+      logoAltText:      'BrixCMS',
+      logoWidth:        '120px',
+      logoLink:         '/',
+      isSticky:         true,
+      hasShadow:        false,
+      paddingVertical:  'py-3',
+      menuItems: [
+        { customText: 'Features', customUrl: '/features',                           isCustomUrl: true, pageSlug: '', openInNewTab: false, iconClass: '', iconAriaLabel: '' },
+        { customText: 'Pro',      customUrl: '/pro',                                isCustomUrl: true, pageSlug: '', openInNewTab: false, iconClass: '', iconAriaLabel: '' },
+        { customText: '',         customUrl: 'https://github.com/Learsi23/BrixCMS', isCustomUrl: true, pageSlug: '', openInNewTab: true,  iconClass: 'fab fa-github',  iconAriaLabel: 'BrixCMS on GitHub'  },
+        { customText: '',         customUrl: 'https://www.youtube.com/@BrixCMS',    isCustomUrl: true, pageSlug: '', openInNewTab: true,  iconClass: 'fab fa-youtube', iconAriaLabel: 'BrixCMS on YouTube' },
+      ],
     },
-  });
-  console.log('✅ Blocks 4.1–4.3: Feature IconCardBlocks');
-
-  // ── Block 5: Spacer ───────────────────────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'SpacerBlock',
-      pageId:    homePage.id,
-      sortOrder: 4,
-      jsonData:  b({ Height: v('3rem'), BackgroundColor: v('#ffffff') }),
+    footer: {
+      backgroundColor:        SURFACE,
+      textColor:              TEXT2,
+      logo:                   '/images/logo-menu.png',
+      logoAltText:            'BrixCMS',
+      logoWidth:              '100px',
+      logoPosition:           'left',
+      showPagesColumn:        false,
+      pagesColumnTitle:       'Pages',
+      pages:                  [],
+      showSocialMediaColumn:  true,
+      socialMediaColumnTitle: 'Links',
+      socialMedia: [
+        { platform: 'github',  url: 'https://github.com/Learsi23/BrixCMS', iconClass: 'fab fa-github'  },
+        { platform: 'youtube', url: 'https://www.youtube.com/@BrixCMS',    iconClass: 'fab fa-youtube' },
+      ],
+      showCopyrightRow:   true,
+      companyName:        'BrixCMS',
+      companyNumber:      '',
+      copyrightText:      'MIT License — free forever',
+      showHorizontalLine: true,
+      paddingVertical:    'py-8',
+      columnsGap:         'gap-8',
     },
   });
 
-  // ── Block 6: CTA Banner ───────────────────────────────────────────────────────
-  await prisma.block.create({
-    data: {
-      type:      'CTABannerBlock',
-      pageId:    homePage.id,
-      sortOrder: 5,
-      jsonData:  b({
-        Title:           v('Ready to build?'),
-        TitleColor:      v('#ffffff'),
-        TitleSize:       v('2.5rem'),
-        Subtitle:        v('Clone the repo, run npm run setup, and you\'re live in under 2 minutes.'),
-        SubtitleColor:   v('rgba(255,255,255,0.7)'),
-        Btn1Text:        v('View on GitHub'),
-        Btn1Url:         v('https://github.com/Learsi23/brix-cms'),
-        Btn1BgColor:     v('#10b981'),
-        Btn1TextColor:   v('#ffffff'),
-        Btn2Text:        v('Open Admin Panel'),
-        Btn2Url:         v('/admin'),
-        Btn2Color:       v('rgba(255,255,255,0.3)'),
-        BackgroundColor: v('#0f172a'),
-        BackgroundColor2:v('#1e293b'),
-        PaddingY:        v('6rem'),
-        TextAlign:       v('center'),
-      }),
-    },
-  });
-  console.log('✅ Block 5–6: Spacer + CTABannerBlock');
-
-  // ── Site configuration (navbar + footer) ──────────────────────────────────────
   await prisma.siteConfig.upsert({
     where:  { key: 'site' },
-    update: {},
-    create: {
-      key:   'site',
-      value: JSON.stringify({
-        navbar: {
-          backgroundColor:  '#ffffff',
-          textColor:        '#0f172a',
-          logo:             '/images/logo-menu.png',
-          logoAltText:      'Brix CMS',
-          logoWidth:        '120px',
-          logoLink:         '/',
-          isSticky:         true,
-          hasShadow:        true,
-          paddingVertical:  'py-3',
-          menuItems: [
-            { customText: 'GitHub',  customUrl: 'https://github.com/Learsi23/brix-cms', isCustomUrl: true, pageSlug: '' },
-            { customText: 'Admin',   customUrl: '/admin',  isCustomUrl: true, pageSlug: '' },
-          ],
-        },
-        footer: {
-          backgroundColor:        '#0f172a',
-          textColor:              '#94a3b8',
-          logo:                   '/images/logo-menu.png',
-          logoAltText:            'Brix CMS',
-          logoWidth:              '100px',
-          logoPosition:           'left',
-          showPagesColumn:        false,
-          pagesColumnTitle:       'Pages',
-          pages:                  [],
-          showSocialMediaColumn:  true,
-          socialMediaColumnTitle: 'Links',
-          socialMedia: [
-            { platform: 'github',   url: 'https://github.com/Learsi23/brix-cms', iconClass: 'fab fa-github' },
-            { platform: 'npm',      url: 'https://www.npmjs.com/package/brix-cms', iconClass: 'fab fa-npm' },
-          ],
-          showCopyrightRow:       true,
-          companyName:            'Brix CMS',
-          companyNumber:          '',
-          copyrightText:          'MIT License — free forever',
-          showHorizontalLine:     true,
-          paddingVertical:        'py-8',
-          columnsGap:             'gap-8',
-        },
-      }),
-    },
+    update: { value: config },
+    create: { key: 'site', value: config },
   });
-  console.log('✅ Site config (navbar + footer)');
+  console.log('✅ Site config (dark navbar + footer)');
+}
 
-  console.log('\n🎉 Brix CMS initialized!');
+// ══════════════════════════════════════════════════════════════════════════════
+//  MAIN
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function main() {
+  // Admin user
+  const admin = await prisma.user.upsert({
+    where:  { email: 'admin@brix.com' },
+    update: {},
+    create: { email: 'admin@brix.com', password: 'admin123', name: 'Administrator', role: 'owner' },
+  });
+  console.log('✅ Admin user:', admin.email);
+
+  // Only seed pages if the DB is empty (or force flag passed)
+  const forceReseed = process.argv.includes('--force');
+  const pageCount   = await prisma.page.count();
+
+  if (pageCount === 0 || forceReseed) {
+    if (forceReseed) console.log('🔄  Force reseed — rebuilding all pages...');
+    await seedHomePage();
+    await seedFeaturesPage();
+    await seedProPage();
+  } else {
+    console.log(`ℹ️  ${pageCount} pages already exist — skipping page seed (pass --force to reseed)`);
+  }
+
+  // Always update site config so navbar/footer stay current
+  await seedSiteConfig();
+
+  console.log('\n🎉 BrixCMS initialized!');
   console.log('📧 Email:    admin@brix.com');
   console.log('🔑 Password: admin123');
   console.log('🌐 Home:     http://localhost:3000');

@@ -95,4 +95,4 @@ export type {
   PublishPageDto,
 } from './types';
 
-export { getFieldValue, createDefaultData } from './types';
+export { getFieldValue, createDefaultData, normalizeFields } from './types';
