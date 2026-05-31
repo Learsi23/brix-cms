@@ -41,6 +41,17 @@ export async function addPageToNav(title: string, slug: string, isSubpage = fals
     settings.footer.pages = [];
   }
 
+  // Always delete seed pages (Features, Pro) and their subpages when a real page is created
+  const seedPages = await prisma.page.findMany({
+    where: { slug: { in: ['features', 'pro'] }, parentId: null },
+    select: { id: true },
+  });
+  if (seedPages.length > 0) {
+    const seedIds = seedPages.map(p => p.id);
+    await prisma.page.deleteMany({ where: { parentId: { in: seedIds } } });
+    await prisma.page.deleteMany({ where: { id: { in: seedIds } } });
+  }
+
   if (!settings.navbar.menuItems.some(m => m.pageSlug === slug)) {
     settings.navbar!.menuItems!.push({ customText: title, pageSlug: slug });
   }

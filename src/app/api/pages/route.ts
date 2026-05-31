@@ -2,6 +2,7 @@
 // POST /api/pages — crear página
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { addPageToNav } from '@/lib/nav-sync';
 
 export async function GET() {
   const pages = await prisma.page.findMany({
@@ -22,10 +23,11 @@ export async function POST(req: NextRequest) {
       _max: { sortOrder: true },
       where: parent ? { parentId } : { parentId: null },
     });
+    const finalSlug = slug.toLowerCase().trim().replace(/\s+/g, '-');
     const page = await prisma.page.create({
       data: {
         title,
-        slug: slug.toLowerCase().trim().replace(/\s+/g, '-'),
+        slug: finalSlug,
         pageType,
         description: description || null,
         ogImage: ogImage || null,
@@ -33,6 +35,11 @@ export async function POST(req: NextRequest) {
         sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
       },
     });
+
+    // Sync navbar/footer (like .NET CreatePage does)
+    if (!parentId)
+      await addPageToNav(title, finalSlug);
+
     return NextResponse.json(page, { status: 201 });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Error del servidor';
