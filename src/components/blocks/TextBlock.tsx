@@ -39,8 +39,8 @@ export default function TextBlock({ data }: { data: BlockData }) {
       };
 
   return (
-    <div style={bgColor ? { backgroundColor: bgColor } : undefined}>
-      <div className="container mx-auto" style={innerStyle}>
+    <div className="container mx-auto" style={bgColor ? { backgroundColor: bgColor } : undefined}>
+      <div style={innerStyle}>
         {title && (
           <h2
             className="leading-tight"

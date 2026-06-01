@@ -36,7 +36,7 @@ async function seedHomePage() {
     await prisma.block.deleteMany({ where: { pageId: page.id } });
     page = await prisma.page.update({
       where:  { id: page.id },
-      data:   { title: 'Home', isPublished: true, publishedAt: new Date(), pageType: 'standard', jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
+      data:   { title: 'Home', isPublished: true, publishedAt: new Date(), pageType: 'standard', isSeed: true, jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
     });
   } else {
     page = await prisma.page.create({
@@ -48,6 +48,7 @@ async function seedHomePage() {
         publishedAt:  new Date(),
         sortOrder:    0,
         pageType:    'standard',
+        isSeed:       true,
         jsonData:    JSON.stringify({ BackgroundColor: v(BG) }),
       },
     });
@@ -164,7 +165,7 @@ async function seedFeaturesPage() {
     await prisma.block.deleteMany({ where: { pageId: page.id } });
     page = await prisma.page.update({
       where:  { id: page.id },
-      data:   { title: 'Features', isPublished: true, publishedAt: new Date(), pageType: 'standard', jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
+      data:   { title: 'Features', isPublished: true, publishedAt: new Date(), pageType: 'standard', isSeed: true, jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
     });
   } else {
     page = await prisma.page.create({
@@ -176,6 +177,7 @@ async function seedFeaturesPage() {
         publishedAt:  new Date(),
         sortOrder:    1,
         pageType:    'standard',
+        isSeed:       true,
         jsonData:    JSON.stringify({ BackgroundColor: v(BG) }),
       },
     });
@@ -449,7 +451,7 @@ async function seedProPage() {
     await prisma.block.deleteMany({ where: { pageId: page.id } });
     page = await prisma.page.update({
       where:  { id: page.id },
-      data:   { title: 'BrixCMS Pro', isPublished: true, publishedAt: new Date(), pageType: 'standard', jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
+      data:   { title: 'BrixCMS Pro', isPublished: true, publishedAt: new Date(), pageType: 'standard', isSeed: true, jsonData: JSON.stringify({ BackgroundColor: v(BG) }) },
     });
   } else {
     page = await prisma.page.create({
@@ -461,6 +463,7 @@ async function seedProPage() {
         publishedAt:  new Date(),
         sortOrder:    2,
         pageType:    'standard',
+        isSeed:       true,
         jsonData:    JSON.stringify({ BackgroundColor: v(BG) }),
       },
     });

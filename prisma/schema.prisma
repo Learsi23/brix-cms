@@ -18,6 +18,7 @@ model Page {
   publishedAt DateTime?
   sortOrder   Int       @default(0)
   pageType    String    @default("standard")
+  isSeed      Boolean   @default(false)
 
   parentId  String?
   parent    Page?   @relation("PageHierarchy", fields: [parentId], references: [id])

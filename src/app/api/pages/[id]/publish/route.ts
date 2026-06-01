@@ -3,7 +3,7 @@
 // Equivalente a PublishPage en ManagerController.cs
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { addPageToNav, removePageFromNav } from '@/lib/nav-sync';
+import { addPageToNav, removePageFromNav, clearSeedNavItems } from '@/lib/nav-sync';
 import type { PublishPageDto } from '@/lib/blocks';
 
 type Params = { params: Promise<{ id: string }> };
@@ -32,6 +32,8 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (shouldPublish) {
       updateData.isPublished = true;
       updateData.publishedAt = new Date();
+      // This page is now a real page, no longer a demo seed.
+      updateData.isSeed = false;
     }
 
     await prisma.page.update({ where: { id }, data: updateData });
@@ -78,6 +80,30 @@ export async function POST(req: NextRequest, { params }: Params) {
       await removePageFromNav(page.slug);
     }
     await addPageToNav(data.title, (data.slug || '').toLowerCase().trim().replace(/\s+/g, '-'), !!data.parentId);
+
+    // Delete the remaining demo/seed pages when the first real page is
+    // published (equivalent to PublishPage in ManagerController.cs). Seeds
+    // survive page *creation* — they're only cleared on first publish.
+    if (shouldPublish) {
+      const seeds = await prisma.page.findMany({
+        where: { isSeed: true, id: { not: id } },
+        select: { id: true },
+      });
+      if (seeds.length > 0) {
+        const seedIds = seeds.map(p => p.id);
+        // Subpages of seeds first (FK on parentId), then their blocks, then the pages.
+        const seedSubpages = await prisma.page.findMany({
+          where: { parentId: { in: seedIds } },
+          select: { id: true },
+        });
+        const allSeedIds = [...seedIds, ...seedSubpages.map(p => p.id)];
+        await prisma.block.deleteMany({ where: { pageId: { in: allSeedIds } } });
+        await prisma.page.deleteMany({ where: { id: { in: seedSubpages.map(p => p.id) } } });
+        await prisma.page.deleteMany({ where: { id: { in: seedIds } } });
+        // Drop the leftover demo navbar/footer links (Features, Pro, …).
+        await clearSeedNavItems();
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {

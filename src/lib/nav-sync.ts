@@ -20,6 +20,9 @@ interface SiteSettings {
   footer?: FooterSettings;
 }
 
+// Adds a page link to the navbar/footer. Purely additive — it never deletes
+// pages. Seed/demo pages survive until the user publishes their first real
+// page (see clearSeedsOnPublish in the publish route).
 export async function addPageToNav(title: string, slug: string, isSubpage = false) {
   if (!slug || isSubpage) return;
 
@@ -35,23 +38,6 @@ export async function addPageToNav(title: string, slug: string, isSubpage = fals
   if (!settings.navbar.menuItems) settings.navbar.menuItems = [];
   if (!settings.footer.pages) settings.footer.pages = [];
 
-  // First real page publish: clear seed items (those without a pageSlug)
-  if (!settings.navbar.menuItems.some(m => m.pageSlug)) {
-    settings.navbar.menuItems = [];
-    settings.footer.pages = [];
-  }
-
-  // Always delete seed pages (Features, Pro) and their subpages when a real page is created
-  const seedPages = await prisma.page.findMany({
-    where: { slug: { in: ['features', 'pro'] }, parentId: null },
-    select: { id: true },
-  });
-  if (seedPages.length > 0) {
-    const seedIds = seedPages.map(p => p.id);
-    await prisma.page.deleteMany({ where: { parentId: { in: seedIds } } });
-    await prisma.page.deleteMany({ where: { id: { in: seedIds } } });
-  }
-
   if (!settings.navbar.menuItems.some(m => m.pageSlug === slug)) {
     settings.navbar!.menuItems!.push({ customText: title, pageSlug: slug });
   }
@@ -64,6 +50,26 @@ export async function addPageToNav(title: string, slug: string, isSubpage = fals
   } else {
     await prisma.siteConfig.create({ data: { key: 'site', value: JSON.stringify(settings) } });
   }
+}
+
+// Removes the seed/demo navbar + footer links — the custom links without a
+// pageSlug (e.g. "Features", "Pro"). Called once, when the first real page is
+// published, so the demo links don't dangle to deleted pages.
+export async function clearSeedNavItems() {
+  const config = await prisma.siteConfig.findUnique({ where: { key: 'site' } });
+  if (!config) return;
+
+  let settings: SiteSettings;
+  try { settings = JSON.parse(config.value); } catch { return; }
+
+  if (settings.navbar?.menuItems) {
+    settings.navbar.menuItems = settings.navbar.menuItems.filter(m => m.pageSlug);
+  }
+  if (settings.footer?.pages) {
+    settings.footer.pages = settings.footer.pages.filter(m => m.pageSlug);
+  }
+
+  await prisma.siteConfig.update({ where: { key: 'site' }, data: { value: JSON.stringify(settings) } });
 }
 
 export async function removePageFromNav(slug: string) {
